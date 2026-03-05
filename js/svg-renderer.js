@@ -172,22 +172,22 @@ function drawSubIndicator(g, CLR, x, y, subType) {
     g.appendChild(svgEl('line', {
       x1: x, y1: y,
       x2: x + L.COL_WIDTH, y2: y,
-      stroke: CLR.sub, 'stroke-width': 2.5,
-      'stroke-dasharray': '8,5',
+      stroke: CLR.sub, 'stroke-width': 5,
+      'stroke-dasharray': '10,6',
     }));
   } else if (subType === 'PH') {
     // Replace left edge of cell with solid blue line
     g.appendChild(svgEl('line', {
       x1: x, y1: y,
       x2: x, y2: y + L.ROW_HEIGHT,
-      stroke: CLR.sub, 'stroke-width': 2.5,
+      stroke: CLR.sub, 'stroke-width': 5,
     }));
   } else if (subType === 'PR') {
     // Replace right edge of cell with solid blue line
     g.appendChild(svgEl('line', {
       x1: x + L.COL_WIDTH, y1: y,
       x2: x + L.COL_WIDTH, y2: y + L.ROW_HEIGHT,
-      stroke: CLR.sub, 'stroke-width': 2.5,
+      stroke: CLR.sub, 'stroke-width': 5,
     }));
   }
 }
