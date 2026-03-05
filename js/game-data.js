@@ -357,10 +357,10 @@ export function getPitcherStats(boxscore, side, decisions) {
 
     const pitching = p.stats?.pitching || {};
     let note = '';
-    if (id === winnerId) note = '(W)';
-    else if (id === loserId) note = '(L)';
-    else if (id === saveId) note = '(S)';
-    else if (pitching.holds > 0) note = '(H)';
+    if (id === winnerId) note = '(WP)';
+    else if (id === loserId) note = '(LP)';
+    else if (id === saveId) note = '(SV)';
+    else if (pitching.holds > 0) note = '(HLD)';
 
     return { id, name: p.person.fullName, note, stats: pitching };
   }).filter(Boolean);
