@@ -1,4 +1,4 @@
-// SVG scorecard rendering — Bob Carpenter layout, high-contrast, dark mode
+// SVG scorecard rendering: Bob Carpenter layout, high-contrast, dark mode
 // Large cells with full-size diamond, large notation, big batter info
 
 import {
@@ -27,9 +27,9 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
 const STAT_HEADERS = ['AB', 'R', 'H', 'BI'];
 const SUMMARY_LABELS = ['R', 'H', 'E', 'LOB', 'S / P'];
 
-// Strike zone mapping range — controls how much "air" surrounds the zone box.
+// Strike zone mapping range: controls how much "air" surrounds the zone box.
 // Wider ranges → smaller zone box relative to plot area → tighter cluster.
-const PX_RANGE = 2.4;   // horizontal range in feet (centered on 0) — zone box ~70% of width
+const PX_RANGE = 2.4;   // horizontal range in feet (centered on 0), zone box ~70% of width
 const PZ_MIN = 1.0;     // bottom of vertical mapping (feet)
 const PZ_MAX = 4.2;     // top of vertical mapping (feet)
 const SZ_HALF_PLATE = 0.83;  // half-plate width in feet
@@ -267,7 +267,7 @@ function drawSubIndicator(g, CLR, x, y, subType, subNum, pStats) {
         'font-size': circleFontSize, 'font-weight': '700', 'font-family': L.FONT, fill: CLR.bg,
       }));
     } else {
-      // No sub letter — draw full line
+      // No sub letter: draw full line
       g.appendChild(svgEl('line', {
         x1: lineX, y1: y, x2: lineX, y2: y + L.ROW_HEIGHT,
         stroke: CLR.sub, 'stroke-width': lineW,
@@ -333,12 +333,12 @@ function drawGrid(svg, CLR, lineup, innings, totalRows, rowOffsets, width, gridH
     }
   }
 
-  // Horizontal bold lines — draw per-cell, skipping cells with pitcher sub lines
+  // Horizontal bold lines: draw per-cell, skipping cells with pitcher sub lines
   for (let i = 0; i <= totalRows; i++) {
     const y = L.HEADER_HEIGHT + i * L.ROW_HEIGHT;
-    // Left margin area (name column) — always draw
+    // Left margin area (name column): always draw
     g.appendChild(svgEl('line', { x1: 0, y1: y, x2: L.MARGIN_LEFT, y2: y, stroke: CLR.gridBold, 'stroke-width': 2.5 }));
-    // Per-inning segments — skip where pitcher sub exists
+    // Per-inning segments: skip where pitcher sub exists
     for (let inn = 0; inn < innings; inn++) {
       // The sub line sits at the TOP of the cell it belongs to, i.e. row i (0-indexed slot)
       const slotIdx = i < lineup.length ? i : -1;
@@ -349,7 +349,7 @@ function drawGrid(svg, CLR, lineup, innings, totalRows, rowOffsets, width, gridH
       const x2 = x1 + L.COL_WIDTH;
       g.appendChild(svgEl('line', { x1, y1: y, x2, y2: y, stroke: CLR.gridBold, 'stroke-width': 2.5 }));
     }
-    // Stats columns area — always draw
+    // Stats columns area: always draw
     const statsX = L.MARGIN_LEFT + innings * L.COL_WIDTH;
     g.appendChild(svgEl('line', { x1: statsX, y1: y, x2: width, y2: y, stroke: CLR.gridBold, 'stroke-width': 2.5 }));
   }
@@ -437,7 +437,7 @@ function drawLineup(svg, CLR, lineup, rowOffsets, boxscore, gameData, side) {
       const jerseyNum = player.jerseyNumber || '';
 
       if (!isSub) {
-        // No separate number — jersey # is already in the name label
+        // No separate number; jersey # is already in the name label
       } else {
         // Horizontal blue line at top of sub band with circle near the left
         const subLetter = String.fromCharCode(65 + subCount); // A, B, C...
@@ -631,7 +631,7 @@ function drawAtBatCell(g, CLR, ab, x, y) {
   }));
 
   // Draw diamond if there are runners on base / baserunner movement, or HR/HBP/CI
-  // Skip diamond for sac flies — just show notation + RBI dots
+  // Skip diamond for sac flies, just show notation + RBI dots
   // Skip diamond for strikeouts unless the batter reaches base (dropped 3rd strike)
   const isSF = ab.result?.eventType === 'sac_fly';
   const isStrikeout = ab.result?.eventType === 'strikeout';
@@ -686,7 +686,7 @@ function drawAtBatCell(g, CLR, ab, x, y) {
     }
 
     // When diamond has runner lines, place notation below diamond (centered between HP and cell bottom)
-    // Always single line, consistent size/weight — use same base size for all, capped to fit width
+    // Always single line, consistent size/weight. Use same base size for all, capped to fit width
     if (hasRunners || alwaysDiamond) {
       const belowY = (diamondCy + L.DIAMOND_R + y + L.ROW_HEIGHT) / 2;
       const belowSize = String(Math.min(24, maxFitSize(notation.length)));
@@ -696,7 +696,7 @@ function drawAtBatCell(g, CLR, ab, x, y) {
         'font-family': L.MONO, fill: notationColor,
       }));
     }
-    // No diamond — notation centered in cell
+    // No diamond: notation centered in cell
     else {
       const splitMatch = notation.match(/^([A-Za-z\u{A4D8}]{2,})(\d{2,})$/u);
       if (splitMatch) {
@@ -716,7 +716,7 @@ function drawAtBatCell(g, CLR, ab, x, y) {
           'font-family': L.MONO, fill: notationColor,
         }));
       } else if (notation.includes(' ')) {
-        // Multi-word annotations (e.g. "Batter Timeout") — split into lines
+        // Multi-word annotations (e.g. "Batter Timeout"): split into lines
         const words = notation.split(' ');
         const longestWord = Math.max(...words.map(w => w.length));
         const fitSize = Math.min(22, maxFitSize(longestWord));
@@ -751,7 +751,7 @@ function drawAtBatCell(g, CLR, ab, x, y) {
     }
   }
 
-  // RBI dots — one filled dot per RBI in the bottom-left of the cell
+  // RBI dots: one filled dot per RBI in the bottom-left of the cell
   if (ab.rbi && ab.rbi > 0) {
     const dotR = 5;
     const dotSpacing = 14;
@@ -898,8 +898,8 @@ function averageZoneEdge(pitches, field, fallback) {
 
 // Figma-matched diamond constants (from 134-unit Figma diamond, scaled to DIAMOND_R)
 const FIGMA_R = 67; // Figma diamond half-size
-const PATH_SW = 4;  // base path stroke-width — matches circle-X marker weight
-const HASH_SW = 4;  // hash mark stroke-width — matches PATH_SW
+const PATH_SW = 4;  // base path stroke-width, matches circle-X marker weight
+const HASH_SW = 4;  // hash mark stroke-width, matches PATH_SW
 const DIAMOND_SW = 2.5; // diamond outline stroke-width (Figma)
 
 function drawDiamond(g, CLR, cx, cy, ab, isHR = false) {
@@ -909,7 +909,7 @@ function drawDiamond(g, CLR, cx, cy, ab, isHR = false) {
   const b2 = { x: cx, y: cy - R };       // top
   const b3 = { x: cx - R, y: cy };       // left
 
-  // Diamond outline — only show for HR (filled), otherwise hidden
+  // Diamond outline: only show for HR (filled), otherwise hidden
   if (isHR) {
     g.appendChild(svgEl('polygon', {
       points: `${hp.x},${hp.y} ${b1.x},${b1.y} ${b2.x},${b2.y} ${b3.x},${b3.y}`,

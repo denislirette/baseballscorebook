@@ -1,4 +1,4 @@
-// Styles Editor — live CSS/layout editor for the scorecard preview
+// Styles Editor: live CSS/layout editor for the scorecard preview
 
 import { DEFAULTS } from './layout-config.js';
 
@@ -359,7 +359,7 @@ function applyCSSToPreview() {
     // SVG uses inline attrs from getColors(), need re-render
     iframe.contentWindow.postMessage({ type: 'rerender' }, '*');
   } catch (e) {
-    // Cross-origin — fall back to postMessage only
+    // Cross-origin: fall back to postMessage only
     iframe.contentWindow.postMessage({ type: 'rerender' }, '*');
   }
 }

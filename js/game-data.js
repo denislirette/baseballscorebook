@@ -1,4 +1,4 @@
-// Game data parsing - transforms GUMBO feed into scorecard structures
+// Game data parsing: transforms GUMBO feed into scorecard structures
 
 const POSITION_MAP = {
   'pitcher': 1, 'catcher': 2, 'first baseman': 3,
@@ -140,7 +140,7 @@ export function buildScorecardGrid(allPlays, halfInning, lineup, boxscore, side)
     // Update cumulative journeys with this at-bat's runner movements
     for (const runner of ab.runners) {
       if (!runner.playerId) continue;
-      // Runner thrown out with no end base — add out segment and record the out
+      // Runner thrown out with no end base: add out segment and record the out
       if (!runner.end && runner.isOut) {
         const pid = runner.playerId;
         if (journeys.has(pid)) {
@@ -152,7 +152,7 @@ export function buildScorecardGrid(allPlays, halfInning, lineup, boxscore, side)
             const isOutAtHome = outBase === 'HP';
             addJourneySegments(j, j.currentBase, isOutAtHome ? 'HP' : outBase, isOutAtHome, true);
           } else {
-            // Out at current base (e.g., pickoff) — don't alter existing segments,
+            // Out at current base (e.g., pickoff). Don't alter existing segments,
             // just record the out so the marker draws at the base position
             j.isOut = true;
             j.outBase = outBase;
@@ -184,7 +184,7 @@ export function buildScorecardGrid(allPlays, halfInning, lineup, boxscore, side)
       if (runner.isOut && runner.outNumber) j.outNumber = runner.outNumber;
     }
 
-    // Clear cumulativeRunners — will be populated in second pass
+    // Clear cumulativeRunners; will be populated in second pass
     ab.cumulativeRunners = [];
 
     const key = `${slot}-${inning}`;
@@ -390,7 +390,7 @@ function parseStrikeout(play) {
     r.details?.runner?.id === play.matchup.batter.id && !r.movement?.isOut && r.movement?.end === '1B'
   );
   if (batterRunner) {
-    // Batter reached on uncaught third strike — check if WP, PB, or generic
+    // Batter reached on uncaught third strike: check if WP, PB, or generic
     const desc = (play.result.description || '').toLowerCase();
     if (desc.includes('wild pitch')) return k + ' WP';
     if (desc.includes('passed ball')) return k + ' PB';
@@ -542,7 +542,7 @@ function getFielderNumber(desc) {
   return positions.length > 0 ? positions[positions.length - 1] : '';
 }
 
-/** Normalize base names — API uses "4B" for home plate in some contexts */
+/** Normalize base names. API uses "4B" for home plate in some contexts. */
 function normalizeBase(base) {
   if (base === '4B') return 'score';
   return base;

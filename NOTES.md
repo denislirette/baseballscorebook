@@ -1,9 +1,9 @@
-# Baseball Scorebook — Development Notes
+# Baseball Scorebook: Development Notes
 
 ## Session: March 7, 2026
 
 ### Cell Editor (WYSIWYG)
-- Built `cell-editor.html` — standalone visual editor for individual play cells
+- Built `cell-editor.html`, a standalone visual editor for individual play cells
 - Draggable handles for pitch column divider, diamond center/radius, strike zone, count text, cell resize
 - Scroll-to-zoom, scenario picker (K, BB, 1B, HR, DP, overflow, etc.)
 - "Save to System" button writes config back to `layout-config.js` via Vite plugin POST endpoint
@@ -29,11 +29,11 @@
 - Annotation font scales down for longer labels (14->12->10), clamped to cell boundaries
 
 ### Play Notation
-- Double play: DP + fielders (DP643, DP64) — was G643
+- Double play: DP + fielders (DP643, DP64), previously G643
 - Strikeout double play: KDP23 or backwards-K DP23
 - Triple play: TP + fielders
 - K notation extra-large filling diamond area
-- Starting pitcher K subscript counter (K1, K2, K3...) — stops counting after pitching substitution
+- Starting pitcher K subscript counter (K1, K2, K3...); stops counting after pitching substitution
 - All no-diamond notations use same large font as K, with overflow capping via maxFitSize()
 - With-diamond notations smaller (24/20/16/14) to not overpower base paths
 
@@ -53,7 +53,7 @@
 - Applied consistently across svg-renderer.js, cell-editor.html, cell-reference.html
 
 ### Legend Page
-- Accessible via header button on game page (Legend, Standings, Dark — consistent styling)
+- Accessible via header button on game page (Legend, Standings, Dark, all consistent styling)
 - Sections: Pitch Call Codes, Pitch Types, Play Notation, Fielding Positions, Batter Stats, Summary Rows, Pitch Colors, Cell Indicators, Runner Annotations, Count & Strike Zone
 
 ### Layout Config
@@ -82,4 +82,4 @@
 - Add collapsible sections for easier navigation on the game page
 - Candidates: pitcher stats tables, bench/bullpen lists, legend overlay sections
 - Consider accordion-style or toggle visibility per section
-- Mobile-friendly — important for smaller viewports
+- Mobile-friendly, important for smaller viewports

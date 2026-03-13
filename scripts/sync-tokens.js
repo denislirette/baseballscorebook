@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * sync-tokens.js — Generate CSS custom properties and layout-config defaults
+ * sync-tokens.js: Generate CSS custom properties and layout-config defaults
  * from design-tokens.json (single source of truth for Figma <-> code sync).
  *
  * Usage:
@@ -69,7 +69,7 @@ function replaceScVars(source, selectorStart, newVars) {
     if (!skipping && trimmed.startsWith('--sc-')) {
       skipping = true;
       newLines.push('');
-      newLines.push('  /* SVG scorecard — synced from design-tokens.json */');
+      newLines.push('  /* SVG scorecard: synced from design-tokens.json */');
       newLines.push(newVars);
     }
 
@@ -79,7 +79,7 @@ function replaceScVars(source, selectorStart, newVars) {
           trimmed.startsWith('/*') || trimmed.startsWith('*')) {
         continue;
       }
-      // Hit a non-sc line — stop skipping
+      // Hit a non-sc line; stop skipping
       skipping = false;
     }
 

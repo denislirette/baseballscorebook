@@ -1,7 +1,7 @@
-/* Baseball Scorebook — Design System & Styles
+/* Baseball Scorebook: Design System & Styles
    ═══════════════════════════════════════════════════════════════
 
-   CHEAT SHEET — Quick reference for common adjustments:
+   CHEAT SHEET: Quick reference for common adjustments:
 
    COLORS (Light Mode)          → :root { --sc-xxx }
    COLORS (Dark Mode)           → [data-theme="dark"] { --sc-xxx }
@@ -44,7 +44,7 @@
 
 
 /* ═══════════════════════════════════════════════════════
-   1. DESIGN TOKENS — Light Mode (default)
+   1. DESIGN TOKENS: Light Mode (default)
    ═══════════════════════════════════════════════════════ */
 :root {
   /* ── Page ── */
@@ -88,7 +88,7 @@
 
 
 /* ═══════════════════════════════════════════════════════
-   2. DESIGN TOKENS — Dark Mode
+   2. DESIGN TOKENS: Dark Mode
    ═══════════════════════════════════════════════════════ */
 [data-theme="dark"] {
   /* ── Page ── */

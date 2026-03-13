@@ -24,7 +24,7 @@ You need [Node.js](https://nodejs.org/) (v18 or later) installed.
 npm run dev
 ```
 
-Open `http://localhost:5173`. Add `?dev` to any page URL to load from saved fixture files instead of hitting the live MLB API — this is how most development happens.
+Open `http://localhost:5173`. Add `?dev` to any page URL to load from saved fixture files instead of hitting the live MLB API. This is how most development happens.
 
 ### 4. Create a branch
 
@@ -57,7 +57,7 @@ Small, focused commits are easier to review than one giant commit.
 git push origin fix/strikeout-notation
 ```
 
-Go to the original repo on GitHub — you'll see a prompt to open a pull request from your branch. Write a short description of what your changes do, and submit.
+Go to the original repo on GitHub. You'll see a prompt to open a pull request from your branch. Write a short description of what your changes do, and submit.
 
 ## How to contribute
 
@@ -69,7 +69,7 @@ Open an issue. Include:
 - The game/date you were looking at (if relevant)
 - Browser and OS
 
-Screenshots are really helpful, especially for rendering issues. Game-specific bugs are common because the MLB API returns slightly different data structures depending on the play type — including the specific game helps reproduce the issue.
+Screenshots are really helpful, especially for rendering issues. Game-specific bugs are common because the MLB API returns slightly different data structures depending on the play type, so including the specific game helps reproduce the issue.
 
 ### Want to fix something?
 
@@ -83,10 +83,10 @@ Open an issue first so we can talk about it. This keeps the project focused and 
 
 ## What would actually help right now
 
-- **Parser improvements** — The scoring notation parser (`js/game-data.js`) handles most cases but there are edge cases in baseball that are genuinely weird. If you find a game where the notation is wrong, that's a great issue to file.
-- **Mobile layout** — The scorecards are wide. Making them work better on phones would be great.
-- **Accessibility** — The SVG scorecards could use better aria labels and keyboard navigation.
-- **More test fixtures** — Saving interesting game fixtures (extra innings, no-hitters, position players pitching) helps catch rendering bugs.
+- **Parser improvements.** The scoring notation parser (`js/game-data.js`) handles most cases but there are edge cases in baseball that are genuinely weird. If you find a game where the notation is wrong, that's a great issue to file.
+- **Mobile layout.** The scorecards are wide. Making them work better on phones would be great.
+- **Accessibility.** The SVG scorecards could use better aria labels and keyboard navigation.
+- **More test fixtures.** Saving interesting game fixtures (extra innings, no-hitters, position players pitching) helps catch rendering bugs.
 
 ## Code guidelines
 
@@ -98,11 +98,11 @@ Open an issue first so we can talk about it. This keeps the project focused and 
 
 **Name things clearly.** `parseAtBatResult()` is better than `processData()`. `renderRunnerPath()` is better than `drawLine()`.
 
-There's no linter or formatter set up yet — just try to match what's already there.
+There's no linter or formatter set up yet. Just try to match what's already there.
 
 ## Testing
 
-There's no automated test suite yet (it's on the list). For now, testing means:
+There's no automated test suite yet (it's on the list). For now testing means:
 1. Load the dev server with `?dev`
 2. Compare your rendered output against [livebaseballscorecards.com](https://livebaseballscorecards.com) for the same game
 3. Check pitch sequences, play notation, runner paths, and substitution indicators
@@ -111,7 +111,7 @@ The [TECHNICAL-REFERENCE.md](TECHNICAL-REFERENCE.md) has detailed docs on the da
 
 ## Pull request guidelines
 
-- Keep PRs focused — one thing per PR, not five things bundled together
+- Keep PRs focused: one thing per PR, not five things bundled together
 - A clear title that says what changed, and a description that explains why
 - If it's a visual change, include before/after screenshots
 - Don't worry about being perfect. If the direction is right, we can iterate
