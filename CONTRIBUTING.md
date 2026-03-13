@@ -26,7 +26,7 @@ Screenshots are really helpful, especially for rendering issues.
 
 ### Want to fix something?
 
-1. Check the [issues](https://github.com/denislirette/baseball-scoreboard/issues) to see if someone's already on it
+1. Check the [issues](https://github.com/denislirette/baseball-scorebook/issues) to see if someone's already on it
 2. Create a branch off `master` (`git checkout -b fix/your-fix-name`)
 3. Make your changes
 4. Test against the reference game fixture (`fixtures/2025-07-04-LAA-TOR.json` with `?dev=true`)

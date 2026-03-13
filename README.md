@@ -27,8 +27,8 @@ Built because I wanted to follow games the old-school way without actually havin
 ## Quick start
 
 ```bash
-git clone https://github.com/denislirette/baseball-scoreboard.git
-cd baseball-scoreboard
+git clone https://github.com/denislirette/baseball-scorebook.git
+cd baseball-scorebook
 npm install
 npm run dev
 ```
