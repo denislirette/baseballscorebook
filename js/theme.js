@@ -1,4 +1,4 @@
-// Dark mode toggle — persists to localStorage, re-renders scorecards on toggle
+// Dark mode toggle: persists to localStorage, re-renders scorecards on toggle
 (function () {
   const btn = document.getElementById('theme-toggle');
   if (!btn) return;

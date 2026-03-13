@@ -352,7 +352,7 @@ baseball-scorebook/
 
 ## Deployment
 
-Hosted on Netlify. Build config is in `netlify.toml` — runs `npm run build` and publishes the `dist/` directory.
+Hosted on Netlify. Build config is in `netlify.toml`, which runs `npm run build` and publishes the `dist/` directory.
 
 ## Key API Response Structures
 

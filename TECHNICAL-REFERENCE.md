@@ -1,4 +1,4 @@
-# Baseball Scoreboard — Technical Reference
+# Baseball Scorebook: Technical Reference
 
 > This document explains how the entire system works so another developer (or AI) can review, debug, and extend it. It covers architecture, data flow, file responsibilities, key data structures, scoring rules, and known gaps.
 >
@@ -22,23 +22,23 @@ Vanilla JavaScript + Vite. No framework. ES modules throughout. The app renders 
 
 | File | Purpose |
 |------|---------|
-| `index.html` | Game picker page — date nav, game grid |
-| `game.html` | Scorecard view — SVG rendering, refresh controls |
-| `js/api.js` | MLB API client with dev mode fixture loading |
-| `js/game-data.js` | GUMBO feed parser — transforms raw API into scorecard data structures |
-| `js/svg-renderer.js` | SVG scorecard rendering — grid, cells, diamonds, pitch sequences, stats |
-| `js/scorecard.js` | Page orchestrator — fetches data, calls renderers, manages refresh |
-| `js/schedule.js` | Game picker page logic — date nav, game cards |
+| `index.html` | Game picker page: date nav, game grid |
+| `game.html` | Scorecard view: SVG rendering, refresh controls |
+| `js/api.js` | MLB API client, with dev mode fixture loading |
+| `js/game-data.js` | GUMBO feed parser: transforms raw API into scorecard data structures |
+| `js/svg-renderer.js` | SVG scorecard rendering: grid, cells, diamonds, pitch sequences, stats |
+| `js/scorecard.js` | Page orchestrator: fetches data, calls renderers, manages refresh |
+| `js/schedule.js` | Game picker page logic: date nav, game cards |
 | `js/layout-config.js` | Mutable layout constants (cell sizes, margins, font sizes) |
-| `js/theme.js` | Dark/light mode toggle, persists to localStorage |
+| `js/theme.js` | Dark/light mode toggle; persists to localStorage |
 | `js/refresh.js` | Auto-refresh controller for live games |
 | `js/standings.js` | AL/NL standings overlay |
 | `js/utils.js` | Date/time formatting utilities |
 | `css/style.css` | All styles, CSS variables for light/dark themes |
-| `design-tokens.json` | Single source of truth for colours, sizing, strokes, typography |
-| `vite.config.js` | Vite 6 config with dev-only token/layout save plugins |
+| `design-tokens.json` | Single source of truth: colours, sizing, strokes, typography |
+| `vite.config.js` | Vite 6 config, with dev-only token/layout save plugins |
 | `fixtures/index.json` | Maps gamePk → fixture filename for dev mode |
-| `fixtures/2025-07-04-LAA-TOR.json` | Primary test fixture: LAA @ TOR, 10 innings, 4-3 walkoff |
+| `fixtures/2025-07-04-LAA-TOR.json` | Primary test fixture (LAA @ TOR, 10 innings, 4-3 walkoff) |
 
 ---
 
@@ -123,7 +123,7 @@ Map {
 
   rbi: 0,
   spKNumber: null,         // if K from starting pitcher: K1, K2, K3...
-  confidence: "high",      // "high" | "low" — set to "low" when notation was inferred, not certain
+  confidence: "high",      // "high" | "low"; set to "low" when notation was inferred, not certain
   confidenceNote: null,    // human-readable note explaining what was uncertain, e.g. "FC fielder positions inferred from description"
 }
 ```
@@ -136,7 +136,7 @@ This is the critical data structure for diamond rendering. It tracks each player
 
 **How it works (game-data.js, buildScorecardGrid):**
 
-1. **First pass** — Process all plays sequentially. For each play, update a per-inning journey map tracking every runner's cumulative segments:
+1. **First pass:** Process all plays sequentially. For each play, update a per-inning journey map tracking every runner's cumulative segments:
    ```js
    journeysByInning = Map<inning, Map<playerId, {
      segments: [{from: "HP", to: "1B"}, {from: "1B", to: "2B"}],
@@ -148,7 +148,7 @@ This is the critical data structure for diamond rendering. It tracks each player
    }>>
    ```
 
-2. **Second pass** — After all plays are processed, attach each player's completed journey to their OWN batting cell (not the cell where a subsequent play advanced them):
+2. **Second pass:** After all plays are processed, attach each player's completed journey to their OWN batting cell (not the cell where a subsequent play advanced them):
    ```js
    // Find the cell where this player batted
    const ab = cells.find(c => c.batterId === playerId);
@@ -209,7 +209,7 @@ BASES: {
 ```js
 const hasRunners = ab.runners && ab.runners.some(r => r.end && r.end !== r.start);
 ```
-Only draws a diamond if there is baserunner movement in the play. Strikeouts and popouts with no runners moving get no diamond — just large notation text centered in the cell.
+Only draws a diamond if there is baserunner movement in the play. Strikeouts and popouts with no runners moving get no diamond, just large notation text centered in the cell.
 
 **Home run special case:** On a solo HR, `movement.originBase` is null and `movement.end` is `"score"`. There are no other runners. This still requires a diamond drawn and fully filled. Explicitly check for `eventType === "home_run"` before evaluating `hasRunners`, and force diamond rendering on any HR regardless of runner count.
 
@@ -357,9 +357,9 @@ An error does NOT require the ball to be dropped. A fielder who throws wildly pu
 Each at-bat cell has a pitch column on the left (width = `PITCH_COL_W`, default 66px).
 
 **Per pitch, three columns of text:**
-1. Call code (left) — coloured by type (see table below)
-2. Pitch type (center) — FF, SI, CH, SL, CU, FC, etc.
-3. Speed (right) — rounded integer MPH
+1. Call code (left), coloured by type (see table below)
+2. Pitch type (center): FF, SI, CH, SL, CU, FC, etc.
+3. Speed (right), rounded integer MPH
 
 ### Call Code Colour Table
 
@@ -438,8 +438,8 @@ Three specific cases that trip up scorers:
 
 ### Building substitution data (game-data.js)
 
-- `buildSubstitutionMap(allPlays, halfInning, lineup)` — scans action events for PH, PR, pitcher subs, defensive subs
-- `buildSubNumberMap(boxscore, lineup, side)` — assigns circled numbers (①②③...) to each substitute
+- `buildSubstitutionMap(allPlays, halfInning, lineup)`: scans action events for PH, PR, pitcher subs, defensive subs
+- `buildSubNumberMap(boxscore, lineup, side)`: assigns circled numbers (①②③...) to each substitute
 
 ### Rendering substitution indicators (svg-renderer.js)
 
@@ -530,16 +530,16 @@ function getColors() {
 }
 ```
 
-Toggle via `js/theme.js` — sets `data-theme="dark"` on `<html>`, persists to localStorage, triggers rerender.
+Toggle via `js/theme.js`, which sets `data-theme="dark"` on `<html>`, persists to localStorage, and triggers rerender.
 
 ---
 
 ## Design Tokens
 
 `design-tokens.json` is the single source of truth. It feeds into:
-- `css/style.css` — via `npm run sync-tokens` (patches CSS variables)
-- `js/layout-config.js` — via same sync script (patches DEFAULTS object)
-- Figma — via clipboard copy (`npm run copy-tokens`) + custom Figma plugin at `figma-plugin/`
+- `css/style.css`: via `npm run sync-tokens` (patches CSS variables)
+- `js/layout-config.js`: via same sync script (patches DEFAULTS object)
+- Figma: via clipboard copy (`npm run copy-tokens`) + custom Figma plugin at `figma-plugin/`
 
 ---
 
@@ -564,43 +564,43 @@ Toggle via `js/theme.js` — sets `data-theme="dark"` on `<html>`, persists to l
 | `/api/v1/teams/stats?season=YYYY&sportId=1&group=pitching,fielding&stats=season` | Team stats for rankings |
 | `/api/v1/teams/{teamId}/coaches?season=YYYY` | Coaches roster |
 
-**On endpoint versions:** The GUMBO feed (`/v1.1/`) is the authoritative source for all play and game data. Do not mix calls to `/v1/game/{gamePk}/playByPlay` with GUMBO data — that endpoint uses slightly different field names for runner movement (`movement.start` vs `movement.originBase`). All runner movement logic in this system assumes GUMBO field names.
+**On endpoint versions:** The GUMBO feed (`/v1.1/`) is the authoritative source for all play and game data. Do not mix calls to `/v1/game/{gamePk}/playByPlay` with GUMBO data; that endpoint uses slightly different field names for runner movement (`movement.start` vs `movement.originBase`). All runner movement logic in this system assumes GUMBO field names.
 
 ### GUMBO Feed Structure (key paths)
 
 ```
-data.gameData          — game metadata, teams, players, venue, weather, datetime
-data.gameData.players  — all player info (keyed by "ID{number}")
-data.liveData.plays.allPlays[]     — every play in game order
-data.liveData.plays.currentPlay    — live game current play
-data.liveData.boxscore.teams.{away|home}  — box score per team
-data.liveData.linescore            — inning-by-inning scores
-data.liveData.decisions            — winner/loser/save pitcher IDs
+data.gameData          - game metadata, teams, players, venue, weather, datetime
+data.gameData.players  - all player info (keyed by "ID{number}")
+data.liveData.plays.allPlays[]     - every play in game order
+data.liveData.plays.currentPlay    - live game current play
+data.liveData.boxscore.teams.{away|home}  - box score per team
+data.liveData.linescore            - inning-by-inning scores
+data.liveData.decisions            - winner/loser/save pitcher IDs
 ```
 
 ### Play Object Structure (allPlays[])
 
 ```
-play.result.type        — "atBat" | "action"
-play.result.event       — "Single", "Strikeout", "Groundout", etc.
-play.result.eventType   — "single", "strikeout", "field_out", etc.
-play.result.description — full text description
-play.result.rbi         — RBI count
-play.about.inning       — inning number
-play.about.halfInning   — "top" | "bottom"
-play.about.isTopInning  — boolean
-play.matchup.batter.id  — batter player ID
-play.matchup.pitcher.id — pitcher player ID
-play.playEvents[]       — pitch-by-pitch events
-play.runners[]          — all runner movements for this play
-  .movement.originBase  — null (batter) | "1B" | "2B" | "3B"
-  .movement.end         — "1B" | "2B" | "3B" | "score"
-  .movement.isOut       — boolean
-  .details.runner.id    — runner player ID
-  .details.event        — event description
-  .credits[]            — fielders who recorded outs or assists on this runner's movement
-    .position.code      — fielder position number as a string ("6", "3", etc.)
-    .credit             — "f_assist" | "f_putout"
+play.result.type        - "atBat" | "action"
+play.result.event       - "Single", "Strikeout", "Groundout", etc.
+play.result.eventType   - "single", "strikeout", "field_out", etc.
+play.result.description - full text description
+play.result.rbi         - RBI count
+play.about.inning       - inning number
+play.about.halfInning   - "top" | "bottom"
+play.about.isTopInning  - boolean
+play.matchup.batter.id  - batter player ID
+play.matchup.pitcher.id - pitcher player ID
+play.playEvents[]       - pitch-by-pitch events
+play.runners[]          - all runner movements for this play
+  .movement.originBase  - null (batter) | "1B" | "2B" | "3B"
+  .movement.end         - "1B" | "2B" | "3B" | "score"
+  .movement.isOut       - boolean
+  .details.runner.id    - runner player ID
+  .details.event        - event description
+  .credits[]            - fielders who recorded outs or assists on this runner's movement
+    .position.code      - fielder position number as a string ("6", "3", etc.)
+    .credit             - "f_assist" | "f_putout"
 ```
 
 **On `play.result.type === "action"`:** Action events include stolen bases, caught stealing, pickoffs, wild pitches, passed balls, balks, pitching changes, pinch hitters, and pinch runners. They share the same object structure as at-bat plays but have no `pitchSequence` for the play itself (though they occur at a specific point in the pitch sequence of the surrounding at-bat, indicated by their position in `allPlays`). Always process action events in sequence with at-bat events during the first pass of `buildScorecardGrid`.
@@ -611,14 +611,14 @@ play.runners[]          — all runner movements for this play
 
 All 8 original gaps have been addressed. Summary of fixes:
 
-1. **FC/Force Out fielder numbers** — ✅ Fixed. `parseFieldersChoice()` extracts fielder chain from `play.runners[].credits` array. Falls back to description parsing.
-2. **Runner-out indicators on diamonds** — ✅ Fixed. Out segments render in red (`CLR.out`), X marker drawn at `outBase` coordinates. Segments carry `isOutSegment` flag.
-3. **Stolen base / caught stealing on diamonds** — ✅ Fixed. Runner event field is parsed for advance type (`sb`, `cs`, `wp`, `pb`, `bk`). Segments carry `advanceType`. Annotations show "SB", "WP", etc. instead of base letters for non-hit advances.
-4. **DP notation prefix** — ✅ Fixed. `parseDoublePlay()` detects trajectory from description (ground/line/fly/pop) and uses appropriate prefix with hyphenated fielders (e.g., `G6-4-3`).
-5. **Solo HR diamond not rendering** — ✅ Fixed. `alwaysDiamond` flag forces diamond rendering for HR, HBP, and CI events regardless of `hasRunners`.
-6. **Dropped third strike (W pitch code)** — ✅ Fixed. `parseStrikeout()` checks if batter reached 1B on a strikeout and appends `WP`, `PB`, or `E2` to the K notation.
-7. **Infield fly rule** — ✅ Fixed. `parseFieldOut()` appends `(IFF)` when description contains "infield fly".
-8. **Runner annotation logic** — ✅ Fixed. Annotations now show the advance event type (SB, WP, CS, PB, BK) for non-hit advances instead of generic base path labels.
+1. **FC/Force Out fielder numbers:** ✅ Fixed. `parseFieldersChoice()` extracts fielder chain from `play.runners[].credits` array. Falls back to description parsing.
+2. **Runner-out indicators on diamonds:** ✅ Fixed. Out segments render in red (`CLR.out`), X marker drawn at `outBase` coordinates. Segments carry `isOutSegment` flag.
+3. **Stolen base / caught stealing on diamonds:** ✅ Fixed. Runner event field is parsed for advance type (`sb`, `cs`, `wp`, `pb`, `bk`). Segments carry `advanceType`. Annotations show "SB", "WP", etc. instead of base letters for non-hit advances.
+4. **DP notation prefix:** ✅ Fixed. `parseDoublePlay()` detects trajectory from description (ground/line/fly/pop) and uses appropriate prefix with hyphenated fielders (e.g., `G6-4-3`).
+5. **Solo HR diamond not rendering:** ✅ Fixed. `alwaysDiamond` flag forces diamond rendering for HR, HBP, and CI events regardless of `hasRunners`.
+6. **Dropped third strike (W pitch code):** ✅ Fixed. `parseStrikeout()` checks if batter reached 1B on a strikeout and appends `WP`, `PB`, or `E2` to the K notation.
+7. **Infield fly rule:** ✅ Fixed. `parseFieldOut()` appends `(IFF)` when description contains "infield fly".
+8. **Runner annotation logic:** ✅ Fixed. Annotations now show the advance event type (SB, WP, CS, PB, BK) for non-hit advances instead of generic base path labels.
 
 ---
 

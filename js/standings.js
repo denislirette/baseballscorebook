@@ -1,4 +1,4 @@
-// AL/NL Standings — 6 division boxes in 2×3 grid (AL left, NL right)
+// AL/NL Standings: 6 division boxes in 2x3 grid (AL left, NL right)
 
 const TEAM_ABBREVS = {
   108: 'LAA', 109: 'ARI', 110: 'BAL', 111: 'BOS', 112: 'CHC',

@@ -13,4 +13,4 @@ Describe what you'd like to see added or changed.
 How does this improve the scorebook experience?
 
 **Anything else?**
-Mockups, examples from other scorecards, links — whatever helps explain the idea.
+Mockups, examples from other scorecards, links, whatever helps explain the idea.

@@ -329,7 +329,7 @@ function renderCell(CLR, scenario) {
       }
     }
 
-    // Mini strike zone — bottom 1/3 of pitch column (hidden when >10 pitches)
+    // Mini strike zone: bottom 1/3 of pitch column (hidden when >10 pitches)
     if (showSZ) {
       const SZ_HALF_PLATE = 0.83;
       const PX_RANGE = 4.0, PZ_MIN = 0.0, PZ_MAX = 5.0;
@@ -420,7 +420,7 @@ function renderCell(CLR, scenario) {
     }
   }
 
-  // Notation text — larger when no diamond is shown
+  // Notation text: larger when no diamond is shown
   if (notation) {
     const notColor = isHR ? CLR.cellBg : CLR.text;
     const isK = notation === 'K' || notation === '\u{A4D8}';
@@ -444,7 +444,7 @@ function renderCell(CLR, scenario) {
     }));
   }
 
-  // Runner annotations — full counter-clockwise path labels
+  // Runner annotations: full counter-clockwise path labels
   if (runners) {
     const order = ['HP', '1B', '2B', '3B'];
     const label = { HP: 'H', '1B': '1', '2B': '2', '3B': '3' };
@@ -512,15 +512,15 @@ function renderHandles() {
 
   const R = 5; // handle radius in cell coords
 
-  // Pitch column divider — vertical drag (x only)
+  // Pitch column divider: vertical drag (x only)
   addHandle(svg, 'PITCH_COL_W', C.PITCH_COL_W, H / 2, 'x', `Pitch col: ${C.PITCH_COL_W}`);
 
-  // Diamond center — shows where center is
+  // Diamond center: shows where center is
   const mainW = W - C.PITCH_COL_W;
   const cx = C.PITCH_COL_W + mainW / 2;
   const cy = H * C.DIAMOND_CY_RATIO;
 
-  // Diamond radius — drag corner of diamond
+  // Diamond radius: drag corner of diamond
   addHandle(svg, 'DIAMOND_R', cx + C.DIAMOND_R, cy, 'x-from-center', `R: ${C.DIAMOND_R}`, cx);
 
   // Diamond vertical position
@@ -533,7 +533,7 @@ function renderHandles() {
   // Count text position
   addHandle(svg, 'COUNT_XY', C.PITCH_COL_W + C.COUNT_X_OFFSET, C.COUNT_Y, 'xy-count', `Count`);
 
-  // Cell resize — bottom-right corner
+  // Cell resize: bottom-right corner
   addHandle(svg, 'CELL_SIZE', W - 2, H - 2, 'cell-resize', `${W}x${H}`);
 
   return svg;

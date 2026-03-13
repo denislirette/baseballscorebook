@@ -1,4 +1,4 @@
-// Scorecard page - main entry point
+// Scorecard page: main entry point
 
 import { updateConfig, resetConfig } from './layout-config.js';
 import { fetchLiveFeed, fetchStandings, fetchAllTeamStats, teamLogoUrl } from './api.js';
@@ -35,7 +35,7 @@ async function loadGame() {
     const gumbo = await fetchLiveFeed(gamePk);
     gameData = gumbo;
 
-    // Derive season from game data (not current year — fixtures may differ)
+    // Derive season from game data (not current year; fixtures may differ)
     const officialDate = gumbo.gameData?.datetime?.officialDate || '';
     const season = officialDate ? parseInt(officialDate.split('-')[0], 10) : new Date().getFullYear();
 
@@ -50,7 +50,7 @@ async function loadGame() {
     // Render immediately, then compute trends and re-render
     renderGame(gameData, standingsData, allTeamStatsData);
 
-    // Async trend computation — re-renders when done
+    // Async trend computation, re-renders when done
     const boxscore = gumbo.liveData.boxscore;
     const awayLineup = buildTeamLineup(boxscore, 'away');
     const homeLineup = buildTeamLineup(boxscore, 'home');
@@ -81,14 +81,14 @@ function renderGame(data, standings, allTeamStats) {
 
   container.innerHTML = '';
 
-  // Pitch legend removed — see Legend overlay for full reference
+  // Pitch legend removed; see Legend overlay for full reference
 
   // Game header with linescore, game info, umpires
   const headerSection = document.createElement('div');
   headerSection.innerHTML = renderGameHeaderHTML(data);
   container.appendChild(headerSection);
 
-  // Standings — render into the overlay (not inline)
+  // Standings: render into the overlay (not inline)
   if (standings) {
     const standingsHTML = renderStandingsHTML(standings, away.id, home.id);
     if (standingsHTML) {
@@ -118,7 +118,7 @@ function renderTeamSection(data, side) {
   header.innerHTML = `<img src="${teamLogoUrl(team.id)}" alt="${team.abbreviation}"><h2>${team.name} (${label})</h2>`;
   section.appendChild(header);
 
-  // Starting pitcher — full width
+  // Starting pitcher (full width)
   const spDiv = document.createElement('div');
   spDiv.innerHTML = renderStartingPitcherHTML(data, side);
   section.appendChild(spDiv);

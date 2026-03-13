@@ -12,7 +12,7 @@ We're committed to making this project welcoming for everyone, regardless of exp
 
 **Expected behaviour:**
 - Be respectful and constructive in discussions
-- Give helpful feedback — explain the "why," not just the "what"
+- Give helpful feedback: explain the "why," not just the "what"
 - Be patient with questions, especially from newcomers
 - Credit others' work and ideas
 

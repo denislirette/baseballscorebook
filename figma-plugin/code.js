@@ -1,4 +1,4 @@
-// Scorecard Token Import — Figma Plugin
+// Scorecard Token Import: Figma Plugin
 // Reads design-tokens.json format and creates/updates Figma Variables.
 
 figma.showUI(__html__, { width: 400, height: 380 });

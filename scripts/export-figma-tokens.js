@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * export-figma-tokens.js — Convert design-tokens.json into DTCG format
+ * export-figma-tokens.js: Convert design-tokens.json into DTCG format
  * for the Microsoft "Variables Import" Figma plugin.
  *
  * Usage:  node scripts/export-figma-tokens.js
