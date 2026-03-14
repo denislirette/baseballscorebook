@@ -23,6 +23,31 @@ export function parseDate(str) {
 }
 
 /**
+ * Format a date as DD-MM-YYYY for display.
+ * @param {Date} date
+ * @returns {string}
+ */
+export function formatDateDisplay(date) {
+  const d = String(date.getDate()).padStart(2, '0');
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const y = date.getFullYear();
+  return `${d}-${m}-${y}`;
+}
+
+/**
+ * Parse a DD-MM-YYYY string into a Date (local timezone).
+ * @param {string} str
+ * @returns {Date|null}
+ */
+export function parseDateDisplay(str) {
+  const match = str.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+  if (!match) return null;
+  const [, d, m, y] = match.map(Number);
+  if (m < 1 || m > 12 || d < 1 || d > 31) return null;
+  return new Date(y, m - 1, d);
+}
+
+/**
  * Format an ISO datetime string to a local time string.
  * @param {string} isoString
  * @returns {string} e.g. "7:05 PM"

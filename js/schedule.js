@@ -1,7 +1,7 @@
 // Game Picker page logic
 
 import { fetchSchedule, getGames, teamLogoUrl, isDevMode } from './api.js';
-import { formatDate, parseDate, formatGameTime, gameStatusText } from './utils.js';
+import { formatDate, parseDate, formatDateDisplay, parseDateDisplay, formatGameTime, gameStatusText } from './utils.js';
 
 const gamesGrid = document.getElementById('games-grid');
 const datePicker = document.getElementById('date-picker');
@@ -26,7 +26,7 @@ function devParam() {
 
 function setDate(date) {
   currentDate = date;
-  datePicker.value = formatDate(date);
+  datePicker.value = formatDateDisplay(date);
   loadGames();
 }
 
@@ -43,7 +43,16 @@ nextBtn.addEventListener('click', () => {
 });
 
 datePicker.addEventListener('change', () => {
-  setDate(parseDate(datePicker.value));
+  const parsed = parseDateDisplay(datePicker.value);
+  if (parsed) setDate(parsed);
+});
+
+datePicker.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const parsed = parseDateDisplay(datePicker.value);
+    if (parsed) setDate(parsed);
+  }
 });
 
 async function loadGames() {
