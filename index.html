@@ -19,9 +19,10 @@
   </header>
 
   <main class="game-picker">
-    <div class="date-nav">
+    <div class="date-nav" role="group" aria-label="Date navigation">
       <button id="prev-day" class="date-btn" aria-label="Previous day">&larr;</button>
-      <input type="date" id="date-picker">
+      <label for="date-picker" class="sr-only">Game date (DD-MM-YYYY)</label>
+      <input type="text" id="date-picker" inputmode="numeric" pattern="\d{2}-\d{2}-\d{4}" placeholder="DD-MM-YYYY" aria-label="Game date in day-month-year format" autocomplete="off">
       <button id="next-day" class="date-btn" aria-label="Next day">&rarr;</button>
     </div>
 

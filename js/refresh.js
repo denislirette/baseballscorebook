@@ -2,6 +2,7 @@
 
 let refreshTimer = null;
 let lastRefresh = null;
+let statusPrefix = '';
 
 /**
  * Set up refresh control listeners and auto-refresh behavior.
@@ -11,37 +12,50 @@ let lastRefresh = null;
 export function renderRefreshControls(refreshFn, getGameState) {
   const autoRefreshCheckbox = document.getElementById('auto-refresh');
   const intervalInput = document.getElementById('refresh-interval');
-  const refreshBtn = document.getElementById('refresh-btn');
+  const saveBtn = document.getElementById('save-interval-btn');
   const statusEl = document.getElementById('refresh-status');
 
-  function getInterval() {
-    return (parseInt(intervalInput.value, 10) || 1) * 1000;
+  let activeInterval = (parseInt(intervalInput.value, 10) || 1) * 1000;
+
+  function updateStatusFull() {
+    if (!lastRefresh) return;
+    const timeStr = lastRefresh.toLocaleTimeString();
+    statusEl.textContent = `Last updated: ${timeStr}`;
+    // Cache prefix (everything except seconds) for fast updates
+    const lastColon = timeStr.lastIndexOf(':');
+    statusPrefix = `Last updated: ${timeStr.slice(0, lastColon + 1)}`;
   }
 
-  function updateStatus() {
-    if (lastRefresh) {
-      statusEl.textContent = `Last updated: ${lastRefresh.toLocaleTimeString()}`;
-    }
+  function updateStatusSeconds() {
+    if (!lastRefresh || !statusPrefix) return;
+    const now = new Date();
+    const secs = String(now.getSeconds()).padStart(2, '0');
+    const suffix = now.toLocaleTimeString().slice(now.toLocaleTimeString().lastIndexOf(':') + 3);
+    statusEl.textContent = `${statusPrefix}${secs}${suffix}`;
   }
 
   async function doRefresh() {
-    statusEl.textContent = 'Refreshing...';
     await refreshFn();
     lastRefresh = new Date();
-    updateStatus();
+    if (activeInterval < 10000) {
+      updateStatusSeconds();
+    } else {
+      updateStatusFull();
+    }
 
     // Stop auto-refresh if game is final
     const state = getGameState();
     if (state === 'Final') {
       stopAutoRefresh();
       autoRefreshCheckbox.checked = false;
-      statusEl.textContent += ' (Game Final - auto-refresh stopped)';
+      updateStatusFull();
+      statusEl.textContent += ' (Game Final)';
     }
   }
 
   function startAutoRefresh() {
     stopAutoRefresh();
-    refreshTimer = setInterval(doRefresh, getInterval());
+    refreshTimer = setInterval(doRefresh, activeInterval);
   }
 
   function stopAutoRefresh() {
@@ -51,7 +65,12 @@ export function renderRefreshControls(refreshFn, getGameState) {
     }
   }
 
-  refreshBtn.addEventListener('click', doRefresh);
+  saveBtn.addEventListener('click', () => {
+    activeInterval = (parseInt(intervalInput.value, 10) || 1) * 1000;
+    if (autoRefreshCheckbox.checked) {
+      startAutoRefresh();
+    }
+  });
 
   autoRefreshCheckbox.addEventListener('change', () => {
     if (autoRefreshCheckbox.checked) {
@@ -61,14 +80,7 @@ export function renderRefreshControls(refreshFn, getGameState) {
     }
   });
 
-  intervalInput.addEventListener('change', () => {
-    if (autoRefreshCheckbox.checked) {
-      startAutoRefresh();
-    }
-  });
-
   // Start auto-refresh by default for live games
-  // (will be stopped automatically when Final is detected)
   if (autoRefreshCheckbox.checked) {
     startAutoRefresh();
   }
