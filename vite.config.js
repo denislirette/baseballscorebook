@@ -54,6 +54,7 @@ export default defineConfig({
         standings: 'standings.html',
         releases: 'releases.html',
         contact: 'contact.html',
+        contactSuccess: 'contact-success.html',
         accessibility: 'accessibility.html',
         analytics: 'analytics.html',
       },

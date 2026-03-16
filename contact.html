@@ -12,10 +12,33 @@
     }
   </script>
   <style>
-    .contact-page { max-width: 600px; padding: 24px var(--container-pad); }
-    .contact-page h1 { font-size: 1.5rem; margin-bottom: 16px; }
-    .contact-page p { line-height: 1.7; margin-bottom: 12px; color: var(--text-secondary); }
-    .contact-page a { color: var(--text); font-weight: 600; }
+    .contact-page { max-width: 65ch; padding: 2em var(--container-pad) 4em; }
+    .contact-page p { line-height: 1.7; margin-bottom: 1em; }
+    .contact-form { margin-top: 2em; }
+    .contact-form label { display: block; font-weight: 600; margin-bottom: 0.25em; }
+    .contact-form input,
+    .contact-form textarea,
+    .contact-form select {
+      width: 100%;
+      padding: 0.5em;
+      font: inherit;
+      border: 1px solid var(--grid-line);
+      background: var(--card-bg);
+      color: var(--text);
+      margin-bottom: 1.25em;
+    }
+    .contact-form textarea { resize: vertical; min-height: 8em; }
+    .contact-form button {
+      padding: 0.6em 2em;
+      font: inherit;
+      font-weight: 600;
+      border: 1px solid var(--grid-line);
+      background: var(--text);
+      color: var(--bg);
+      cursor: pointer;
+    }
+    .contact-form button:hover { opacity: 0.85; }
+    .form-note { font-size: 0.85em; color: var(--text-secondary); margin-top: 1em; }
   </style>
 </head>
 <body>
@@ -27,9 +50,34 @@
 
   <main class="contact-page">
     <h1>Contact</h1>
-    <p>BaseballScorecard.org is built and maintained by Denis Lirette.</p>
-    <p>For bug reports, feature requests, or contributions, visit the <a href="https://github.com/denislirette/baseballscorebook">GitHub repository</a>.</p>
-    <p>You can also open an <a href="https://github.com/denislirette/baseballscorebook/issues">issue on GitHub</a> for any questions or feedback.</p>
+    <p>Have a question, found a bug, or just want to say hi? Fill out the form below and I'll get back to you.</p>
+    <p>For bug reports and feature requests, you can also <a href="https://github.com/denislirette/baseballscorecard/issues" target="_blank" rel="noopener">open an issue on GitHub</a>.</p>
+
+    <form name="contact" method="POST" data-netlify="true" class="contact-form" action="/contact-success.html">
+      <input type="hidden" name="form-name" value="contact">
+
+      <label for="contact-name">Name</label>
+      <input type="text" id="contact-name" name="name" required>
+
+      <label for="contact-email">Email</label>
+      <input type="email" id="contact-email" name="email" required>
+
+      <label for="contact-subject">Subject</label>
+      <select id="contact-subject" name="subject">
+        <option value="general">General question</option>
+        <option value="bug">Bug report</option>
+        <option value="feature">Feature request</option>
+        <option value="accessibility">Accessibility feedback</option>
+        <option value="other">Other</option>
+      </select>
+
+      <label for="contact-message">Message</label>
+      <textarea id="contact-message" name="message" required></textarea>
+
+      <button type="submit">Send Message</button>
+
+      <p class="form-note">Your message goes directly to me. I read everything and will respond as soon as I can.</p>
+    </form>
   </main>
 
   <script type="module" src="/js/nav.js"></script>
