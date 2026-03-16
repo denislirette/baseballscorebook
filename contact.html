@@ -53,8 +53,9 @@
     <p>Have a question, found a bug, or just want to say hi? Fill out the form below and I'll get back to you.</p>
     <p>For bug reports and feature requests, you can also <a href="https://github.com/denislirette/baseballscorecard/issues" target="_blank" rel="noopener">open an issue on GitHub</a>.</p>
 
-    <form name="contact" method="POST" data-netlify="true" class="contact-form" action="/contact-success.html">
+    <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" class="contact-form" action="/contact-success.html">
       <input type="hidden" name="form-name" value="contact">
+      <p class="sr-only"><label>Don't fill this out: <input name="bot-field"></label></p>
 
       <label for="contact-name">Name</label>
       <input type="text" id="contact-name" name="name" required>
