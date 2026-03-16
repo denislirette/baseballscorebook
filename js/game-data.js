@@ -584,7 +584,7 @@ function parseFieldOut(desc, event) {
     const deduped = positions.filter((p, i) => i === 0 || p !== positions[i - 1]);
     const unassisted = lower.includes('unassisted') || deduped.length === 1;
     if (unassisted && deduped.length >= 1) return `G${deduped[0]}`;
-    if (deduped.length >= 2) return 'G' + deduped.join('-');
+    if (deduped.length >= 2) return 'G' + deduped.join('');
   }
   if (lower.includes('sacrifice bunt')) return parseSacBunt(desc);
 
@@ -597,7 +597,7 @@ function parseFieldOut(desc, event) {
       const gDeduped = positions.filter((p, i) => i === 0 || p !== positions[i - 1]);
       const gUnassisted = lower.includes('unassisted') || gDeduped.length === 1;
       if (gUnassisted) return `G${gDeduped[0]}`;
-      return 'G' + gDeduped.join('-');
+      return 'G' + gDeduped.join('');
     }
   }
 
@@ -622,20 +622,20 @@ function findPositionAfter(str, afterWord) {
 function parseDoublePlay(desc) {
   const lower = desc.toLowerCase();
   const positions = extractAllPositions(lower);
-  if (positions.length >= 2) return 'DP' + positions.join('-');
+  if (positions.length >= 2) return 'DP' + positions.join('');
   return 'DP';
 }
 
 function parseStrikeoutDP(play, desc) {
   const k = isCalledThirdStrike(play) ? '\u{A4D8}' : 'K';
   const positions = extractAllPositions(desc.toLowerCase());
-  if (positions.length >= 2) return k + '+' + positions.join('-');
+  if (positions.length >= 2) return k + '+' + positions.join('');
   return k + 'DP';
 }
 
 function parseTriplePlay(desc) {
   const positions = extractAllPositions(desc.toLowerCase());
-  if (positions.length >= 2) return 'TP' + positions.join('-');
+  if (positions.length >= 2) return 'TP' + positions.join('');
   return 'TP';
 }
 
@@ -653,16 +653,16 @@ function parseFieldersChoice(play) {
       }
     }
   }
-  if (creditPositions.length > 0) return 'FC' + creditPositions.join('-');
+  if (creditPositions.length > 0) return 'FC' + creditPositions.join('');
   // Fallback: parse from description
   const positions = extractAllPositions((play.result.description || '').toLowerCase());
-  if (positions.length > 0) return 'FC' + positions.join('-');
+  if (positions.length > 0) return 'FC' + positions.join('');
   return 'FC';
 }
 
 function parseSacBunt(desc) {
   const positions = extractAllPositions(desc.toLowerCase());
-  if (positions.length >= 2) return 'SH' + positions.join('-');
+  if (positions.length >= 2) return 'SH' + positions.join('');
   if (positions.length === 1) return 'SH' + positions[0];
   return 'SH';
 }

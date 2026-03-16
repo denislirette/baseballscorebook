@@ -129,11 +129,11 @@ function renderTeamSection(data, side) {
   // Opposing pitcher game stats
   const pitchersDiv = document.createElement('div');
   pitchersDiv.className = 'pitcher-stats-section';
-  pitchersDiv.innerHTML = renderPitcherStatsHTML(data, oppSide, oppTeam.abbreviation);
+  pitchersDiv.innerHTML = renderPitcherStatsHTML(data, oppSide, oppTeam.teamName);
   section.appendChild(pitchersDiv);
 
   // Opposing bullpen
-  const bullpenHTML = renderBullpenHTML(data, oppSide, oppTeam.abbreviation);
+  const bullpenHTML = renderBullpenHTML(data, oppSide, oppTeam.teamName);
   if (bullpenHTML) {
     const bullpenDiv = document.createElement('div');
     bullpenDiv.className = 'pitcher-stats-section';
@@ -142,7 +142,7 @@ function renderTeamSection(data, side) {
   }
 
   // This team's bench
-  const benchHTML = renderBenchHTML(data, side, team.abbreviation);
+  const benchHTML = renderBenchHTML(data, side, team.teamName);
   if (benchHTML) {
     const benchDiv = document.createElement('div');
     benchDiv.className = 'pitcher-stats-section';
@@ -183,11 +183,15 @@ window.addEventListener('message', (event) => {
   }
 });
 
-// Persist <details> open/closed state across refreshes
-const DETAILS_KEY = 'detailsState';
+// Persist <details> open/closed state per game
+function getGameDetailsKey() {
+  const params = new URLSearchParams(window.location.search);
+  const gamePk = params.get('gamePk') || 'unknown';
+  return `detailsState-${gamePk}`;
+}
 
 function getDetailsState() {
-  try { return JSON.parse(localStorage.getItem(DETAILS_KEY)) || {}; } catch { return {}; }
+  try { return JSON.parse(localStorage.getItem(getGameDetailsKey())) || {}; } catch { return {}; }
 }
 
 function restoreDetailsState() {
@@ -198,10 +202,18 @@ function restoreDetailsState() {
     el.addEventListener('toggle', () => {
       const s = getDetailsState();
       if (el.open) s[key] = true; else delete s[key];
-      localStorage.setItem(DETAILS_KEY, JSON.stringify(s));
+      localStorage.setItem(getGameDetailsKey(), JSON.stringify(s));
+    });
+    // Arrow keys open/close accordions
+    el.querySelector('summary').addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' && !el.open) { el.open = true; e.preventDefault(); }
+      if (e.key === 'ArrowLeft' && el.open) { el.open = false; e.preventDefault(); }
     });
   }
 }
+
+// Clean up old global details state
+localStorage.removeItem('detailsState');
 
 // Initial load
 loadGame().then(() => {

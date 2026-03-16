@@ -156,6 +156,11 @@ function renderTeam(svg, data, side, ox, oy, cols) {
           class: 'th-active',
           x: cellX, y: cellY, width: CS, height: CS,
         }));
+        svg.appendChild(el('rect', {
+          class: 'th-active-border',
+          x: cellX + 1, y: cellY + 1, width: CS - 2, height: CS - 2,
+          fill: 'none', stroke: 'var(--sc-active-border, #b8960c)', 'stroke-width': 2,
+        }));
       }
 
       // Pitcher sub: blue dashed line replaces grid line
@@ -197,17 +202,20 @@ export function drawCell(svg, cellX, cellY, ab) {
 
   const runners = ab.cumulativeRunners || [];
   const hasSegs = runners.some(r => r.segments?.length > 0);
-  const batterScored = runners.some(r => r.scored);
+  const batterRunner = runners.find(r => r.playerId === ab.batterId);
+  const batterScored = batterRunner?.scored || false;
   const showDiamond = isHR || batterScored || hasSegs;
 
-  const dcy = showDiamond ? cy - 4 : cy;
+  const isBaseHit = /^[1-3]B$/.test(notation);
+  // Only shift diamond up when notation text will appear below it
+  const dcy = (showDiamond && !isBaseHit && !isHR) ? cy - 4 : cy;
 
-  // ── Out dots (top-right) ──
+  // ── Out dots (top-left) ──
   const outs = (ab.runners || []).filter(r => r.isOut).length;
   if (outs > 0) {
     const dotY = cellY + PAD + DOTR;
     const dotSpacing = 6;
-    const startX = cellX + CS - PAD - DOTR - (outs - 1) * dotSpacing;
+    const startX = cellX + PAD + DOTR;
     for (let i = 0; i < Math.min(outs, 3); i++) {
       svg.appendChild(el('circle', {
         class: 'th-out',
@@ -216,29 +224,25 @@ export function drawCell(svg, cellX, cellY, ab) {
     }
   }
 
-  // ── Home run: solid diamond ──
+  // ── Home run: solid diamond (centered in cell) ──
   if (isHR) {
+    const hrDR = Math.round(DR * 1.5);
     svg.appendChild(el('polygon', {
       class: 'th-t',
-      points: dPts(cx, dcy, DR),
+      points: dPts(cx, cy, hrDR),
     }));
-    svg.appendChild(tx('HR', cx, dcy + 3.5, {
+    svg.appendChild(tx('HR', cx, cy + 5.5, {
       class: 'th-bg',
-      'font-size': '9', 'font-weight': '700',
+      'font-size': '16', 'font-weight': '700',
       'text-anchor': 'middle',
       'font-family': 'sans-serif',
     }));
     return;
   }
 
-  // ── Run scored: solid diamond ──
-  if (batterScored) {
-    svg.appendChild(el('polygon', {
-      class: 'th-t',
-      points: dPts(cx, dcy, DR),
-    }));
-  } else if (hasSegs) {
-    // ── Base paths reached: draw line segments ──
+  // ── Diamond / base paths ──
+  if (hasSegs) {
+    // Draw base path line segments for all runners
     for (const runner of runners) {
       for (const seg of runner.segments || []) {
         const from = dPt(cx, dcy, DR, seg.from);
@@ -260,10 +264,45 @@ export function drawCell(svg, cellX, cellY, ab) {
         }
       }
     }
+
+    // Hash marks on HP→1B segment (base HITS only: 1B/2B/3B)
+    const hitHashes = notation === '1B' ? 1 : notation === '2B' ? 2 : notation === '3B' ? 3 : 0;
+    if (hitHashes > 0) {
+      const hp = dPt(cx, dcy, DR, 'HP');
+      const fb = dPt(cx, dcy, DR, '1B');
+      const mx = (hp.x + fb.x) / 2;
+      const my = (hp.y + fb.y) / 2;
+      const dx = fb.x - hp.x;
+      const dy = fb.y - hp.y;
+      const len = Math.sqrt(dx * dx + dy * dy);
+      const px = -dy / len;
+      const py = dx / len;
+      const hashLen = DR * 0.45;
+      const hashGap = 4;
+      for (let i = 0; i < hitHashes; i++) {
+        const offset = (i - (hitHashes - 1) / 2) * hashGap;
+        const hx = mx + offset * dx / len;
+        const hy = my + offset * dy / len;
+        svg.appendChild(el('line', {
+          class: 'th-s',
+          x1: hx - px * hashLen, y1: hy - py * hashLen,
+          x2: hx + px * hashLen, y2: hy + py * hashLen,
+          'stroke-width': PSW,
+        }));
+      }
+    }
+  } else if (batterScored) {
+    // Batter scored but no segment data — show filled diamond centered, same size as HR
+    const scoredDR = Math.round(DR * 1.5);
+    svg.appendChild(el('polygon', {
+      class: 'th-t',
+      points: dPts(cx, cy, scoredDR),
+    }));
   }
 
   // ── Notation text ──
-  if (notation) {
+  // Skip notation only for base hits (1B/2B/3B) — paths + hash marks represent those
+  if (notation && !isBaseHit) {
     const splitMatch = notation.match(SPLIT_RE);
     if (splitMatch) {
       // Two-line notation: prefix (DP, FC, etc.) on top, positions below

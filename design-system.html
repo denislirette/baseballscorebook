@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design System - BaseballScorecard.org</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/css/style.css">
+  <script>
+    if (localStorage.getItem('theme') === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  </script>
+  <style>
+    .ds-page { max-width: 1400px; padding: 2em var(--container-pad) 4em; }
+    .ds-page h2 {
+      font-size: 1em; text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--text-secondary); margin: 2em 0 0.75em; padding-bottom: 6px;
+      border-bottom: 1px solid var(--grid-line);
+    }
+    .ds-page p { line-height: 1.7; margin-bottom: 1em; }
+
+    /* Color palette */
+    .palette { display: flex; gap: 0; flex-wrap: wrap; margin: 12px 0; }
+    .palette-color {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      padding: 12px 16px; border: 1px solid var(--grid-line); margin: -0.5px;
+      min-width: 100px;
+    }
+    .palette-swatch {
+      width: 48px; height: 48px; border: 1px solid var(--grid-line);
+      position: relative; cursor: pointer;
+    }
+    .palette-swatch input[type="color"] {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      opacity: 0; cursor: pointer; border: none;
+    }
+    .palette-hex { font-size: 0.75em; font-family: "SF Mono", monospace; font-weight: 600; }
+    .palette-name { font-size: 0.65em; color: var(--text-secondary); text-align: center; }
+
+    /* Usage map */
+    .usage-group { margin-bottom: 20px; }
+    .usage-group-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+    .usage-swatch-sm { width: 20px; height: 20px; border: 1px solid var(--grid-line); flex-shrink: 0; }
+    .usage-group-title { font-size: 0.85em; font-weight: 700; font-family: "SF Mono", monospace; }
+    .usage-vars { display: flex; flex-wrap: wrap; gap: 6px; margin-left: 30px; }
+    .usage-var {
+      font-size: 0.7em; font-family: "SF Mono", monospace;
+      padding: 3px 8px; background: var(--surface); border: 1px solid var(--grid-line);
+    }
+    .usage-var-desc { font-size: 0.65em; color: var(--text-secondary); display: block; }
+
+    /* Token grid */
+    .token-group { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .token {
+      display: flex; align-items: center; gap: 10px; padding: 8px;
+      border: 1px solid var(--grid-line);
+    }
+    .token-swatch {
+      width: 36px; height: 36px; border: 1px solid var(--grid-line);
+      cursor: pointer; position: relative; flex-shrink: 0;
+    }
+    .token-swatch input[type="color"] {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      opacity: 0; cursor: pointer; border: none;
+    }
+    .token-info { flex: 1; min-width: 0; }
+    .token-name { font-size: 0.7em; font-family: "SF Mono", monospace; color: var(--text-secondary); }
+    .token-value { font-size: 0.8em; font-family: "SF Mono", monospace; font-weight: 600; margin-top: 2px; }
+    .token-value input {
+      width: 80px; font-size: inherit; font-family: inherit; font-weight: inherit;
+      border: 1px solid transparent; background: transparent; color: var(--text); padding: 1px 3px;
+    }
+    .token-value input:focus { border-color: var(--grid-line); outline: none; background: var(--surface); }
+    .token-label { font-size: 0.65em; color: var(--text-secondary); margin-top: 1px; }
+
+    /* Typography samples */
+    .type-sample { margin: 8px 0; padding: 12px; border: 1px solid var(--grid-line); }
+    .type-row { display: flex; align-items: baseline; gap: 16px; margin: 6px 0; }
+    .type-row .label { font-size: 0.7em; color: var(--text-secondary); min-width: 100px; font-family: "SF Mono", monospace; }
+
+    /* Scorecard preview */
+    .sc-preview { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; margin: 12px 0; }
+    .sc-sample { padding: 16px; border: 1px solid var(--grid-line); }
+    .sc-sample-label { font-size: 0.7em; color: var(--text-secondary); margin-bottom: 8px; font-family: "SF Mono", monospace; }
+
+    /* Sticky actions bar */
+    .ds-actions {
+      display: flex; gap: 12px; align-items: center;
+      position: sticky; top: 0; z-index: 100;
+      background: var(--bg); padding: 12px 0; margin-bottom: 1em;
+      border-bottom: 1px solid var(--grid-line);
+    }
+    .ds-actions .btn {
+      padding: 8px 16px; font-size: 0.85em; font-weight: 600; cursor: pointer;
+      border: 1px solid var(--grid-line); background: var(--surface); color: var(--text);
+    }
+    .ds-actions .btn:hover { background: var(--grid-line); }
+    .ds-actions .btn.primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+    .ds-actions .btn.primary:hover { opacity: 0.85; }
+    .ds-actions .status { font-size: 0.8em; color: var(--text-secondary); }
+
+    /* Live cell preview */
+    .live-cells { margin: 12px 0; overflow-x: auto; }
+    .live-cells svg { display: block; }
+
+    /* Spacing scale */
+    .spacing-row { display: flex; align-items: center; gap: 12px; margin: 4px 0; }
+    .spacing-bar { height: 12px; background: var(--sc-pitch-in-play); opacity: 0.5; }
+    .spacing-label { font-size: 0.7em; font-family: "SF Mono", monospace; color: var(--text-secondary); min-width: 60px; }
+
+    /* Pitch color dots */
+    .pitch-dots { display: flex; gap: 16px; flex-wrap: wrap; margin: 8px 0; }
+    .pitch-dot-sample { display: flex; align-items: center; gap: 6px; }
+    .pitch-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .pitch-dot-label { font-size: 0.75em; font-family: "SF Mono", monospace; }
+  </style>
+</head>
+<body>
+  <div class="ds-page">
+    <p>All design tokens for BaseballScorecard.org. Edit colors below, then save to write directly to <code>css/style.css</code>.</p>
+
+    <div class="ds-actions">
+      <button class="btn primary" id="saveBtn">Save to CSS</button>
+      <button class="btn" id="resetBtn">Reset</button>
+      <span class="status" id="status"></span>
+    </div>
+
+    <h2>Color Palette</h2>
+    <div id="paletteSection"></div>
+    <h3 id="altPaletteLabel" style="font-size:0.8em; color:var(--text-secondary); margin-top:12px;"></h3>
+    <div id="altPaletteSection"></div>
+
+    <h2>Live Preview</h2>
+    <div class="live-cells" id="liveCells"></div>
+
+    <h2>Color Usage Map</h2>
+    <div id="usageMap"></div>
+
+    <h2>Edit Tokens</h2>
+    <div id="tokenSections"></div>
+
+<h2>Typography</h2>
+<div class="type-sample">
+  <div class="type-row">
+    <span class="label">MONO 22px 700</span>
+    <span style="font-family: Arial, Helvetica, sans-serif; font-size: 22px; font-weight: 700;">NETO-6 Joey Neto</span>
+  </div>
+  <div class="type-row">
+    <span class="label">MONO 18px 400</span>
+    <span style="font-family: Arial, Helvetica, sans-serif; font-size: 18px; font-weight: 400;">.267 AVG / .748 OPS</span>
+  </div>
+  <div class="type-row">
+    <span class="label">MONO 16px 700</span>
+    <span style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: 700;">1-0</span>
+  </div>
+  <div class="type-row">
+    <span class="label">MONO 16px 400</span>
+    <span style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: 400;">FF 94 &nbsp; SL 84 &nbsp; CU 78</span>
+  </div>
+  <div class="type-row">
+    <span class="label">Notation 900</span>
+    <span style="font-family: Arial, Helvetica, sans-serif; font-size: 40px; font-weight: 900;">BB</span>
+  </div>
+  <div class="type-row">
+    <span class="label">Notation 400</span>
+    <span style="font-family: Arial, Helvetica, sans-serif; font-size: 40px; font-weight: 400;">G63 &nbsp; F8 &nbsp; K &nbsp; &#xA4D8;</span>
+  </div>
+</div>
+
+<h2>Pitch Colors</h2>
+<div class="pitch-dots" id="pitchDots"></div>
+
+<h2>Scorecard Elements</h2>
+<div class="sc-preview" id="scorecardPreview"></div>
+
+<h2>Spacing Scale</h2>
+<div id="spacingScale"></div>
+
+<h2>Borders</h2>
+<div class="sc-preview">
+  <div class="sc-sample">
+    <div class="sc-sample-label">Grid Bold (2.5px)</div>
+    <div style="width: 150px; border-top: 2.5px solid var(--sc-grid-bold); margin-top: 8px;"></div>
+  </div>
+  <div class="sc-sample">
+    <div class="sc-sample-label">Grid (1px)</div>
+    <div style="width: 150px; border-top: 1px solid var(--sc-grid); margin-top: 8px;"></div>
+  </div>
+  <div class="sc-sample">
+    <div class="sc-sample-label">Sub Line (5px)</div>
+    <div style="width: 150px; border-top: 5px solid var(--sc-sub); margin-top: 8px;"></div>
+  </div>
+  <div class="sc-sample">
+    <div class="sc-sample-label">Base Path (4px)</div>
+    <div style="width: 150px; border-top: 4px solid var(--sc-text); margin-top: 8px;"></div>
+  </div>
+</div>
+
+  </div><!-- /.ds-page -->
+
+<script type="module">
+import { svgEl, svgText, refreshLayout, getColors, drawAtBatCell, drawSubIndicator } from './js/svg-renderer.js';
+import { getConfig } from './js/layout-config.js';
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+// ─── Token override system ───────────────────────────────────────
+// Use a <style> element instead of inline styles on <html> so that
+// theme toggling (which changes data-theme attribute) works cleanly.
+// The override style uses high-specificity selectors that match the current theme.
+
+const _overrideStyle = document.createElement('style');
+_overrideStyle.id = 'ds-token-overrides';
+document.head.appendChild(_overrideStyle);
+const _overrides = {}; // varName -> value
+
+function applyTokenOverride(varName, value) {
+  _overrides[varName] = value;
+  _rebuildOverrideStyle();
+}
+
+function clearAllOverrides() {
+  for (const k of Object.keys(_overrides)) delete _overrides[k];
+  _overrideStyle.textContent = '';
+}
+
+function _rebuildOverrideStyle() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const selector = isDark ? 'html[data-theme="dark"]' : 'html:root';
+  const rules = Object.entries(_overrides)
+    .map(([k, v]) => `  ${k}: ${v};`)
+    .join('\n');
+  _overrideStyle.textContent = rules ? `${selector} {\n${rules}\n}` : '';
+}
+
+function mkPitch(callCode, typeCode, pX, pZ, speed) {
+  return { callCode, typeCode, pX: pX ?? null, pZ: pZ ?? null, speed: speed ?? null, szTop: 3.4, szBot: 1.6, challenged: false, challengeLabel: null, overturned: false };
+}
+
+function buildCumulativeRunners(runners, batterId) {
+  const order = ['HP', '1B', '2B', '3B'];
+  return runners.map(r => {
+    const startIdx = order.indexOf(r.start || 'HP');
+    const endBase = r.end === 'score' ? 'HP' : r.end;
+    const numSegs = r.end === 'score' ? 4 - startIdx : order.indexOf(endBase) - startIdx;
+    if (numSegs <= 0) return null;
+    const segments = [];
+    for (let n = 0; n < numSegs; n++) {
+      const i = (startIdx + n) % 4;
+      segments.push({ from: order[i], to: order[(i + 1) % 4], isOutSegment: r.isOut && n === numSegs - 1 });
+    }
+    return { playerId: r.playerId, segments, isOut: !!r.isOut, outNumber: r.outNumber || null, outBase: r.isOut ? r.end : null };
+  }).filter(Boolean);
+}
+
+// ─── Mini scorecard grid: 3 rows × 5 innings ────────────────────
+// Reads actual config dimensions so preview matches the real scorecard.
+
+const FONT = 'Arial, Helvetica, sans-serif';
+
+// Row 0: starter (Neto) — 5 innings of at-bats
+// Row 1: starter (Wiemer) — 2 innings, then sub
+// Row 2: sub (Clement, PH for Wiemer in inn 3) — innings 3-5
+// Pitcher change line between rows 2 and 3-area
+
+// We define a flat list of visual rows, each with cells[0..4] and lineup info.
+function buildRows() {
+  return [
+    {
+      name: '6 CJ Neto, R #11', stat: '.267 AVG / .748 OPS', isSub: false,
+      cells: [
+        { ab: mkAb([mkPitch('B','FF',-1,3,95), mkPitch('C','SL',0.3,2.2,84), mkPitch('F','FF',0.5,2.8,96), mkPitch('X','CH',-0.2,2,87)],
+          '1B', 'single', 1, null, [{id:1,s:'HP',e:'1B'},{id:2,s:'2B',e:'score'}]) },
+        { ab: mkAb([mkPitch('C','FF',0.2,2.5,95), mkPitch('S','SL',-0.5,1.8,84), mkPitch('S','CH',0.1,1.5,87)],
+          'K', 'strikeout', 0, 1, []) },
+        { ab: mkAb([mkPitch('B','FF',-1,3.5,93), mkPitch('C','SL',0.2,2.5,85), mkPitch('B','CH',1.2,1,86), mkPitch('B','FF',-1.1,3.8,94), mkPitch('B','SI',1.3,1.2,92)],
+          'BB', 'walk', 0, null, [{id:1,s:'HP',e:'1B'}]) },
+        { ab: mkAb([mkPitch('B','SL',-1,1.5,85), mkPitch('S','FF',0.2,3,97), mkPitch('X','FF',0.4,2.8,96)],
+          'HR', 'home_run', 2, null, [{id:1,s:'HP',e:'score'},{id:3,s:'1B',e:'score'}]) },
+        { ab: mkAb([mkPitch('B','FF',-1,3.5,95),
+            {callCode:'C',typeCode:'SL',pX:0.9,pZ:1.5,speed:84,szTop:3.4,szBot:1.6,challenged:true,challengeLabel:'W1',overturned:true},
+            mkPitch('F','FF',0.5,2.8,96), mkPitch('X','CH',-0.2,2,87)],
+          '2B', 'double', 0, null, [{id:1,s:'HP',e:'2B'}]) },
+      ],
+    },
+    {
+      name: '8 Joey Wiemer, L #21', stat: '.231 AVG / .698 OPS', isSub: false,
+      cells: [
+        { ab: mkAb([mkPitch('B','FF',-1,3,95), mkPitch('C','SL',0.3,2.2,84), mkPitch('F','CU',-0.5,1.2,78),
+            mkPitch('F','FF',0.4,2.9,96), mkPitch('B','CH',1.2,1,86), mkPitch('F','SL',-0.3,2,83),
+            mkPitch('F','FF',0.2,2.8,95), mkPitch('B','SI',-1.1,3.2,92), mkPitch('X','CH',-0.2,2,87)],
+          '1B', 'single', 0, null, [{id:10,s:'HP',e:'1B'}]),
+          subType: 'PR' },
+        { ab: mkAb([mkPitch('B','FF',1.2,3.5,96), mkPitch('F','SL',-0.3,2,84), mkPitch('X','FF',0.5,2.5,97)],
+          'F8', 'field_out', 0, 2, []),
+          pitcherBelow: true,
+          pitcherLine: { pStats: { strikes: 42, pitches: 67, ks: 5 } } },
+        null, null, null, // empty after sub
+      ],
+    },
+    {
+      name: '4 Ernie Clement, R #33', stat: '.289 AVG / .812 OPS', isSub: true,
+      cells: [
+        null, null, // empty before sub
+        { ab: mkAb([mkPitch('B','FF',-1,3,95), mkPitch('C','SL',0.3,2.2,84), mkPitch('X','CH',-0.2,2,87)],
+          '1B', 'single', 0, null, [{id:11,s:'HP',e:'1B'}]),
+          subType: 'PH' },
+        { ab: mkAb([mkPitch('B','FF',-1,3,94), mkPitch('X','FF',0.5,2.8,96)],
+          'SF9', 'sac_fly', 1, 1, [{id:5,s:'3B',e:'score'}]) },
+        { ab: mkAb([mkPitch('C','FF',0.2,2.5,95), mkPitch('F','SL',-0.5,1.8,84), mkPitch('S','CH',0.1,1.5,87)],
+          '\u{A4D8}', 'strikeout', 0, 3, []) },
+      ],
+    },
+  ];
+}
+
+function mkAb(pitches, notation, eventType, rbi, outNumber, runners) {
+  const r = (runners || []).map(r => ({ playerId: r.id, start: r.s, end: r.e, isOut: !!r.out, outNumber: r.outNum || null }));
+  const ab = { batterId: 1, pitchSequence: pitches, notation, result: { eventType }, rbi, outNumber, runners: r };
+  ab.cumulativeRunners = buildCumulativeRunners(r, ab.batterId);
+  return ab;
+}
+
+function renderLiveCells() {
+  refreshLayout();
+  const CLR = getColors();
+  const cfg = getConfig();
+  const container = document.getElementById('liveCells');
+  container.innerHTML = '';
+  const pitcherLines = [];
+
+  const COLS = 5;
+  const CW = cfg.COL_WIDTH;
+  const CH = cfg.ROW_HEIGHT;
+  const ML = cfg.MARGIN_LEFT;
+  const HEADER_H = cfg.HEADER_HEIGHT;
+  const rows = buildRows();
+
+  const totalW = ML + COLS * CW;
+  const totalH = HEADER_H + rows.length * CH;
+
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('xmlns', SVG_NS);
+  svg.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
+  svg.setAttribute('width', String(totalW));
+  svg.setAttribute('height', String(totalH));
+  svg.style.maxWidth = '100%';
+  svg.style.height = 'auto';
+
+  // Background
+  svg.appendChild(svgEl('rect', { x: 0, y: 0, width: totalW, height: totalH, fill: CLR.bg }));
+
+  // ── Inning headers ──
+  svg.appendChild(svgEl('rect', { x: 0, y: 0, width: ML, height: HEADER_H, fill: CLR.headerBg }));
+  for (let i = 0; i < COLS; i++) {
+    const hx = ML + i * CW;
+    svg.appendChild(svgEl('rect', { x: hx, y: 0, width: CW, height: HEADER_H, fill: CLR.headerBg }));
+    svg.appendChild(svgText(String(i + 1), hx + CW / 2, HEADER_H / 2, {
+      'text-anchor': 'middle', 'dominant-baseline': 'central',
+      'font-size': '22', 'font-weight': '700', 'font-family': FONT, fill: CLR.text,
+    }));
+  }
+
+  // ── Render rows ──
+  for (let ri = 0; ri < rows.length; ri++) {
+    const row = rows[ri];
+    const rowY = HEADER_H + ri * CH;
+    const nameColor = row.isSub ? CLR.sub : CLR.text;
+
+    // Lineup area
+    svg.appendChild(svgEl('rect', { x: 0, y: rowY, width: ML, height: CH, fill: CLR.cellBg }));
+
+    // Sub horizontal line at top of sub row (across lineup area)
+    if (row.isSub) {
+      svg.appendChild(svgEl('line', {
+        x1: 4, y1: rowY, x2: ML - 4, y2: rowY,
+        stroke: CLR.sub, 'stroke-width': cfg.SUB_LINE_W,
+      }));
+    }
+
+    // Player name + stats (matching real renderer layout)
+    svg.appendChild(svgText(row.name, 8, rowY + CH / 2 - 14, {
+      'font-size': '22', 'font-weight': '700', 'font-family': FONT, fill: nameColor,
+      'dominant-baseline': 'central',
+    }));
+    svg.appendChild(svgText(row.stat, 8, rowY + CH / 2 + 14, {
+      'font-size': '18', 'font-family': FONT, fill: CLR.textLight,
+      'dominant-baseline': 'central',
+    }));
+
+    // Cells
+    for (let ci = 0; ci < COLS; ci++) {
+      const cx = ML + ci * CW;
+      const cell = row.cells[ci];
+
+      // Cell background
+      const hasData = cell && cell.ab;
+      const bgFill = hasData ? CLR.cellBg : CLR.cellBgEmpty;
+      svg.appendChild(svgEl('rect', { x: cx + 0.5, y: rowY + 0.5, width: CW - 1, height: CH - 1, fill: bgFill }));
+
+      if (!cell) continue;
+
+      // At-bat content
+      const g = svgEl('g');
+      drawAtBatCell(g, CLR, cell.ab, cx, rowY, !!cell.pitcherBelow);
+      svg.appendChild(g);
+
+      // Sub indicator on the play cell
+      if (cell.subType) {
+        const subG = svgEl('g');
+        drawSubIndicator(subG, CLR, cx, rowY, cell.subType, null, null);
+        svg.appendChild(subG);
+      }
+
+      // Collect pitcher lines to draw after grid
+      if (cell.pitcherLine) {
+        pitcherLines.push({ cx, y: rowY + CH, pStats: cell.pitcherLine.pStats });
+      }
+    }
+  }
+
+  // ── Grid lines ──
+  // Horizontal lines
+  svg.appendChild(svgEl('line', { x1: 0, y1: 0, x2: totalW, y2: 0, stroke: CLR.gridBold, 'stroke-width': 2.5 }));
+  svg.appendChild(svgEl('line', { x1: 0, y1: HEADER_H, x2: totalW, y2: HEADER_H, stroke: CLR.gridBold, 'stroke-width': 2.5 }));
+  for (let i = 0; i < rows.length; i++) {
+    const gy = HEADER_H + (i + 1) * CH;
+    svg.appendChild(svgEl('line', { x1: 0, y1: gy, x2: totalW, y2: gy, stroke: CLR.gridBold, 'stroke-width': 2.5 }));
+  }
+
+  // Vertical lines
+  svg.appendChild(svgEl('line', { x1: ML, y1: 0, x2: ML, y2: totalH, stroke: CLR.gridBold, 'stroke-width': 2.5 }));
+  for (let i = 1; i <= COLS; i++) {
+    svg.appendChild(svgEl('line', { x1: ML + i * CW, y1: 0, x2: ML + i * CW, y2: totalH, stroke: CLR.grid, 'stroke-width': 1.5 }));
+  }
+
+  // ── Pitcher change lines (drawn on top of grid) ──
+  for (const pl of pitcherLines) {
+    const plG = svgEl('g');
+    drawSubIndicator(plG, CLR, pl.cx, pl.y, 'pitcher', null, pl.pStats);
+    svg.appendChild(plG);
+  }
+
+  container.appendChild(svg);
+}
+
+// ─── Color palette + usage map ───────────────────────────────────
+
+// Canonical palette: unique colors with human names
+const PALETTE_NAMES = {
+  '#faf9f6': 'Warm White',
+  '#1c1918': 'Ink',
+  '#6b6462': 'Stone',
+  '#868278': 'Pewter',
+  '#f0efec': 'Ash',
+  '#294991': 'Navy',
+  '#1a2f5e': 'Deep Navy',
+  '#673d7d': 'Plum',
+  '#377049': 'Forest',
+  '#a04a49': 'Brick',
+  '#7a9a7e': 'Sage',
+  '#2a6d8d': 'Steel Blue',
+  '#f6e1ba': 'Wheat',
+  // Dark mode extras
+  '#f5f2e9': 'Cream',
+  '#a8a29e': 'Pebble',
+  '#7e7a76': 'Graphite',
+  '#36322f': 'Charcoal',
+  '#292524': 'Coal',
+  '#1f1d1c': 'Soot',
+  '#33302e': 'Slate',
+  '#3d3528': 'Amber Dark',
+  '#9fc9ff': 'Sky',
+  '#cce2ff': 'Ice',
+  '#d7afff': 'Lavender',
+  '#e0ddd5': 'Bone',
+  '#c4c0b8': 'Silver',
+  '#9e9894': 'Fog',
+  '#7bbf91': 'Mint',
+  '#e08887': 'Salmon',
+  '#9dbd9f': 'Light Sage',
+  '#6cb4d9': 'Cerulean',
+};
+
+// Variable descriptions for the usage map
+const VAR_DESCRIPTIONS = {
+  '--bg': 'Page background',
+  '--text': 'Primary text',
+  '--text-secondary': 'Secondary text',
+  '--grid-line': 'Borders & dividers',
+  '--surface': 'Elevated surfaces',
+  '--card-bg': 'Card background',
+  '--link': 'Link',
+  '--link-hover': 'Link hover',
+  '--visited': 'Visited link',
+  '--sc-text': 'Scorecard text & lines',
+  '--sc-text-light': 'Player stats',
+  '--sc-text-muted': 'Faded labels',
+  '--sc-grid': 'Grid lines (thin)',
+  '--sc-grid-bold': 'Grid lines (thick)',
+  '--sc-diamond': 'Diamond outline',
+  '--sc-reached': 'Runner reached',
+  '--sc-scored': 'Runner scored',
+  '--sc-out': 'Runner out / strike',
+  '--sc-hit': 'Hit indicator',
+  '--sc-sub': 'Sub line (PH/PR)',
+  '--sc-pitcher-line': 'Pitcher change',
+  '--sc-bg': 'Scorecard bg',
+  '--sc-cell-bg': 'Cell fill',
+  '--sc-cell-bg-empty': 'Empty cell',
+  '--sc-header-bg': 'Header bg',
+  '--sc-active-cell': 'Active cell',
+  '--sc-pitch-ball': 'Pitch: ball',
+  '--sc-pitch-strike': 'Pitch: strike',
+  '--sc-pitch-in-play': 'Pitch: in play',
+  '--sc-pitch-hbp': 'Pitch: HBP',
+};
+
+function buildPalette() {
+  const container = document.getElementById('paletteSection');
+  const root = getComputedStyle(document.documentElement);
+
+  // Collect unique hex values from current computed styles
+  const seen = new Map(); // hex -> [varNames]
+  for (const varName of Object.keys(VAR_DESCRIPTIONS)) {
+    const val = rgbToHex(root.getPropertyValue(varName).trim());
+    if (!val) continue;
+    const lower = val.toLowerCase();
+    if (!seen.has(lower)) seen.set(lower, []);
+    seen.get(lower).push(varName);
+  }
+
+  container.innerHTML = '';
+  const paletteDiv = document.createElement('div');
+  paletteDiv.className = 'palette';
+
+  for (const [hex, vars] of seen) {
+    const name = PALETTE_NAMES[hex] || hex;
+    const item = document.createElement('div');
+    item.className = 'palette-color';
+
+    const swatch = document.createElement('div');
+    swatch.className = 'palette-swatch';
+    swatch.style.background = hex;
+
+    const colorInput = document.createElement('input');
+    colorInput.type = 'color';
+    colorInput.value = hex;
+    swatch.appendChild(colorInput);
+
+    const hexLabel = document.createElement('span');
+    hexLabel.className = 'palette-hex';
+    hexLabel.textContent = hex;
+
+    const nameLabel = document.createElement('span');
+    nameLabel.className = 'palette-name';
+    nameLabel.textContent = `${name} (${vars.length})`;
+
+    // When this palette color changes, update ALL variables that share it
+    colorInput.addEventListener('input', () => {
+      const newColor = colorInput.value;
+      swatch.style.background = newColor;
+      hexLabel.textContent = newColor;
+      // Apply override to every variable in this group
+      for (const varName of vars) {
+        applyTokenOverride(varName, newColor);
+      }
+      // Rebuild usage map + live preview + token editors
+      buildUsageMap();
+      buildTokenSections();
+      renderLiveCells();
+    });
+
+    item.appendChild(swatch);
+    item.appendChild(hexLabel);
+    item.appendChild(nameLabel);
+    paletteDiv.appendChild(item);
+  }
+
+  container.appendChild(paletteDiv);
+}
+
+function buildAltPalette() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const label = document.getElementById('altPaletteLabel');
+  const container = document.getElementById('altPaletteSection');
+  label.textContent = isDark ? 'Light mode equivalent' : 'Dark mode equivalent';
+
+  // Read the other theme's colors from CSS rules
+  const targetSelector = isDark ? ':root' : 'data-theme="dark"';
+  const altColors = {};
+  for (const sheet of document.styleSheets) {
+    try {
+      for (const rule of sheet.cssRules) {
+        if (rule.selectorText && rule.selectorText.includes(targetSelector)) {
+          for (const varName of Object.keys(VAR_DESCRIPTIONS)) {
+            const val = rule.style.getPropertyValue(varName).trim();
+            if (val) altColors[varName] = val;
+          }
+        }
+      }
+    } catch (e) {}
+  }
+
+  // Group by hex
+  const seen = new Map();
+  for (const [varName, val] of Object.entries(altColors)) {
+    const lower = val.toLowerCase();
+    if (!seen.has(lower)) seen.set(lower, []);
+    seen.get(lower).push(varName);
+  }
+
+  let html = '<div class="palette">';
+  for (const [hex, vars] of seen) {
+    const name = PALETTE_NAMES[hex] || hex;
+    html += `<div class="palette-color" style="opacity:0.7">
+      <div class="palette-swatch" style="background:${hex}"></div>
+      <span class="palette-hex">${hex}</span>
+      <span class="palette-name">${name} (${vars.length})</span>
+    </div>`;
+  }
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function buildUsageMap() {
+  const container = document.getElementById('usageMap');
+  const root = getComputedStyle(document.documentElement);
+
+  // Group variables by their computed color value
+  const groups = new Map(); // hex -> [{varName, desc}]
+  for (const [varName, desc] of Object.entries(VAR_DESCRIPTIONS)) {
+    const val = rgbToHex(root.getPropertyValue(varName).trim());
+    if (!val) continue;
+    const lower = val.toLowerCase();
+    if (!groups.has(lower)) groups.set(lower, []);
+    groups.get(lower).push({ varName, desc });
+  }
+
+  let html = '';
+  for (const [hex, vars] of groups) {
+    const name = PALETTE_NAMES[hex] || hex;
+    html += `<div class="usage-group">
+      <div class="usage-group-header">
+        <div class="usage-swatch-sm" style="background:${hex}"></div>
+        <span class="usage-group-title">${hex} — ${name}</span>
+      </div>
+      <div class="usage-vars">`;
+    for (const v of vars) {
+      html += `<div class="usage-var">${v.varName}<span class="usage-var-desc">${v.desc}</span></div>`;
+    }
+    html += '</div></div>';
+  }
+  container.innerHTML = html;
+}
+
+// ─── Token definitions ───────────────────────────────────────────
+
+const TOKEN_GROUPS = {
+  'Page Colors': {
+    '--bg':             'Page background',
+    '--text':           'Primary text',
+    '--text-secondary': 'Secondary text',
+    '--grid-line':      'Borders & dividers',
+    '--surface':        'Elevated surfaces',
+    '--card-bg':        'Card background',
+    '--link':           'Link color',
+    '--link-hover':     'Link hover',
+    '--visited':        'Visited link',
+  },
+  'Scorecard — Text': {
+    '--sc-text':       'Main text / lines',
+    '--sc-text-light': 'Player stats, secondary',
+    '--sc-text-muted': 'Faded labels',
+  },
+  'Scorecard — Grid': {
+    '--sc-grid':          'Grid lines (thin)',
+    '--sc-grid-bold':     'Grid lines (thick)',
+    '--sc-bg':            'Scorecard background',
+    '--sc-cell-bg':       'Cell fill',
+    '--sc-cell-bg-empty': 'Empty cell fill',
+    '--sc-header-bg':     'Header background',
+    '--sc-active-cell':   'Active cell highlight',
+  },
+  'Scorecard — Semantic': {
+    '--sc-diamond':  'Diamond outline',
+    '--sc-reached':  'Runner reached base',
+    '--sc-scored':   'Runner scored (green)',
+    '--sc-out':      'Runner out (red)',
+    '--sc-hit':          'Hit indicator',
+    '--sc-sub':          'Sub line (PH/PR/def)',
+    '--sc-pitcher-line': 'Pitcher change line',
+  },
+  'Scorecard — Pitch Dots': {
+    '--sc-pitch-ball':    'Ball',
+    '--sc-pitch-strike':  'Strike (red)',
+    '--sc-pitch-in-play': 'In play (blue)',
+    '--sc-pitch-hbp':     'Hit by pitch',
+  },
+};
+
+// ─── State ───────────────────────────────────────────────────────
+
+let originalLight = {};
+let originalDark = {};
+
+function readCurrentTokens() {
+  const root = getComputedStyle(document.documentElement);
+  const tokens = {};
+  for (const group of Object.values(TOKEN_GROUPS)) {
+    for (const varName of Object.keys(group)) {
+      const val = root.getPropertyValue(varName).trim();
+      tokens[varName] = val;
+    }
+  }
+  return tokens;
+}
+
+function rgbToHex(str) {
+  if (str.startsWith('#')) return str;
+  const match = str.match(/(\d+),\s*(\d+),\s*(\d+)/);
+  if (!match) return str;
+  const r = parseInt(match[1]), g = parseInt(match[2]), b = parseInt(match[3]);
+  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+}
+
+// ─── Build token editor UI ───────────────────────────────────────
+
+function buildTokenSections() {
+  const container = document.getElementById('tokenSections');
+  container.innerHTML = '';
+
+  for (const [groupName, vars] of Object.entries(TOKEN_GROUPS)) {
+    const h2 = document.createElement('h2');
+    h2.textContent = groupName;
+    container.appendChild(h2);
+
+    const grid = document.createElement('div');
+    grid.className = 'token-group';
+
+    for (const [varName, label] of Object.entries(vars)) {
+      const val = rgbToHex(getComputedStyle(document.documentElement).getPropertyValue(varName).trim());
+
+      const token = document.createElement('div');
+      token.className = 'token';
+
+      token.innerHTML = `
+        <div class="token-swatch" style="background: ${val}">
+          <input type="color" value="${val}" data-var="${varName}">
+        </div>
+        <div class="token-info">
+          <div class="token-name">${varName}</div>
+          <div class="token-value"><input type="text" value="${val}" data-var="${varName}"></div>
+          <div class="token-label">${label}</div>
+        </div>
+      `;
+
+      const colorInput = token.querySelector('input[type="color"]');
+      const textInput = token.querySelector('input[type="text"]');
+      const swatch = token.querySelector('.token-swatch');
+
+      colorInput.addEventListener('input', () => {
+        const v = colorInput.value;
+        textInput.value = v;
+        swatch.style.background = v;
+        applyTokenOverride(varName, v);
+        buildPalette();
+        buildAltPalette();
+        buildUsageMap();
+        renderLiveCells();
+      });
+
+      textInput.addEventListener('input', () => {
+        const v = textInput.value;
+        if (/^#[0-9a-fA-F]{3,8}$/.test(v)) {
+          colorInput.value = v.length === 4
+            ? `#${v[1]}${v[1]}${v[2]}${v[2]}${v[3]}${v[3]}`
+            : v;
+          swatch.style.background = v;
+          applyTokenOverride(varName, v);
+          buildPalette();
+          buildUsageMap();
+          renderLiveCells();
+        }
+      });
+
+      grid.appendChild(token);
+    }
+
+    container.appendChild(grid);
+  }
+}
+
+// ─── Pitch dots preview ──────────────────────────────────────────
+
+function buildPitchDots() {
+  const container = document.getElementById('pitchDots');
+  const dots = [
+    { var: '--sc-pitch-ball', label: 'Ball (B)' },
+    { var: '--sc-pitch-strike', label: 'Strike (C/S/F)' },
+    { var: '--sc-pitch-in-play', label: 'In Play (X)' },
+    { var: '--sc-pitch-hbp', label: 'HBP (H)' },
+  ];
+  container.innerHTML = dots.map(d => `
+    <div class="pitch-dot-sample">
+      <div class="pitch-dot" style="background: var(${d.var})"></div>
+      <span class="pitch-dot-label">${d.label}</span>
+    </div>
+  `).join('');
+}
+
+// ─── Scorecard element previews ──────────────────────────────────
+
+function buildScorecardPreview() {
+  const container = document.getElementById('scorecardPreview');
+  container.innerHTML = `
+    <div class="sc-sample">
+      <div class="sc-sample-label">Diamond (HR filled)</div>
+      <svg width="80" height="80" viewBox="0 0 80 80">
+        <polygon points="40,70 70,40 40,10 10,40" fill="var(--sc-text)" stroke="var(--sc-text)" stroke-width="2.5"/>
+        <text x="40" y="40" text-anchor="middle" dominant-baseline="central" font-size="16" font-weight="900" font-family="Arial" fill="var(--sc-bg)">HR</text>
+      </svg>
+    </div>
+    <div class="sc-sample">
+      <div class="sc-sample-label">Base paths + hash (1B)</div>
+      <svg width="80" height="80" viewBox="0 0 80 80">
+        <line x1="40" y1="70" x2="70" y2="40" stroke="var(--sc-text)" stroke-width="4"/>
+        <line x1="33" y1="48" x2="55" y2="63" stroke="var(--sc-text)" stroke-width="4"/>
+      </svg>
+    </div>
+    <div class="sc-sample">
+      <div class="sc-sample-label">Out marker</div>
+      <svg width="40" height="40" viewBox="0 0 40 40">
+        <circle cx="20" cy="20" r="14" fill="var(--sc-out-badge)"/>
+        <text x="20" y="20" text-anchor="middle" dominant-baseline="central" font-size="16" font-weight="700" font-family="Arial" fill="var(--sc-bg)">2</text>
+      </svg>
+    </div>
+    <div class="sc-sample">
+      <div class="sc-sample-label">RBI diamond</div>
+      <svg width="40" height="40" viewBox="0 0 40 40">
+        <polygon points="20,6 34,20 20,34 6,20" fill="var(--sc-text)"/>
+      </svg>
+    </div>
+    <div class="sc-sample">
+      <div class="sc-sample-label">Sub line (PH)</div>
+      <svg width="20" height="80" viewBox="0 0 20 80">
+        <line x1="10" y1="0" x2="10" y2="80" stroke="var(--sc-sub)" stroke-width="5"/>
+      </svg>
+    </div>
+    <div class="sc-sample">
+      <div class="sc-sample-label">Pitcher change</div>
+      <svg width="160" height="20" viewBox="0 0 160 20">
+        <rect x="2" y="6.5" width="7" height="7" fill="var(--sc-sub)"/>
+        <rect x="13" y="6.5" width="7" height="7" fill="var(--sc-sub)"/>
+        <rect x="24" y="6.5" width="7" height="7" fill="var(--sc-sub)"/>
+        <rect x="35" y="6.5" width="7" height="7" fill="var(--sc-sub)"/>
+        <text x="80" y="10" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" font-family="Arial" fill="var(--sc-sub)">42 / 67 / 5K</text>
+        <rect x="120" y="6.5" width="7" height="7" fill="var(--sc-sub)"/>
+        <rect x="131" y="6.5" width="7" height="7" fill="var(--sc-sub)"/>
+        <rect x="142" y="6.5" width="7" height="7" fill="var(--sc-sub)"/>
+        <rect x="153" y="6.5" width="7" height="7" fill="var(--sc-sub)"/>
+      </svg>
+    </div>
+    <div class="sc-sample">
+      <div class="sc-sample-label">Cell backgrounds</div>
+      <div style="display:flex; gap:4px;">
+        <div style="width:40px; height:40px; background:var(--sc-cell-bg); border:1px solid var(--sc-grid);" title="Cell"></div>
+        <div style="width:40px; height:40px; background:var(--sc-cell-bg-empty); border:1px solid var(--sc-grid);" title="Empty"></div>
+        <div style="width:40px; height:40px; background:var(--sc-active-cell); border:1px solid var(--sc-grid);" title="Active"></div>
+        <div style="width:40px; height:40px; background:var(--sc-header-bg); border:1px solid var(--sc-grid);" title="Header"></div>
+      </div>
+    </div>
+  `;
+}
+
+// ─── Spacing scale ───────────────────────────────────────────────
+
+function buildSpacingScale() {
+  const container = document.getElementById('spacingScale');
+  const sizes = [
+    { name: 'PAD', value: 10 },
+    { name: 'TOP_ROW_H', value: 22 },
+    { name: 'BOT_ROW_H', value: 28 },
+    { name: 'PITCH_GAP', value: 14 },
+    { name: 'DIAMOND_R', value: 55 },
+    { name: 'PITCH_COL_W', value: 48 },
+    { name: 'BASE_PATH_SW', value: 4 },
+    { name: 'HASH_SW', value: 4 },
+    { name: 'DIAMOND_SW', value: 2.5 },
+    { name: 'SUB_LINE_W', value: 5 },
+    { name: 'COL_WIDTH', value: 200 },
+    { name: 'ROW_HEIGHT', value: 200 },
+    { name: 'MARGIN_LEFT', value: 380 },
+  ];
+  container.innerHTML = sizes.map(s => `
+    <div class="spacing-row">
+      <span class="spacing-label">${s.value}px</span>
+      <div class="spacing-bar" style="width: ${Math.min(s.value, 400)}px;"></div>
+      <span class="spacing-label">${s.name}</span>
+    </div>
+  `).join('');
+}
+
+// ─── Collect current values from inputs ──────────────────────────
+
+function collectTokenValues() {
+  const tokens = {};
+  document.querySelectorAll('.token-value input[type="text"]').forEach(input => {
+    tokens[input.dataset.var] = input.value;
+  });
+  return tokens;
+}
+
+// ─── Save ────────────────────────────────────────────────────────
+
+async function save() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const tokens = collectTokenValues();
+  const payload = { light: {}, dark: {} };
+
+  if (isDark) {
+    payload.dark = tokens;
+    // Read light values from original (user hasn't edited them in this mode)
+    payload.light = originalLight;
+  } else {
+    payload.light = tokens;
+    payload.dark = originalDark;
+  }
+
+  const status = document.getElementById('status');
+  try {
+    const res = await fetch('/api/save-tokens', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      status.textContent = 'Saved to css/style.css';
+      status.style.color = '#377049';
+      // Update originals
+      if (isDark) originalDark = { ...tokens };
+      else originalLight = { ...tokens };
+      setTimeout(() => { status.textContent = ''; status.style.color = ''; }, 3000);
+    } else {
+      status.textContent = 'Error: ' + data.error;
+      status.style.color = '#a04a49';
+    }
+  } catch (e) {
+    status.textContent = 'Save failed: ' + e.message;
+    status.style.color = '#a04a49';
+  }
+}
+
+// ─── Theme toggle ────────────────────────────────────────────────
+
+// Theme toggle is handled by the global nav (js/theme.js) + MutationObserver above
+
+// ─── Init ────────────────────────────────────────────────────────
+
+// Snapshot dark values first (before building UI) by reading the CSS rules directly
+// so we don't need to flash the theme.
+function snapshotComputedTokens() {
+  const root = getComputedStyle(document.documentElement);
+  const tokens = {};
+  for (const group of Object.values(TOKEN_GROUPS)) {
+    for (const varName of Object.keys(group)) {
+      tokens[varName] = rgbToHex(root.getPropertyValue(varName).trim());
+    }
+  }
+  return tokens;
+}
+
+// Snapshot current mode on load; the other mode gets snapshotted on first toggle
+const _startedDark = document.documentElement.getAttribute('data-theme') === 'dark';
+if (_startedDark) {
+  originalDark = snapshotComputedTokens();
+} else {
+  originalLight = snapshotComputedTokens();
+}
+
+buildPalette();
+buildAltPalette();
+buildTokenSections();
+buildUsageMap();
+buildPitchDots();
+buildScorecardPreview();
+buildSpacingScale();
+renderLiveCells();
+
+document.getElementById('saveBtn').addEventListener('click', save);
+document.getElementById('resetBtn').addEventListener('click', () => {
+  clearAllOverrides();
+  buildPalette();
+  buildAltPalette();
+  buildTokenSections();
+  buildUsageMap();
+  buildPitchDots();
+  buildScorecardPreview();
+  renderLiveCells();
+  document.getElementById('status').textContent = 'Reset to CSS values';
+  setTimeout(() => { document.getElementById('status').textContent = ''; }, 2000);
+});
+// Listen for theme changes from the global nav toggle
+const observer = new MutationObserver((mutations) => {
+  for (const m of mutations) {
+    if (m.attributeName === 'data-theme') {
+      clearAllOverrides();
+      buildPalette();
+      buildTokenSections();
+      buildUsageMap();
+      buildPitchDots();
+      buildScorecardPreview();
+      renderLiveCells();
+    }
+  }
+});
+observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+</script>
+<script type="module" src="/js/nav.js"></script>
+<script type="module" src="/js/theme.js"></script>
+</body>
+</html>

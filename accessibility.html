@@ -18,39 +18,30 @@
   </style>
 </head>
 <body>
-  <header class="app-header">
-    <a href="/" class="back-link">All Games</a>
-    <h1>Accessibility</h1>
-    <button class="header-btn" id="theme-toggle" aria-label="Toggle dark mode"></button>
-  </header>
 
   <main class="a11y-page">
-    <h1>Accessibility Policy</h1>
+    <h1>Accessibility</h1>
 
-    <p>BaseballScorecard.org cares deeply about the experience of every user, regardless of ability. This is why I have adopted the <a href="https://www.w3.org/WAI/standards-guidelines/wcag/">W3C Web Content Accessibility Guidelines (WCAG) 2.0 Level AA</a> as the accessibility standard for this site.</p>
+    <p>I want everyone to be able to use this site. Whether you rely on a screen reader, navigate by keyboard, zoom in to 400%, or just happen to be on a slow connection at the ballpark — the experience should work for you.</p>
 
-    <p>I know this site is not perfect yet. Accessibility is an ongoing effort, not a checkbox. I am actively working to improve the experience for everyone, and I take every piece of feedback seriously.</p>
+    <p>I'm not going to pretend it's perfect. Scorecards are inherently visual, and making dense SVG grids truly accessible is hard. But I care about getting it right, and I'm working on it.</p>
 
-    <h2>What I do today</h2>
+    <h2>Where things stand</h2>
+    <p>The site targets <a href="https://www.w3.org/WAI/standards-guidelines/wcag/" target="_blank" rel="noopener">WCAG 2.2 Level AA</a>. In practice, that means:</p>
     <ul>
-      <li>WCAG AA compliant color contrast in both light and dark themes</li>
-      <li>All interactive elements are keyboard accessible</li>
-      <li>SVG scorecards include aria-labels for screen readers</li>
-      <li>Custom date picker with full ARIA grid pattern and keyboard navigation</li>
-      <li>Color is never the sole indicator of meaning; text labels accompany all color-coded elements</li>
-      <li>Responsive layout works across desktop, tablet, and mobile viewports</li>
+      <li>Keyboard navigation works everywhere — date picker, game cards, theme toggle, all of it</li>
+      <li>Colour contrast meets AA in both light and dark themes</li>
+      <li>Colour alone never carries meaning. Pitch types, outs, and play results always have text alongside the visual indicators</li>
+      <li>The whole thing is plain HTML, CSS, and vanilla JS. No heavy framework. It loads fast and works on anything with a browser</li>
     </ul>
 
-    <h2>Known limitations</h2>
-    <ul>
-      <li>SVG scorecard cell-level data is visual and not fully navigable by screen readers. I am working on improving this.</li>
-      <li>The mini strike zone plot relies on color-coded dots. Pitch call codes in the text column provide the same information in text form.</li>
-    </ul>
+    <h2>What I know isn't great yet</h2>
+    <p>The SVG scorecards are the biggest gap. Each play cell packs a lot of visual information into a small space — pitch sequences, base paths, notation — and right now a screen reader can't meaningfully navigate that data cell by cell. I'm figuring out the best way to expose it without making the markup a mess.</p>
 
-    <h2>Help me improve</h2>
-    <p>If you encounter an accessibility barrier, please <a href="https://github.com/denislirette/baseballscorebook/issues">let me know on GitHub</a>. When you reach out, it helps if you can describe the issue you ran into and the assistive technology you use. This allows me to reproduce the problem and fix it properly.</p>
+    <p>External links (MLB data, GitHub) are outside my control and may not meet the same bar.</p>
 
-    <p>If you use this site with assistive technology and would be willing to share your experience with me, I would genuinely appreciate the conversation. Please <a href="/contact.html">get in touch</a> and I will set up a time to talk.</p>
+    <h2>Tell me what's broken</h2>
+    <p>If something doesn't work for you, I want to hear about it. <a href="/contact.html?subject=accessibility">Send me a message</a> — it goes straight to me, not a form that disappears into nothing. If you can mention what assistive tech you're using and what went wrong, that helps me fix it faster. But even a quick "this didn't work" is useful.</p>
   </main>
 
   <script type="module" src="/js/nav.js"></script>

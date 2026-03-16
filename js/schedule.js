@@ -109,7 +109,8 @@ function renderGameCard(game, dateStr) {
   const isFinal = status.abstractGameState === 'Final';
   const isLive = status.abstractGameState === 'Live';
   const isInPlay = isLive && status.detailedState !== 'Warmup' && status.detailedState !== 'Pre-Game';
-  const showScore = isFinal || isInPlay;
+  const isCancelled = /cancel|postpone|suspend/i.test(status.detailedState);
+  const showScore = (isFinal || isInPlay) && !isCancelled;
 
   const awayRecord = away.leagueRecord ? ` (${away.leagueRecord.wins}-${away.leagueRecord.losses})` : '';
   const homeRecord = home.leagueRecord ? ` (${home.leagueRecord.wins}-${home.leagueRecord.losses})` : '';
@@ -120,8 +121,8 @@ function renderGameCard(game, dateStr) {
 
   a.innerHTML = `
     <div class="game-card-header">
-      <div class="game-card-status ${isInPlay ? 'status-live' : 'status-final'}">
-        ${showScore ? gameStatusText(status) : formatGameTime(game.gameDate)}
+      <div class="game-card-status ${isCancelled ? 'status-cancelled' : isInPlay ? 'status-live' : 'status-final'}">
+        ${isCancelled ? status.detailedState.toUpperCase() : showScore ? gameStatusText(status) : formatGameTime(game.gameDate)}
       </div>
       <div class="game-card-teams">
         <div class="game-card-team">

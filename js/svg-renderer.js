@@ -57,6 +57,9 @@ function refreshLayout() {
     SUB_CIRCLE_R: c.SUB_CIRCLE_R,
     SUB_LINE_W: c.SUB_LINE_W,
     SUB_CIRCLE_VPOS: c.SUB_CIRCLE_VPOS,
+    BASE_PATH_SW: c.BASE_PATH_SW,
+    HASH_SW: c.HASH_SW,
+    DIAMOND_SW: c.DIAMOND_SW,
     FONT: 'Arial, Helvetica, sans-serif',
     MONO: 'Arial, Helvetica, sans-serif',
     BASES: {
@@ -83,6 +86,7 @@ function getColors() {
     reached:   v('--sc-reached')   || '#121212',
     scored:    v('--sc-scored')    || '#007700',
     out:       v('--sc-out')       || '#CC0000',
+    outBadge:  v('--sc-out-badge') || '#292524',
     hit:       v('--sc-hit')       || '#007700',
     sub:       v('--sc-sub')       || '#0000CC',
     bg:        v('--sc-bg')        || '#FFFFFF',
@@ -94,7 +98,9 @@ function getColors() {
     pitchInPlay: v('--sc-pitch-in-play') || '#0000CC',
     pitchHbp:    v('--sc-pitch-hbp')    || '#121212',
     activeCell:  v('--sc-active-cell')  || '#FFFACD',
-    challenge:   v('--sc-challenge')   || '#7B2D8E',
+    activeBorder: v('--sc-active-border') || '#b8960c',
+    challenge:    v('--sc-challenge')    || '#7B2D8E',
+    pitcherLine:  v('--sc-pitcher-line') || '#7a9a7e',
   };
 }
 
@@ -276,49 +282,17 @@ function drawSubIndicator(g, CLR, x, y, subType, subNum, pStats) {
   const lineW = L.SUB_LINE_W;
   const gap = 3; // space between line end and circle edge
 
-  // Helper: draw a vertical line split by a letter square + type label square.
-  function drawVerticalSubLine(lineX, subCircleX, typeLabel) {
-    // Align with the bottom row of the cell grid (PAD=10, BOT_ROW_H=28)
-    const circleCy = y + L.ROW_HEIGHT - 10 - 14; // center of bottom row
-    const sqSize = circleR * 2;
-    const typeGap = 6;
-    if (subNum) {
-      // Compute type label position (below the letter square)
-      const hasType = !!typeLabel;
-      const typeH = sqSize;
-      const typeCy = circleCy + circleR + typeGap + circleR;
-      const totalBottom = hasType ? typeCy + circleR + gap : circleCy + circleR + gap;
-      // Top segment: from cell top to just above letter square
-      g.appendChild(svgEl('line', {
-        x1: lineX, y1: y, x2: lineX, y2: circleCy - circleR - gap,
-        stroke: CLR.sub, 'stroke-width': lineW,
-      }));
-      // Bottom segment: from below last square to cell bottom
-      g.appendChild(svgEl('line', {
-        x1: lineX, y1: totalBottom, x2: lineX, y2: y + L.ROW_HEIGHT,
-        stroke: CLR.sub, 'stroke-width': lineW,
-      }));
-      // Letter square
-      g.appendChild(svgEl('rect', {
-        x: subCircleX - circleR, y: circleCy - circleR,
-        width: sqSize, height: sqSize,
-        fill: CLR.sub, stroke: 'none',
-      }));
-      g.appendChild(svgText(String(subNum), subCircleX, circleCy, {
-        'text-anchor': 'middle', 'dominant-baseline': 'central',
-        'font-size': circleFontSize, 'font-weight': '700', 'font-family': L.FONT, fill: CLR.bg,
-      }));
-    } else {
-      // No sub letter: draw full line
-      g.appendChild(svgEl('line', {
-        x1: lineX, y1: y, x2: lineX, y2: y + L.ROW_HEIGHT,
-        stroke: CLR.sub, 'stroke-width': lineW,
-      }));
-    }
+  // Helper: draw a vertical sub indicator line (plain bar).
+  function drawVerticalSubLine(lineX) {
+    g.appendChild(svgEl('line', {
+      x1: lineX, y1: y, x2: lineX, y2: y + L.ROW_HEIGHT,
+      stroke: CLR.sub, 'stroke-width': lineW,
+    }));
   }
 
   if (subType === 'pitcher') {
-    // Cover the grid line with cell background, then draw dashed blue line on top
+    // Cover the grid line with cell background, then draw pitcher change line on top
+    const pColor = CLR.pitcherLine;
     g.appendChild(svgEl('rect', {
       x: x, y: y - 4, width: L.COL_WIDTH, height: 8,
       fill: CLR.cellBg, stroke: 'none',
@@ -332,45 +306,40 @@ function drawSubIndicator(g, CLR, x, y, subType, subNum, pStats) {
       const fs = String(L.PITCH_FONT_SIZE);
       const label = `${pStats.strikes} / ${pStats.pitches} / ${pStats.ks}K`;
       const labelX = x + L.COL_WIDTH / 2;
-      // Ensure at least 4 squares per side by computing label width from available space
       const minSquares = 4;
-      const sideW = minSquares * sqStep; // minimum space for squares on each side
-      const maxLabelW = L.COL_WIDTH - 4 - sideW * 2; // remaining for label
+      const sideW = minSquares * sqStep;
+      const maxLabelW = L.COL_WIDTH - 4 - sideW * 2;
       const halfLabel = maxLabelW / 2;
 
-      // Left squares: fill from cell left edge to label
       const leftStart = x + 2;
       const leftEnd = labelX - halfLabel;
       for (let sx = leftStart; sx + sqSize <= leftEnd; sx += sqStep) {
         g.appendChild(svgEl('rect', {
           x: sx, y: y - sqSize / 2, width: sqSize, height: sqSize,
-          fill: CLR.sub,
+          fill: pColor,
         }));
       }
 
-      // Right squares: fill from label to cell right edge
       const rightStart = labelX + halfLabel;
       const rightEnd = x + L.COL_WIDTH - 2;
       for (let sx = rightStart; sx + sqSize <= rightEnd; sx += sqStep) {
         g.appendChild(svgEl('rect', {
           x: sx, y: y - sqSize / 2, width: sqSize, height: sqSize,
-          fill: CLR.sub,
+          fill: pColor,
         }));
       }
 
-      // Label text centered on the line
       g.appendChild(svgText(label, labelX, y, {
         'text-anchor': 'middle', 'dominant-baseline': 'central',
-        'font-size': fs, 'font-weight': '700', 'font-family': L.MONO, fill: CLR.sub,
+        'font-size': fs, 'font-weight': '700', 'font-family': L.MONO, fill: pColor,
       }));
     } else {
-      // No stats: squares across full width
       const start = x + 2;
       const end = x + L.COL_WIDTH - 2;
       for (let sx = start; sx + sqSize <= end; sx += sqStep) {
         g.appendChild(svgEl('rect', {
           x: sx, y: y - sqSize / 2, width: sqSize, height: sqSize,
-          fill: CLR.sub,
+          fill: pColor,
         }));
       }
     }
@@ -409,6 +378,14 @@ function drawGrid(svg, CLR, lineup, colMap, totalRows, rowOffsets, width, gridHe
           width: L.COL_WIDTH - 1, height: L.ROW_HEIGHT - 1,
           fill: bgFill, stroke: 'none',
         }));
+        if (isActive) {
+          const bw = 3;
+          g.appendChild(svgEl('rect', {
+            x: cx + bw / 2, y: y + bw / 2,
+            width: L.COL_WIDTH - bw, height: L.ROW_HEIGHT - bw,
+            fill: 'none', stroke: CLR.activeBorder, 'stroke-width': bw,
+          }));
+        }
       }
     }
   }
@@ -535,34 +512,12 @@ function drawLineup(svg, CLR, lineup, rowOffsets, boxscore, gameData, side, subM
       if (!isSub) {
         // No separate number; jersey # is already in the name label
       } else {
-        // Horizontal blue line at top of sub band with circle near the left
-        const subLetter = String.fromCharCode(65 + subCount); // A, B, C...
+        // Horizontal sub line at top of sub band
         subCount++;
-        const cR = L.SUB_CIRCLE_R;
-        const cFS = String(Math.round(cR * 1.3));
-        const gap = 3;
         const lineY = bandY;
-        const circleCx = Math.round(L.MARGIN_LEFT * L.SUB_CIRCLE_POS);
         const lineEndX = L.MARGIN_LEFT - 4;
-        // Left segment: from left edge to just before circle
         g.appendChild(svgEl('line', {
-          x1: 4, y1: lineY, x2: circleCx - cR - gap, y2: lineY,
-          stroke: CLR.sub, 'stroke-width': L.SUB_LINE_W,
-        }));
-        // Square on the line
-        const sqSize = cR * 2;
-        g.appendChild(svgEl('rect', {
-          x: circleCx - cR, y: lineY - cR,
-          width: sqSize, height: sqSize,
-          fill: CLR.sub, stroke: 'none',
-        }));
-        g.appendChild(svgText(subLetter, circleCx, lineY, {
-          'text-anchor': 'middle', 'dominant-baseline': 'central',
-          'font-size': cFS, 'font-weight': '700', 'font-family': L.FONT, fill: CLR.bg,
-        }));
-        // Right segment: from after letter square to right edge
-        g.appendChild(svgEl('line', {
-          x1: circleCx + cR + gap, y1: lineY, x2: lineEndX, y2: lineY,
+          x1: 4, y1: lineY, x2: lineEndX, y2: lineY,
           stroke: CLR.sub, 'stroke-width': L.SUB_LINE_W,
         }));
       }
@@ -656,34 +611,16 @@ function drawAtBats(svg, CLR, lineup, grid, rowOffsets, colMap, subMap, subNumbe
     }
   }
 
+  // Pass 1: Draw substitution indicators first (bottom layer)
   for (let slotIdx = 0; slotIdx < lineup.length; slotIdx++) {
     const slot = lineup[slotIdx];
     for (let inn = 1; inn <= innings; inn++) {
       const key = `${slot.slot}-${inn}`;
       const y = L.HEADER_HEIGHT + rowOffsets[slotIdx] * L.ROW_HEIGHT;
-
-      // Draw each at-bat in its own visual column
-      const atBats = grid.get(key);
-      if (atBats && atBats.length > 0) {
-        // Check if the cell directly below has a pitcher sub (shifts content up to avoid overlap)
-        const nextSlot = slotIdx + 1 < lineup.length ? lineup[slotIdx + 1] : null;
-        const belowKey = nextSlot ? `${nextSlot.slot}-${inn}` : null;
-        const hasPitcherSubBelow = belowKey && subMap.get(belowKey)?.some(s => s.type === 'pitcher');
-        for (let ai = 0; ai < atBats.length; ai++) {
-          const x = colMap.colX(inn, ai);
-          drawAtBatCell(g, CLR, atBats[ai], x, y, hasPitcherSubBelow);
-        }
-      }
-
-      // Draw substitution indicators.
-      // In bat-around innings (multiple columns), skip PH/PR lines since
-      // the column split already indicates the substitution visually.
       const cellAbs = grid.get(key);
       const isBatAround = cellAbs && cellAbs.length > 1;
       const subs = subMap.get(key);
       if (subs) {
-        // Draw PH/PR/defensive subs first, then pitcher subs on top
-        // so the dashed line is never covered by a vertical sub cover rect
         const sorted = [...subs].sort((a, b) => (a.type === 'pitcher' ? 1 : 0) - (b.type === 'pitcher' ? 1 : 0));
         for (const sub of sorted) {
           if (isBatAround && (sub.type === 'PH' || sub.type === 'PR')) continue;
@@ -696,10 +633,29 @@ function drawAtBats(svg, CLR, lineup, grid, rowOffsets, colMap, subMap, subNumbe
     }
   }
 
+  // Pass 2: Draw at-bat cells on top (ABS badges, pitches, etc. above sub lines)
+  for (let slotIdx = 0; slotIdx < lineup.length; slotIdx++) {
+    const slot = lineup[slotIdx];
+    for (let inn = 1; inn <= innings; inn++) {
+      const key = `${slot.slot}-${inn}`;
+      const y = L.HEADER_HEIGHT + rowOffsets[slotIdx] * L.ROW_HEIGHT;
+      const atBats = grid.get(key);
+      if (atBats && atBats.length > 0) {
+        const nextSlot = slotIdx + 1 < lineup.length ? lineup[slotIdx + 1] : null;
+        const belowKey = nextSlot ? `${nextSlot.slot}-${inn}` : null;
+        const hasPitcherSubBelow = belowKey && subMap.get(belowKey)?.some(s => s.type === 'pitcher');
+        for (let ai = 0; ai < atBats.length; ai++) {
+          const x = colMap.colX(inn, ai);
+          drawAtBatCell(g, CLR, atBats[ai], x, y, hasPitcherSubBelow);
+        }
+      }
+    }
+  }
+
   // Inning flow notch: a single 45° line (top-right → bottom-left) crossing
   // through the bottom-right corner of the cell where the 3rd out is recorded.
   const notchHalf = 14;
-  const notchSW = DIAMOND_SW;
+  const notchSW = L.DIAMOND_SW;
   for (let inn = 1; inn <= innings; inn++) {
     let thirdOutSlotIdx = -1;
     for (let si = 0; si < lineup.length; si++) {
@@ -738,13 +694,12 @@ function drawAtBatCell(g, CLR, ab, x, y, hasPitcherSubBelow) {
   const TOP_ROW_H = 22;    // height of top row (out circle + count + first pitch baseline)
   const BOT_ROW_H = 28;    // height of bottom row (RBI + notation + strike zone)
 
-  // Pitch area: right side, single or double column
+  // Pitch area: right side, single column always
   const pitchCount = ab.pitchSequence.length;
-  const twoCols = pitchCount > PITCH_OVERFLOW;
-  const singlePitchW = L.PITCH_COL_W;
-  const pitchAreaW = twoCols ? singlePitchW * 2 + 4 : singlePitchW;
+  const pitchAreaW = L.PITCH_COL_W;
   const PITCH_GAP = 14; // breathing room between main area and pitches
-  const pitchX = x + L.COL_WIDTH - PAD - pitchAreaW;
+  const PITCH_PAD_R = 4; // right padding for pitch column (tighter than left PAD)
+  const pitchX = x + L.COL_WIDTH - PITCH_PAD_R - pitchAreaW;
 
   // Main area: left side (for diamond, notation, out badge, RBI)
   const mainLeft = x + PAD;
@@ -757,20 +712,23 @@ function drawAtBatCell(g, CLR, ab, x, y, hasPitcherSubBelow) {
   const midTop = topY + TOP_ROW_H;                   // top of middle zone (diamond area)
   const botY = y + L.ROW_HEIGHT - PAD - BOT_ROW_H;  // top of bottom row
   const midBot = botY;                                // bottom of middle zone
-  const midCy = (midTop + midBot) / 2 - subBelowShift; // diamond center Y
+  const midCy = (midTop + midBot) / 2 - 10 - subBelowShift; // diamond center Y
 
-  // ── Top row: out badge (left), count (center) ──
+  // ── Top row: out badge (left), count (right of main area) ──
   const count = computeCount(ab.pitchSequence);
-  g.appendChild(svgText(count, mainCx, topY + TOP_ROW_H / 2, {
+  g.appendChild(svgText(count, pitchX - PITCH_GAP * 2, topY + TOP_ROW_H / 2 - 2, {
     'font-size': '16', 'font-weight': '700', 'font-family': L.FONT, fill: CLR.textLight,
     'text-anchor': 'middle', 'dominant-baseline': 'central',
   }));
 
   // ── Pitches (right side) ──
-  drawPitchSequence(g, CLR, ab.pitchSequence, pitchX, topY, twoCols);
-
-  // ── Strike zone (bottom-right, under pitches) ──
-  drawMiniStrikeZone(g, CLR, ab.pitchSequence, pitchX, y, pitchAreaW);
+  const needsScroll = pitchCount > PITCH_OVERFLOW;
+  if (needsScroll) {
+    drawScrollablePitchSequence(g, CLR, ab.pitchSequence, pitchX, topY, pitchAreaW, y);
+  } else {
+    drawPitchSequence(g, CLR, ab.pitchSequence, pitchX, topY, false);
+    drawMiniStrikeZone(g, CLR, ab.pitchSequence, pitchX, y, pitchAreaW);
+  }
 
   // ── Diamond logic ──
   const isSF = ab.result?.eventType === 'sac_fly';
@@ -845,7 +803,7 @@ function drawAtBatCell(g, CLR, ab, x, y, hasPitcherSubBelow) {
       const ideal = Math.round(largeSize * scale);
       notFontSize = String(Math.min(ideal, maxFitSize(notation.length)));
 
-      const splitMatch = dpSplitMatch || notation.match(/^([A-Za-z\u{A4D8}]{2,})([\d][\d-]*)$/u);
+      const splitMatch = dpSplitMatch || (notation.length > 4 && notation.match(/^([A-Za-z\u{A4D8}]{2,})([\d][\d]*)$/u));
       if (splitMatch) {
         const prefix = splitMatch[1];
         const nums = splitMatch[2];
@@ -876,7 +834,7 @@ function drawAtBatCell(g, CLR, ab, x, y, hasPitcherSubBelow) {
   if (ab.rbi && ab.rbi > 0) {
     const rbiR = L.SUB_CIRCLE_R;
     const rbiSpacing = rbiR * 2 + 4;
-    const rbiBaseX = mainLeft + rbiR;
+    const rbiBaseX = mainLeft + rbiR + 4;
     const rbiBaseY = botY + BOT_ROW_H / 2;
     for (let i = 0; i < ab.rbi; i++) {
       const cx = rbiBaseX + i * rbiSpacing;
@@ -888,11 +846,11 @@ function drawAtBatCell(g, CLR, ab, x, y, hasPitcherSubBelow) {
   }
 
   // ── Top row: Out badge (top-left, inside padding) ──
-  if (ab.outNumber && !(hasRunners || alwaysDiamond)) {
-    const badgeR = L.SUB_CIRCLE_R;
-    const badgeCx = mainLeft + badgeR;
+  if (ab.outNumber) {
+    const badgeR = Math.round(L.SUB_CIRCLE_R * 1.45);
+    const badgeCx = mainLeft + badgeR + 2;
     const badgeCy = topY + TOP_ROW_H / 2;
-    drawOutMarker(g, badgeCx, badgeCy, CLR.text, ab.outNumber, CLR.bg);
+    drawOutMarker(g, badgeCx, badgeCy, CLR.outBadge, ab.outNumber, CLR.bg, badgeR);
   }
 }
 
@@ -908,6 +866,77 @@ function computeCount(pitches) {
     }
   }
   return `${balls}-${strikes}`;
+}
+
+// ─── Scrollable pitch sequence (>10 pitches, foreignObject) ──────
+
+function drawScrollablePitchSequence(g, CLR, pitches, pitchX, topY, colW, cellY) {
+  const fs = L.PITCH_FONT_SIZE;
+  const step = L.PITCH_STEP;
+  const scrollH = L.ROW_HEIGHT - (topY - cellY) - 8; // available height
+  const contentH = pitches.length * step + 4;
+
+  const fo = document.createElementNS(SVG_NS, 'foreignObject');
+  fo.setAttribute('x', pitchX);
+  fo.setAttribute('y', topY);
+  fo.setAttribute('width', colW);
+  fo.setAttribute('height', scrollH);
+
+  const div = document.createElement('div');
+  div.style.cssText = `
+    width: ${colW}px; height: ${scrollH}px; overflow-y: auto; overflow-x: hidden;
+    scrollbar-width: thin; scrollbar-color: ${CLR.grid} transparent;
+  `;
+
+  // Build pitch rows as tiny inline SVGs inside the scrollable div
+  for (let i = 0; i < pitches.length; i++) {
+    const pitch = pitches[i];
+    const color = pitchColor(pitch.callCode, CLR);
+    const isInPlay = pitch.callCode === 'X' || pitch.callCode === 'D' || pitch.callCode === 'E';
+    const fw = isInPlay ? '700' : '400';
+    const typeLabel = pitch.typeCode || '';
+    const speed = pitch.speed ? String(Math.round(pitch.speed)) : '';
+
+    const rowSvg = document.createElementNS(SVG_NS, 'svg');
+    rowSvg.setAttribute('width', colW);
+    rowSvg.setAttribute('height', step);
+    rowSvg.setAttribute('viewBox', `0 0 ${colW} ${step}`);
+    rowSvg.style.display = 'block';
+
+    const midX = colW / 2;
+    const textY = fs;
+
+    // Challenge badge
+    const hasBadge = !!pitch.challenged;
+    const sqSize = fs - 4;
+    if (hasBadge) {
+      const label = pitch.overturned ? 'W' : 'L';
+      const speedW = speed.length * fs * 0.55;
+      const sqX = midX + 3 + speedW + 2;
+      const sqY = textY - sqSize + 1;
+      rowSvg.appendChild(svgEl('rect', { x: sqX, y: sqY, width: sqSize, height: sqSize, fill: CLR.challenge }));
+      rowSvg.appendChild(svgText(label, sqX + sqSize / 2, sqY + sqSize / 2, {
+        'text-anchor': 'middle', 'dominant-baseline': 'central',
+        'font-size': String(sqSize - 2), 'font-weight': '700', 'font-family': L.MONO, fill: CLR.bg,
+      }));
+    }
+
+    if (typeLabel) {
+      rowSvg.appendChild(svgText(typeLabel, midX - 3, textY, {
+        'font-size': String(fs), 'font-weight': fw, 'font-family': L.MONO, fill: color, 'text-anchor': 'end',
+      }));
+    }
+    if (speed) {
+      rowSvg.appendChild(svgText(speed, midX + 3, textY, {
+        'font-size': String(fs), 'font-weight': fw, 'font-family': L.MONO, fill: color,
+      }));
+    }
+
+    div.appendChild(rowSvg);
+  }
+
+  fo.appendChild(div);
+  g.appendChild(fo);
 }
 
 // ─── Vertical pitch sequence (call code · pitch type · speed) ────
@@ -942,14 +971,22 @@ function drawPitchSequence(g, CLR, pitches, pitchX, topY, twoCols) {
 
 function drawSinglePitch(g, CLR, pitch, colBaseX, startY, row, step, colW, fs) {
   const color = pitchColor(pitch.callCode, CLR);
+  const isInPlay = pitch.callCode === 'X' || pitch.callCode === 'D' || pitch.callCode === 'E';
+  const fw = isInPlay ? '700' : '400';
   const textY = startY + row * step + L.PITCH_FONT_SIZE;
   const midX = colBaseX + colW / 2;
+  const fsi = parseInt(fs);
+
+  // ABS challenge badge: purple square with W/L, right-aligned at end of column
+  const sqSize = fsi - 4;
+  const hasBadge = !!pitch.challenged;
+  const badgeW = hasBadge ? sqSize + 3 : 0;
 
   // Pitch type (FF / SL / CU / CH) - right of center, right-aligned
   const typeLabel = pitch.typeCode || '';
   if (typeLabel) {
     g.appendChild(svgText(typeLabel, midX - 3, textY, {
-      'font-size': fs, 'font-weight': '400', 'font-family': L.MONO, fill: color,
+      'font-size': fs, 'font-weight': fw, 'font-family': L.MONO, fill: color,
       'text-anchor': 'end',
     }));
   }
@@ -958,16 +995,23 @@ function drawSinglePitch(g, CLR, pitch, colBaseX, startY, row, step, colW, fs) {
   const speed = pitch.speed ? String(Math.round(pitch.speed)) : '';
   if (speed) {
     g.appendChild(svgText(speed, midX + 3, textY, {
-      'font-size': fs, 'font-weight': '400', 'font-family': L.MONO, fill: color,
+      'font-size': fs, 'font-weight': fw, 'font-family': L.MONO, fill: color,
     }));
   }
 
-  // ABS challenge indicator: W/L in purple, same size as velocity
-  if (pitch.challengeLabel) {
+  // Badge tucked right after speed
+  if (hasBadge) {
     const label = pitch.overturned ? 'W' : 'L';
-    const speedW = speed.length * L.PITCH_FONT_SIZE * 0.6;
-    g.appendChild(svgText(label, midX + 3 + speedW + 2, textY, {
-      'font-size': String(Math.round(L.PITCH_FONT_SIZE * 0.8)), 'font-weight': '900', 'font-family': L.MONO, fill: CLR.challenge,
+    const speedW = speed.length * fsi * 0.55;
+    const sqX = midX + 3 + speedW + 2;
+    const sqY = textY - sqSize + 1;
+    g.appendChild(svgEl('rect', {
+      x: sqX, y: sqY, width: sqSize, height: sqSize,
+      fill: CLR.challenge,
+    }));
+    g.appendChild(svgText(label, sqX + sqSize / 2, sqY + sqSize / 2, {
+      'text-anchor': 'middle', 'dominant-baseline': 'central',
+      'font-size': String(sqSize - 2), 'font-weight': '700', 'font-family': L.MONO, fill: '#ffffff',
     }));
   }
 }
@@ -1037,9 +1081,7 @@ function averageZoneEdge(pitches, field, fallback) {
 
 // Figma-matched diamond constants (from 134-unit Figma diamond, scaled to DIAMOND_R)
 const FIGMA_R = 67; // Figma diamond half-size
-const PATH_SW = 4;  // base path stroke-width, matches circle-X marker weight
-const HASH_SW = 4;  // hash mark stroke-width, matches PATH_SW
-const DIAMOND_SW = 2.5; // diamond outline stroke-width (Figma)
+// These are now read from L.BASE_PATH_SW, L.HASH_SW, L.DIAMOND_SW via layout-config
 
 function drawDiamond(g, CLR, cx, cy, ab, isHR = false) {
   const R = L.DIAMOND_R;
@@ -1052,12 +1094,12 @@ function drawDiamond(g, CLR, cx, cy, ab, isHR = false) {
   if (isHR) {
     g.appendChild(svgEl('polygon', {
       points: `${hp.x},${hp.y} ${b1.x},${b1.y} ${b2.x},${b2.y} ${b3.x},${b3.y}`,
-      fill: CLR.text, stroke: CLR.text, 'stroke-width': DIAMOND_SW,
+      fill: CLR.text, stroke: CLR.text, 'stroke-width': L.DIAMOND_SW,
     }));
   }
 
   // Base path lines from runner journeys (extended past corners to overlap)
-  const EXT = PATH_SW * 0.6; // overlap amount
+  const EXT = L.BASE_PATH_SW * 0.6; // overlap amount
   const cumRunners = ab.cumulativeRunners;
   if (cumRunners && cumRunners.length > 0) {
     for (const runner of cumRunners) {
@@ -1077,22 +1119,22 @@ function drawDiamond(g, CLR, cx, cy, ab, isHR = false) {
           // Truncate: draw from start to midpoint only (no extension)
           g.appendChild(svgEl('line', {
             x1: from.x, y1: from.y, x2: outMx, y2: outMy,
-            stroke: CLR.text, 'stroke-width': PATH_SW,
+            stroke: CLR.text, 'stroke-width': L.BASE_PATH_SW,
           }));
         } else {
           const ln = extendedLine(from, to, EXT);
           g.appendChild(svgEl('line', {
             ...ln,
-            stroke: CLR.text, 'stroke-width': PATH_SW,
+            stroke: CLR.text, 'stroke-width': L.BASE_PATH_SW,
           }));
         }
       }
       if (runner.isOut) {
         if (outSeg) {
-          drawOutMarker(g, outMx, outMy, CLR.text, runner.outNumber, CLR.bg);
+          drawOutMarker(g, outMx, outMy, CLR.outBadge, runner.outNumber, CLR.bg);
         } else if (runner.outBase) {
           const pos = diamondPt(cx, cy, R, runner.outBase);
-          drawOutMarker(g, pos.x, pos.y, CLR.text, runner.outNumber, CLR.bg);
+          drawOutMarker(g, pos.x, pos.y, CLR.outBadge, runner.outNumber, CLR.bg);
         }
       }
     }
@@ -1104,7 +1146,7 @@ function drawDiamond(g, CLR, cx, cy, ab, isHR = false) {
       const ln = extendedLine(from, to, EXT);
       g.appendChild(svgEl('line', {
         ...ln,
-        stroke: CLR.text, 'stroke-width': PATH_SW,
+        stroke: CLR.text, 'stroke-width': L.BASE_PATH_SW,
       }));
     }
   }
@@ -1132,8 +1174,8 @@ const OUT_NUMBER_PATHS = {
   3: 'M14.917 26.4917L18.7686 26.0244C18.8913 27.0062 19.2217 27.7567 19.7598 28.2759C20.2979 28.7951 20.9492 29.0547 21.7139 29.0547C22.5352 29.0547 23.2243 28.7432 23.7812 28.1201C24.3477 27.4971 24.6309 26.6569 24.6309 25.5996C24.6309 24.599 24.3618 23.806 23.8237 23.2207C23.2856 22.6354 22.6296 22.3428 21.8555 22.3428C21.3457 22.3428 20.7368 22.4419 20.0288 22.6401L20.4678 19.3975C21.5439 19.4258 22.3652 19.1945 22.9316 18.7036C23.498 18.2033 23.7812 17.5425 23.7812 16.7212C23.7812 16.0226 23.5736 15.4657 23.1582 15.0503C22.7428 14.6349 22.1906 14.4272 21.5015 14.4272C20.8218 14.4272 20.2412 14.6632 19.7598 15.1353C19.2783 15.6073 18.9857 16.2964 18.8818 17.2026L15.2144 16.5796C15.4692 15.3241 15.8516 14.3234 16.3613 13.5776C16.8805 12.8224 17.598 12.2324 18.5137 11.8076C19.4388 11.3734 20.4725 11.1562 21.6147 11.1562C23.5688 11.1562 25.1359 11.7793 26.3159 13.0254C27.2882 14.0449 27.7744 15.1966 27.7744 16.4805C27.7744 18.3024 26.7785 19.7562 24.7866 20.8418C25.9761 21.0967 26.9248 21.6678 27.6328 22.5552C28.3503 23.4425 28.709 24.514 28.709 25.7695C28.709 27.5915 28.0435 29.1444 26.7124 30.4282C25.3813 31.7121 23.7246 32.354 21.7422 32.354C19.8636 32.354 18.306 31.8159 17.0693 30.7397C15.8327 29.6541 15.1152 28.2381 14.917 26.4917Z',
 };
 
-function drawOutMarker(g, cx, cy, color, outNumber, numColor) {
-  const r = L.SUB_CIRCLE_R; // same size as sub square and RBI diamond
+function drawOutMarker(g, cx, cy, color, outNumber, numColor, customR) {
+  const r = customR || L.SUB_CIRCLE_R;
   const scale = (r * 2) / 44;
   const marker = svgEl('g', {
     transform: `translate(${cx - r}, ${cy - r}) scale(${scale})`,
@@ -1189,7 +1231,7 @@ function drawHitHashMarks(g, CLR, hp, b1, count, R) {
     g.appendChild(svgEl('line', {
       x1: hx - px * hashHalf, y1: hy - py * hashHalf,
       x2: hx + px * hashHalf, y2: hy + py * hashHalf,
-      stroke: CLR.text, 'stroke-width': HASH_SW,
+      stroke: CLR.text, 'stroke-width': L.HASH_SW,
     }));
   }
 }
@@ -1453,13 +1495,14 @@ export function renderPitcherStatsHTML(data, side, teamAbbrev) {
   if (pitchers.length === 0) return '';
   const label = teamAbbrev ? `${teamAbbrev} PITCHERS` : 'PITCHERS';
 
-  const rows = pitchers.map(p => {
+  const rows = pitchers.map((p, i) => {
     const s = p.stats;
     const ss = p.seasonStats || {};
     const hand = getPlayerPitchHand(gameData, p.id);
     const pitchCodes = formatRepertoire(p.repertoire);
+    const spacer = i > 0 ? `<tr class="pitcher-spacer"><td colspan="12"></td></tr>` : '';
     // Season stats row (above game row, smaller font)
-    const seasonRow = `
+    const seasonRow = `${spacer}
       <tr class="pitcher-season-row">
         <td class="pitcher-season-label" colspan="2">Season Stats</td>
         <td>${v(ss.inningsPitched)}</td>
@@ -1494,7 +1537,7 @@ export function renderPitcherStatsHTML(data, side, teamAbbrev) {
 
   return `
     <table class="pitcher-stats-table">
-      <thead><tr><th>${label}</th><th>PITCHES</th><th>IP</th><th>H</th><th>R</th><th>ER</th><th>BB</th><th>K</th><th>S</th><th>P</th><th>ERA</th><th>WHIP</th></tr></thead>
+      <thead><tr><th>${label}</th><th>PITCH TYPES (USAGE/MPH)</th><th>IP</th><th>H</th><th>R</th><th>ER</th><th>BB</th><th>K</th><th>S</th><th>P</th><th>ERA</th><th>WHIP</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
 }
@@ -1607,7 +1650,7 @@ export function renderBullpenHTML(data, side, teamAbbrev) {
     <details class="collapsible-section" data-section="bullpen-${side}">
       <summary role="button" aria-expanded="false">${label} <span class="section-count">(${players.length})</span></summary>
       <table class="pitcher-stats-table">
-        <thead><tr><th>Player</th><th>PITCHES</th><th>IP</th><th>H</th><th>R</th><th>ER</th><th>BB</th><th>K</th><th>S</th><th>P</th><th>ERA</th><th>WHIP</th></tr></thead>
+        <thead><tr><th>Player</th><th>PITCH TYPES (USAGE/MPH)</th><th>IP</th><th>H</th><th>R</th><th>ER</th><th>BB</th><th>K</th><th>S</th><th>P</th><th>ERA</th><th>WHIP</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
     </details>`;

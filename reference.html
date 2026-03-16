@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reference - BaseballScorecard.org</title>
+  <title>Guide - BaseballScorecard.org</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="stylesheet" href="/css/style.css">
   <script>
@@ -24,36 +24,99 @@
     .formula-cell { overflow: visible; }
     [data-theme="dark"] mjx-container svg { fill: var(--text) !important; color: var(--text) !important; }
     [data-theme="dark"] mjx-container { color: var(--text) !important; }
+
+    /* ── Wider page content ── */
+    .page-content { max-width: 1200px; }
+
+    /* ── Annotated Diagram Styles ── */
+    .diagram-section { margin-bottom: 64px; }
+    .diagram-section h2 {
+      font-size: 1.125em; font-weight: 700; margin-bottom: 16px;
+    }
+    .diagram-section h3 { font-size: 0.95em; font-weight: 700; margin: 20px 0 8px; }
+    .diagram-wrap {
+      display: flex; flex-wrap: wrap; gap: 32px; align-items: flex-start;
+    }
+    .diagram-figure {
+      flex: 1 1 300px; max-width: 100%;
+    }
+    .diagram-figure svg {
+      display: block; width: 100%; height: auto; max-width: 500px;
+    }
+    .diagram-figure.diagram-wide svg { max-width: 900px; }
+    .diagram-figure.diagram-narrow svg { max-width: 360px; }
+    .diagram-callouts {
+      margin: 12px 0 0; padding: 0; list-style: none; font-size: 0.85em;
+      color: var(--text); line-height: 1.7;
+    }
+    .diagram-callouts li {
+      display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px;
+    }
+    .callout-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: none; color: var(--text); font-size: 11px;
+      font-weight: 700; flex-shrink: 0;
+      border: 2px solid var(--text);
+      line-height: 1;
+    }
+    .diagram-callouts strong { font-weight: 700; }
+    .anatomy-legend td { padding: 8px 8px; vertical-align: top; }
+    .anatomy-legend .callout-num-cell { width: 32px; text-align: center; }
+    .anatomy-legend a { color: var(--link); text-decoration: underline; }
+    .anatomy-legend a:visited { color: var(--visited); }
+    .diagram-row {
+      display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-end;
+    }
+    .diagram-row .diagram-figure { flex: 1 1 180px; max-width: 25%; }
+    .diagram-row .diagram-figure svg { max-width: 100%; }
+    .diagram-caption {
+      text-align: center; font-size: 0.8em; font-weight: 700;
+      margin-top: 6px; color: var(--text);
+    }
+    @media (max-width: 768px) {
+      .diagram-figure svg { max-width: 100%; }
+      .diagram-figure.diagram-wide svg { max-width: 100%; }
+      .diagram-row .diagram-figure { flex: 0 1 140px; }
+      .diagram-row .diagram-figure svg { max-width: 140px; }
+    }
   </style>
 </head>
 <body>
   <header class="app-header">
     <a href="/" class="back-link">All Games</a>
-    <h1>Reference</h1>
+    <h1>Guide</h1>
     <button class="header-btn" id="theme-toggle" aria-label="Toggle dark mode"></button>
   </header>
 
   <div class="page-with-subnav">
     <aside class="subnav">
       <nav aria-label="Page sections">
-        <p class="subnav-group">Legend</p>
         <ul>
-          <li><a href="#pitch-call-codes">Pitch Call Codes</a></li>
-          <li><a href="#pitch-types">Pitch Types</a></li>
-          <li><a href="#play-notation">Play Notation</a></li>
-          <li><a href="#runner-events">Runner Events</a></li>
-          <li><a href="#fielding-positions">Fielding Positions</a></li>
-          <li><a href="#batter-stats">Batter Stats Columns</a></li>
-          <li><a href="#summary-rows">Summary Rows</a></li>
-          <li><a href="#pitch-colors">Pitch Colors</a></li>
-          <li><a href="#abs-challenge">ABS Challenge</a></li>
-          <li><a href="#diamond">Diamond &amp; Base Paths</a></li>
-          <li><a href="#cell-indicators">Cell Indicators</a></li>
-          <li><a href="#count-strike-zone">Count &amp; Strike Zone</a></li>
+          <li class="subnav-indent"><a href="#anatomy">Play Cell Anatomy</a></li>
+          <li class="subnav-indent"><a href="#diamond-states">Base Hits &amp; the Diamond</a></li>
+          <li class="subnav-indent"><a href="#sub-diagrams">Substitutions</a></li>
+        </ul>
+        <p class="subnav-group">Pitches</p>
+        <ul>
+          <li class="subnav-indent"><a href="#pitch-call-codes">Call Codes</a></li>
+          <li class="subnav-indent"><a href="#pitch-types">Pitch Types</a></li>
+          <li class="subnav-indent"><a href="#pitch-colors">Pitch Colors</a></li>
+          <li class="subnav-indent"><a href="#count-strike-zone">Count &amp; Strike Zone</a></li>
+        </ul>
+        <p class="subnav-group">Scorecard</p>
+        <ul>
+          <li class="subnav-indent"><a href="#play-notation">Play Notation</a></li>
+          <li class="subnav-indent"><a href="#runner-events">Runner Events</a></li>
+          <li class="subnav-indent"><a href="#diamond">Diamond &amp; Base Paths</a></li>
+          <li class="subnav-indent"><a href="#cell-indicators">Cell Indicators</a></li>
+          <li class="subnav-indent"><a href="#fielding-positions">Fielding Positions</a></li>
+          <li class="subnav-indent"><a href="#batter-stats">Batter Stats</a></li>
+          <li class="subnav-indent"><a href="#summary-rows">Summary Rows</a></li>
+          <li class="subnav-indent"><a href="#abs-challenge">ABS Challenge</a></li>
         </ul>
         <p class="subnav-group">Batting Formulas</p>
         <ul>
-          <li><a href="#batting-formulas">Overview</a></li>
           <li class="subnav-indent"><a href="#formula-avg">AVG</a></li>
           <li class="subnav-indent"><a href="#formula-obp">OBP</a></li>
           <li class="subnav-indent"><a href="#formula-slg">SLG</a></li>
@@ -65,7 +128,6 @@
         </ul>
         <p class="subnav-group">Pitching Formulas</p>
         <ul>
-          <li><a href="#pitching-formulas">Overview</a></li>
           <li class="subnav-indent"><a href="#formula-era">ERA</a></li>
           <li class="subnav-indent"><a href="#formula-whip">WHIP</a></li>
           <li class="subnav-indent"><a href="#formula-ip">IP</a></li>
@@ -74,17 +136,417 @@
           <li class="subnav-indent"><a href="#formula-kbb">K/BB</a></li>
           <li class="subnav-indent"><a href="#formula-fip">FIP</a></li>
         </ul>
-        <p class="subnav-group">Other</p>
-        <ul>
-          <li><a href="#notes">Notes</a></li>
-        </ul>
+        <p class="subnav-group"><a href="#data-source" style="color:inherit;text-decoration:none;">Data Source</a></p>
       </nav>
     </aside>
 
     <main class="page-content">
 
-      <!-- ── Scorecard Legend ── -->
-      <h2 class="stats-section" style="font-size:1.25em;font-weight:700;margin-bottom:16px;border-bottom:2px solid var(--grid-line);padding-bottom:6px;">Scorecard Legend</h2>
+      <!-- ══════════════════════════════════════════════════════
+           HOW TO READ THE PLAY CELL — Annotated Diagrams
+           ══════════════════════════════════════════════════════ -->
+
+      <!-- Section 1: Play Cell Anatomy (two cells + color legend) -->
+      <div class="diagram-section" id="anatomy">
+        <h2>Play Cell Anatomy</h2>
+        <div style="display:flex; gap:4px; align-items:flex-end; flex-wrap:nowrap; padding:24px 32px;">
+          <div id="anatomyCell" style="flex:1; min-width:0;"></div>
+          <div id="anatomyCellHBP" style="flex:1; min-width:0;"></div>
+          <div id="anatomyCellOut" style="flex:1; min-width:0;"></div>
+        </div>
+        <table class="anatomy-legend" style="border-collapse:collapse; font-size:0.85em; width:100%; margin-top:16px;">
+          <tr><td class="callout-num-cell"><span class="callout-num">1</span></td><td><strong>Out number</strong></td><td>Which out of the inning (1, 2, 3)</td></tr>
+          <tr><td class="callout-num-cell"><span class="callout-num">2</span></td><td><strong>Count</strong></td><td>Ball-strike count at end of AB</td></tr>
+          <tr>
+            <td class="callout-num-cell"><span class="callout-num">3</span></td>
+            <td><strong><a href="#pitch-types">Pitch log</a></strong></td>
+            <td>Type + velocity for every pitch<br><span style="color:var(--sc-pitch-ball)">Ball (BLACK)</span> / <span style="color:var(--sc-pitch-strike)">Strike/Foul (RED)</span> / <strong style="color:var(--sc-pitch-in-play)">In play (GREEN)</strong></td>
+          </tr>
+          <tr><td class="callout-num-cell"><span class="callout-num">4</span></td><td><strong><a href="#count-strike-zone">Pitch location</a></strong></td><td>Strike zone chart; dot color = pitch result</td></tr>
+          <tr><td class="callout-num-cell"><span class="callout-num">5</span></td><td><strong><a href="#diamond">Base paths</a> &amp; <a href="#diamond-states">hash marks</a></strong></td><td>Runner advancement; 1/2/3 hashes = 1B/2B/3B</td></tr>
+          <tr><td class="callout-num-cell"><span class="callout-num">6</span></td><td><strong>RBI marker</strong></td><td>Filled diamond per run batted in</td></tr>
+          <tr><td class="callout-num-cell"><span class="callout-num">7</span></td><td><strong><a href="#play-notation">Scoring notation</a></strong></td><td>Play result at bottom of cell (when diamond is present)</td></tr>
+          <tr><td class="callout-num-cell"><span class="callout-num">8</span></td><td><strong><a href="#abs-challenge">ABS challenge</a></strong></td><td>Purple [W]/[L] badge + purple dot in zone</td></tr>
+          <tr><td class="callout-num-cell"><span class="callout-num">9</span></td><td><strong><a href="#sub-diagrams">Substitution</a></strong></td><td>Left line = pinch hitter (PH); right line = pinch runner (PR)</td></tr>
+          <tr><td class="callout-num-cell"><span class="callout-num">10</span></td><td><strong><a href="#cell-indicators">Pitching change</a></strong></td><td>Square-block line between rows with S/P/K stats</td></tr>
+          <tr><td class="callout-num-cell"><span class="callout-num">11</span></td><td><strong><a href="#play-notation">Centered notation</a></strong></td><td>When no diamond is shown (outs, K, BB), the scoring shorthand is centered — e.g. G63 = groundout, shortstop (6) to first baseman (3)</td></tr>
+          <tr><td class="callout-num-cell"><span class="callout-num">12</span></td><td><strong>Active cell</strong></td><td>Highlighted background on the current batter's cell during live games</td></tr>
+        </table>
+      </div>
+
+      <script type="module">
+      import { svgEl, svgText, refreshLayout, getColors, drawAtBatCell, drawSubIndicator } from '/js/svg-renderer.js';
+      import { getConfig } from '/js/layout-config.js';
+
+      const SVG_NS = 'http://www.w3.org/2000/svg';
+
+      function mkP(c, t, px, pz, s) {
+        return { callCode:c, typeCode:t, pX:px, pZ:pz, speed:s, szTop:3.4, szBot:1.6, challenged:false, challengeLabel:null, overturned:false };
+      }
+
+      // Shared callout helper using foreignObject so the numbered circles
+      // are real HTML elements — identical to the legend table below.
+      function addCallout(svg, CLR, num, cx, cy, targets, lineColor) {
+        if (!Array.isArray(targets[0])) targets = [targets];
+        const lc = lineColor || CLR.text;
+        const R = 15; // circle visual radius in SVG units (accounts for foreignObject sizing)
+        for (const [tx, ty] of targets) {
+          // Start line at the edge of the circle, not the center
+          const dx = tx - cx, dy = ty - cy;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist > 0) {
+            const startX = cx + (dx / dist) * R;
+            const startY = cy + (dy / dist) * R;
+            svg.appendChild(svgEl('line', { x1: startX, y1: startY, x2: tx, y2: ty, stroke: lc, 'stroke-width': 1.5, 'stroke-dasharray': '4,3' }));
+          }
+        }
+        // Use foreignObject to render the exact same .callout-num HTML element
+        const fo = document.createElementNS(SVG_NS, 'foreignObject');
+        // Size the foreignObject large enough for the circle; center it on (cx, cy)
+        const foSize = 30; // enough room for the 22px circle + some breathing
+        fo.setAttribute('x', cx - foSize/2);
+        fo.setAttribute('y', cy - foSize/2);
+        fo.setAttribute('width', foSize);
+        fo.setAttribute('height', foSize);
+        fo.style.overflow = 'visible';
+        const span = document.createElement('span');
+        span.className = 'callout-num';
+        span.textContent = num;
+        if (lineColor) {
+          span.style.borderColor = lineColor;
+          span.style.color = lineColor;
+        }
+        // Center the span inside the foreignObject
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'display:flex;align-items:center;justify-content:center;width:100%;height:100%;';
+        wrapper.appendChild(span);
+        fo.appendChild(wrapper);
+        svg.appendChild(fo);
+      }
+
+      function buildAnatomyCell() {
+        refreshLayout();
+        const CLR = getColors();
+        const cfg = getConfig();
+        const W = cfg.COL_WIDTH, H = cfg.ROW_HEIGHT;
+        const M = 50; // SVG viewBox margin; overflow:visible handles any spillover
+        const PAD = 10, pcW = cfg.PITCH_COL_W;
+        const pX = W - 4 - pcW;
+        const mCx = PAD + (pX - 14 - PAD) / 2;
+        const cntX = pX - 28;
+        const pMid = pX + pcW / 2;
+        const pStep = Math.min(cfg.PITCH_STEP, (H - 20 - H * 0.28) / 5);
+        const absY = PAD + pStep + cfg.PITCH_FONT_SIZE;
+
+        // ── Cell 1: Single + runner scores, ABS, RBI, PH sub line ──
+        const svg1 = document.createElementNS(SVG_NS, 'svg');
+        svg1.setAttribute('viewBox', `${-M} ${-M} ${W + M*2} ${H + M*2}`);
+        svg1.style.width = '100%';
+        svg1.style.height = 'auto';
+        svg1.style.overflow = 'visible';
+
+        svg1.appendChild(svgEl('rect', { x:0, y:0, width:W, height:H, fill:CLR.cellBg, stroke:CLR.gridBold, 'stroke-width':2 }));
+
+        const ab1 = {
+          batterId: 1,
+          pitchSequence: [
+            mkP('B','FF',-1,3,95),
+            { callCode:'C', typeCode:'SL', pX:0.9, pZ:1.5, speed:84, szTop:3.4, szBot:1.6, challenged:true, challengeLabel:'W1', overturned:true },
+            mkP('F','FF',0.5,2.8,96),
+            mkP('B','CU',-0.8,1.2,78),
+            mkP('X','CH',-0.2,2,87),
+          ],
+          notation: '1B', result: { eventType: 'single' }, rbi: 1, outNumber: 2,
+          runners: [{ playerId:1, start:'HP', end:'1B' }, { playerId:2, start:'2B', end:'score' }],
+          cumulativeRunners: [
+            { playerId:1, segments:[{from:'HP',to:'1B'}], isOut:false, outNumber:null, outBase:null },
+            { playerId:2, segments:[{from:'2B',to:'3B'},{from:'3B',to:'HP'}], isOut:false, outNumber:null, outBase:null },
+          ],
+        };
+
+        const g1 = svgEl('g');
+        drawAtBatCell(g1, CLR, ab1, 0, 0, false);
+        svg1.appendChild(g1);
+
+        const sub1 = svgEl('g');
+        drawSubIndicator(sub1, CLR, 0, 0, 'PH', null, null);
+        svg1.appendChild(sub1);
+
+        // Callouts cell 1
+        addCallout(svg1, CLR, 1, -M+11, PAD+11,     [PAD+14, PAD+11]);              // Out number
+        addCallout(svg1, CLR, 2, cntX, -M+11,        [cntX, PAD]);                   // Count
+        addCallout(svg1, CLR, 3, pMid, -M+11,        [pMid, PAD]);                   // Pitch log
+        addCallout(svg1, CLR, 4, W+M-11, H-20,       [pX+pcW, H-20]);               // Pitch location (short line)
+        addCallout(svg1, CLR, 5, -M+11, H/2,         [PAD, H/2]);                    // Base paths + hash
+        addCallout(svg1, CLR, 6, -M+11, H-PAD-14,    [PAD+14, H-PAD-14]);            // RBI
+
+        // ABS callout #8: purple lines to [W] badge and purple dot in strike zone
+        const absColor = CLR.challenge || '#7B2D8E';
+        const badgeX = pX + pcW - 2;
+        const badgeY = absY;
+        // Map challenged pitch pX=0.9, pZ=1.5 to strike zone coordinates
+        // SZ region: bottom 28% of cell, centered in pitch column
+        const szRegionH = H * 0.28;
+        const szPadX = 6, szPadTop = 4, szPadBot = 8;
+        const szMaxH = szRegionH - szPadTop - szPadBot;
+        const szAspect = 2.0;
+        let szH = szMaxH, szW = szH / szAspect;
+        if (szW > pcW - szPadX*2) { szW = pcW - szPadX*2; szH = szW * szAspect; }
+        const szX = pX + szPadX + (pcW - szPadX*2 - szW) / 2;
+        const szY2 = H - szRegionH + szPadTop + (szMaxH - szH) / 2;
+        const PX_RANGE = 2.4, PZ_MIN = 1.0, PZ_MAX = 4.2;
+        const dotX = szX + ((0.9 + PX_RANGE/2) / PX_RANGE) * szW;
+        const dotY = szY2 + (1 - (1.5 - PZ_MIN) / (PZ_MAX - PZ_MIN)) * szH;
+        addCallout(svg1, CLR, 8, W+M-11, (badgeY + dotY)/2, [[badgeX, badgeY], [dotX, dotY]], absColor);
+
+        addCallout(svg1, CLR, 9, -M+11, H*0.65,     [-3, H*0.65]);                  // Sub line
+
+        document.getElementById('anatomyCell').innerHTML = '';
+        document.getElementById('anatomyCell').appendChild(svg1);
+
+        // ── Cell 2: HBP + pitcher change ──
+        // oY offsets cell down; align cell 2 bottom with cell 1 bottom
+        const oY = 16;
+        const svg2 = document.createElementNS(SVG_NS, 'svg');
+        // Same total height as cell 1 so bottoms align
+        svg2.setAttribute('viewBox', `${-M} ${-M + oY} ${W + M*2} ${H + M*2}`);
+        svg2.style.width = '100%';
+        svg2.style.height = 'auto';
+        svg2.style.overflow = 'visible';
+
+        svg2.appendChild(svgEl('rect', { x:0, y:oY, width:W, height:H, fill:CLR.cellBg, stroke:CLR.gridBold, 'stroke-width':2 }));
+
+        const pitcherG = svgEl('g');
+        drawSubIndicator(pitcherG, CLR, 0, oY, 'pitcher', null, { strikes: 42, pitches: 67, ks: 5 });
+        svg2.appendChild(pitcherG);
+
+        const ab2 = {
+          batterId: 1,
+          pitchSequence: [
+            mkP('B','FF',-1,3.5,93), mkP('C','SL',0.2,2.5,85),
+            mkP('F','FF',0.5,2.8,96), mkP('B','CU',-0.8,1.2,78),
+            mkP('B','CH',1.2,1,86), mkP('H','SI',0.8,1.5,92),
+          ],
+          notation: 'HBP', result: { eventType: 'hit_by_pitch' }, rbi: 0, outNumber: null,
+          runners: [{ playerId:1, start:'HP', end:'1B' }],
+          cumulativeRunners: [
+            { playerId:1, segments:[{from:'HP',to:'1B'}], isOut:false, outNumber:null, outBase:null },
+          ],
+        };
+
+        const g2 = svgEl('g');
+        drawAtBatCell(g2, CLR, ab2, 0, oY, false);
+        svg2.appendChild(g2);
+
+        addCallout(svg2, CLR, 7, mCx, oY+H+M-11,    [mCx, oY+H-PAD]);              // Scoring notation
+        addCallout(svg2, CLR, 10, W/2+pcW, oY-M+14,   [W/2+pcW, oY]);                 // Pitcher change
+
+        document.getElementById('anatomyCellHBP').innerHTML = '';
+        document.getElementById('anatomyCellHBP').appendChild(svg2);
+
+        // ── Cell 3: Groundout G63 — centered notation, no diamond ──
+        const svg3 = document.createElementNS(SVG_NS, 'svg');
+        svg3.setAttribute('viewBox', `${-M} ${-M} ${W + M*2} ${H + M*2}`);
+        svg3.style.width = '100%';
+        svg3.style.height = 'auto';
+        svg3.style.overflow = 'visible';
+
+        // Active cell background (highlighted)
+        svg3.appendChild(svgEl('rect', { x:0, y:0, width:W, height:H, fill:CLR.activeCell, stroke:CLR.gridBold, 'stroke-width':2 }));
+
+        const ab3 = {
+          batterId: 1,
+          pitchSequence: [
+            mkP('B','SI',-0.8,1.8,92),
+            mkP('C','FF',0.2,2.5,95),
+            mkP('X','SI',0,1.6,93),
+          ],
+          notation: 'G63', result: { eventType: 'field_out' }, rbi: 0, outNumber: 1,
+          runners: [], cumulativeRunners: [],
+        };
+
+        const g3 = svgEl('g');
+        drawAtBatCell(g3, CLR, ab3, 0, 0, false);
+        svg3.appendChild(g3);
+
+        // Callout #11: centered notation
+        const diamondCx = PAD + (pX - 14 - PAD) / 2;
+        const midCy = (PAD + 22 + H - PAD - 28) / 2 - 10;
+        addCallout(svg3, CLR, 11, W+M-11, midCy, [diamondCx + 30, midCy]);
+
+        // Callout #12: active cell highlight
+        addCallout(svg3, CLR, 12, -M+11, H+M-11, [0, H]);
+
+        document.getElementById('anatomyCellOut').innerHTML = '';
+        document.getElementById('anatomyCellOut').appendChild(svg3);
+      }
+
+      // ── Diamond states: 4 live cells ──
+      const DIAMOND_STATES = [
+        { label: 'Single (1B)', notation: '1B', eventType: 'single',
+          runners: [{ playerId:1, start:'HP', end:'1B' }],
+          cum: [{ playerId:1, segments:[{from:'HP',to:'1B'}], isOut:false, outNumber:null, outBase:null }] },
+        { label: 'Double (2B)', notation: '2B', eventType: 'double',
+          runners: [{ playerId:1, start:'HP', end:'2B' }],
+          cum: [{ playerId:1, segments:[{from:'HP',to:'1B'},{from:'1B',to:'2B'}], isOut:false, outNumber:null, outBase:null }] },
+        { label: 'Triple (3B)', notation: '3B', eventType: 'triple',
+          runners: [{ playerId:1, start:'HP', end:'3B' }],
+          cum: [{ playerId:1, segments:[{from:'HP',to:'1B'},{from:'1B',to:'2B'},{from:'2B',to:'3B'}], isOut:false, outNumber:null, outBase:null }] },
+        { label: 'Home Run (HR)', notation: 'HR', eventType: 'home_run',
+          runners: [{ playerId:1, start:'HP', end:'score' }],
+          cum: [{ playerId:1, segments:[{from:'HP',to:'1B'},{from:'1B',to:'2B'},{from:'2B',to:'3B'},{from:'3B',to:'HP'}], isOut:false, outNumber:null, outBase:null }] },
+      ];
+
+      function buildDiamondStates() {
+        refreshLayout();
+        const CLR = getColors();
+        const cfg = getConfig();
+        const W = cfg.COL_WIDTH, H = cfg.ROW_HEIGHT;
+        const container = document.getElementById('diamondStatesRow');
+        container.innerHTML = '';
+
+        for (const state of DIAMOND_STATES) {
+          const svg = document.createElementNS(SVG_NS, 'svg');
+          svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+          svg.setAttribute('width', String(W * 1.2));
+          svg.setAttribute('height', String(H * 1.2));
+          svg.style.maxWidth = '100%';
+          svg.style.height = 'auto';
+
+          svg.appendChild(svgEl('rect', { x:0, y:0, width:W, height:H, fill:CLR.cellBg, stroke:CLR.gridBold, 'stroke-width':2 }));
+
+          const ab = {
+            batterId: 1,
+            pitchSequence: [mkP('X','FF',0.1,2.5,94)],
+            notation: state.eventType === 'home_run' ? state.notation : '',
+            result: { eventType: state.eventType },
+            rbi: state.eventType === 'home_run' ? 1 : 0,
+            outNumber: null,
+            runners: state.runners,
+            cumulativeRunners: state.cum,
+          };
+
+          const g = svgEl('g');
+          drawAtBatCell(g, CLR, ab, 0, 0, false);
+          svg.appendChild(g);
+
+          const wrapper = document.createElement('div');
+          wrapper.className = 'diagram-figure';
+          wrapper.appendChild(svg);
+          const caption = document.createElement('div');
+          caption.className = 'diagram-caption';
+          caption.textContent = state.label;
+          wrapper.appendChild(caption);
+          container.appendChild(wrapper);
+        }
+      }
+
+      // ── Substitution diagrams ──
+      const SUB_CELLS = [
+        {
+          label: 'Pinch Hitter (PH)',
+          ab: { batterId:1, pitchSequence:[mkP('B','FF',-1,3,95), mkP('C','SL',0.3,2.2,84), mkP('X','CH',-0.2,2,87)],
+            notation:'1B', result:{eventType:'single'}, rbi:0, outNumber:null,
+            runners:[{playerId:1,start:'HP',end:'1B'}],
+            cumulativeRunners:[{playerId:1,segments:[{from:'HP',to:'1B'}],isOut:false,outNumber:null,outBase:null}] },
+          subType: 'PH',
+        },
+        {
+          label: 'Pinch Runner (PR)',
+          ab: { batterId:1, pitchSequence:[mkP('B','FF',-1,3,95), mkP('F','SL',0.3,2.2,84), mkP('X','FF',0.1,2.5,94)],
+            notation:'2B', result:{eventType:'double'}, rbi:0, outNumber:null,
+            runners:[{playerId:1,start:'HP',end:'2B'}],
+            cumulativeRunners:[{playerId:1,segments:[{from:'HP',to:'1B'},{from:'1B',to:'2B'}],isOut:false,outNumber:null,outBase:null}] },
+          subType: 'PR',
+        },
+        {
+          label: 'Pitching Change',
+          ab: { batterId:1, pitchSequence:[mkP('C','FF',0.2,2.5,95), mkP('F','SL',-0.5,1.8,84), mkP('S','CH',0.1,1.5,87)],
+            notation:'\u{A4D8}', result:{eventType:'strikeout'}, rbi:0, outNumber:3,
+            runners:[], cumulativeRunners:[] },
+          subType: 'pitcher',
+          pitcherBelow: true,
+          pStats: { strikes:42, pitches:67, ks:5 },
+        },
+      ];
+
+      function buildSubDiagrams() {
+        refreshLayout();
+        const CLR = getColors();
+        const cfg = getConfig();
+        const W = cfg.COL_WIDTH, H = cfg.ROW_HEIGHT;
+        const container = document.getElementById('subDiagramsRow');
+        container.innerHTML = '';
+
+        for (const cell of SUB_CELLS) {
+          const isPitcher = cell.subType === 'pitcher';
+          const topPad = isPitcher ? 30 : 0; // space above for pitcher change line + stats
+          const svgH = H + topPad;
+
+          const svg = document.createElementNS(SVG_NS, 'svg');
+          svg.setAttribute('viewBox', `${-10} ${-topPad} ${W + 20} ${svgH}`);
+          svg.setAttribute('width', String((W + 20) * 1.2));
+          svg.setAttribute('height', String(svgH * 1.2));
+          svg.style.maxWidth = '100%';
+          svg.style.height = 'auto';
+
+          svg.appendChild(svgEl('rect', { x:0, y:0, width:W, height:H, fill:CLR.cellBg, stroke:CLR.gridBold, 'stroke-width':2 }));
+
+          const g = svgEl('g');
+          drawAtBatCell(g, CLR, cell.ab, 0, 0, !!cell.pitcherBelow);
+          svg.appendChild(g);
+
+          if (cell.subType) {
+            const subG = svgEl('g');
+            drawSubIndicator(subG, CLR, 0, 0, cell.subType, null, cell.pStats || null);
+            svg.appendChild(subG);
+          }
+
+          const wrapper = document.createElement('div');
+          wrapper.className = 'diagram-figure';
+
+          wrapper.appendChild(svg);
+
+          const caption = document.createElement('div');
+          caption.className = 'diagram-caption';
+          caption.textContent = cell.label;
+          wrapper.appendChild(caption);
+          container.appendChild(wrapper);
+        }
+      }
+
+      buildAnatomyCell();
+      buildDiamondStates();
+      buildSubDiagrams();
+
+
+
+      // Rebuild on theme change
+      const obs = new MutationObserver(() => {
+        document.getElementById('anatomyCell').innerHTML = '';
+        document.getElementById('anatomyCellOut').innerHTML = '';
+        buildAnatomyCell();
+        buildDiamondStates();
+        buildSubDiagrams();
+      });
+      obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+      </script>
+
+      <!-- Section 2: Diamond States (live-rendered) -->
+      <div class="diagram-section" id="diamond-states">
+        <h2>Base Hits &amp; the Diamond</h2>
+        <p style="font-size:0.85em;color:var(--text-secondary);margin-bottom:16px;">The diamond represents the base paths. Thick lines trace runner advancement. Perpendicular <strong>hash marks</strong> on the home-to-first segment indicate the hit type. A <strong>filled diamond</strong> with white text means a home run.</p>
+        <div class="diagram-row" id="diamondStatesRow"></div>
+      </div>
+
+      <!-- Section: Substitutions -->
+      <div class="diagram-section" id="sub-diagrams">
+        <h2>Substitutions</h2>
+        <p style="font-size:0.85em;color:var(--text-secondary);margin-bottom:16px;">Substitution lines mark when a new player enters the game. A <strong>left vertical line</strong> means pinch hitter, a <strong>right vertical line</strong> means pinch runner or defensive sub. A <strong>square-block horizontal line</strong> between rows marks a pitching change, with the outgoing pitcher's strike/pitch/K totals.</p>
+        <div class="diagram-row" id="subDiagramsRow"></div>
+      </div>
+
+      <hr style="border:none;border-top:1px solid var(--grid-line);margin:32px 0;">
 
       <div class="legend-grid">
 
@@ -122,21 +584,21 @@
         <div class="legend-section" id="play-notation">
           <h3>Play Notation</h3>
           <table class="legend-table">
-            <tr><td>K</td><td>Strikeout (swinging)</td></tr>
-            <tr><td>ꓘ</td><td>Strikeout (looking)</td></tr>
-            <tr><td>BB</td><td>Walk (base on balls)</td></tr>
-            <tr><td>IBB</td><td>Intentional walk</td></tr>
-            <tr><td>HBP</td><td>Hit by pitch</td></tr>
-            <tr><td>HR</td><td>Home run (filled diamond, white text)</td></tr>
-            <tr><td>G63</td><td>Groundout, SS to 1B</td></tr>
-            <tr><td>F8</td><td>Flyout to center field</td></tr>
-            <tr><td>L7</td><td>Lineout to left field</td></tr>
-            <tr><td>P4</td><td>Pop out to 2B</td></tr>
-            <tr><td>FC46</td><td>Fielder's choice</td></tr>
-            <tr><td>DP<br>643</td><td>Double play (split: prefix + positions)</td></tr>
-            <tr><td>E6</td><td>Error by shortstop</td></tr>
-            <tr><td>SF9</td><td>Sacrifice fly to RF</td></tr>
-            <tr><td>SH13</td><td>Sac bunt, P to 1B</td></tr>
+            <tr id="play-K"><td>K</td><td>Strikeout (swinging)</td></tr>
+            <tr id="play-Kl"><td>ꓘ</td><td>Strikeout (looking)</td></tr>
+            <tr id="play-BB"><td>BB</td><td>Walk (base on balls)</td></tr>
+            <tr id="play-IBB"><td>IBB</td><td>Intentional walk</td></tr>
+            <tr id="play-HBP"><td>HBP</td><td>Hit by pitch</td></tr>
+            <tr id="play-HR"><td>HR</td><td>Home run (<a href="#diamond">filled diamond</a>, white text)</td></tr>
+            <tr><td>G63</td><td>Groundout, <a href="#pos-6">SS (6)</a> to <a href="#pos-3">1B (3)</a></td></tr>
+            <tr><td>F8</td><td>Flyout to <a href="#pos-8">center field (8)</a></td></tr>
+            <tr><td>L7</td><td>Lineout to <a href="#pos-7">left field (7)</a></td></tr>
+            <tr><td>P4</td><td>Pop out to <a href="#pos-4">2B (4)</a></td></tr>
+            <tr><td>FC46</td><td>Fielder's choice, <a href="#pos-4">2B (4)</a> to <a href="#pos-6">SS (6)</a></td></tr>
+            <tr><td>DP<br>643</td><td>Double play (split: prefix + <a href="#fielding-positions">positions</a>)</td></tr>
+            <tr><td>E6</td><td>Error by <a href="#pos-6">shortstop (6)</a></td></tr>
+            <tr><td>SF9</td><td>Sacrifice fly to <a href="#pos-9">RF (9)</a></td></tr>
+            <tr><td>SH13</td><td>Sac bunt, <a href="#pos-1">P (1)</a> to <a href="#pos-3">1B (3)</a></td></tr>
             <tr><td>CI</td><td>Catcher interference</td></tr>
             <tr><td>BI</td><td>Batter interference</td></tr>
             <tr><td>SFDP</td><td>Sac fly double play</td></tr>
@@ -163,26 +625,26 @@
         <div class="legend-section" id="fielding-positions">
           <h3>Fielding Positions</h3>
           <table class="legend-table">
-            <tr><td>1</td><td>Pitcher (P)</td></tr>
-            <tr><td>2</td><td>Catcher (C)</td></tr>
-            <tr><td>3</td><td>First base (1B)</td></tr>
-            <tr><td>4</td><td>Second base (2B)</td></tr>
-            <tr><td>5</td><td>Third base (3B)</td></tr>
-            <tr><td>6</td><td>Shortstop (SS)</td></tr>
-            <tr><td>7</td><td>Left field (LF)</td></tr>
-            <tr><td>8</td><td>Center field (CF)</td></tr>
-            <tr><td>9</td><td>Right field (RF)</td></tr>
-            <tr><td>10</td><td>Designated hitter (DH)</td></tr>
+            <tr id="pos-1"><td>1</td><td>Pitcher (P)</td></tr>
+            <tr id="pos-2"><td>2</td><td>Catcher (C)</td></tr>
+            <tr id="pos-3"><td>3</td><td>First base (1B)</td></tr>
+            <tr id="pos-4"><td>4</td><td>Second base (2B)</td></tr>
+            <tr id="pos-5"><td>5</td><td>Third base (3B)</td></tr>
+            <tr id="pos-6"><td>6</td><td>Shortstop (SS)</td></tr>
+            <tr id="pos-7"><td>7</td><td>Left field (LF)</td></tr>
+            <tr id="pos-8"><td>8</td><td>Center field (CF)</td></tr>
+            <tr id="pos-9"><td>9</td><td>Right field (RF)</td></tr>
+            <tr id="pos-10"><td>10</td><td>Designated hitter (DH)</td></tr>
           </table>
         </div>
 
         <div class="legend-section" id="batter-stats">
-          <h3>Batter Stats Columns</h3>
+          <h3>Batter Stats</h3>
           <table class="legend-table">
-            <tr><td>AB</td><td>At bats</td></tr>
-            <tr><td>R</td><td>Runs scored</td></tr>
-            <tr><td>H</td><td>Hits</td></tr>
-            <tr><td>BI</td><td>Batted in (RBI)</td></tr>
+            <tr id="stat-AB"><td>AB</td><td>At bats — used in <a href="#formula-avg">AVG</a>, <a href="#formula-slg">SLG</a>, <a href="#formula-babip">BABIP</a></td></tr>
+            <tr id="stat-R"><td>R</td><td>Runs scored</td></tr>
+            <tr id="stat-H"><td>H</td><td>Hits — used in <a href="#formula-avg">AVG</a>, <a href="#formula-obp">OBP</a>, <a href="#formula-babip">BABIP</a></td></tr>
+            <tr id="stat-BI"><td>BI</td><td>Batted in (RBI)</td></tr>
           </table>
         </div>
 
@@ -200,32 +662,32 @@
         <div class="legend-section" id="pitch-colors">
           <h3>Pitch Colors</h3>
           <table class="legend-table">
-            <tr><td><span class="legend-color" style="background:var(--sc-pitch-ball)"></span></td><td>Ball</td></tr>
-            <tr><td><span class="legend-color" style="background:var(--sc-pitch-strike)"></span></td><td>Strike / Foul</td></tr>
-            <tr><td><span class="legend-color" style="background:var(--sc-pitch-in-play)"></span></td><td>In play</td></tr>
-            <tr><td><span class="legend-color" style="background:var(--sc-pitch-hbp)"></span></td><td>Hit by pitch</td></tr>
-            <tr><td><span class="legend-color" style="background:#7B2D8E"></span></td><td>ABS challenge</td></tr>
+            <tr><td><span class="legend-color" style="background:var(--sc-pitch-ball)"></span></td><td>Ball (<a href="#pitch-call-codes">B</a>)</td></tr>
+            <tr><td><span class="legend-color" style="background:var(--sc-pitch-strike)"></span></td><td>Strike / Foul (<a href="#pitch-call-codes">C, S, F, T, W</a>)</td></tr>
+            <tr><td><span class="legend-color" style="background:var(--sc-pitch-in-play)"></span></td><td>In play (<a href="#pitch-call-codes">X</a>) — bold</td></tr>
+            <tr><td><span class="legend-color" style="background:var(--sc-pitch-hbp)"></span></td><td>Hit by pitch (<a href="#pitch-call-codes">H</a>)</td></tr>
+            <tr><td><span class="legend-color" style="background:#7B2D8E"></span></td><td><a href="#abs-challenge">ABS challenge</a></td></tr>
           </table>
         </div>
 
         <div class="legend-section" id="abs-challenge">
           <h3>ABS Challenge</h3>
           <table class="legend-table">
-            <tr><td style="color:#7B2D8E;font-weight:700">W</td><td>Challenge won (call overturned)</td></tr>
-            <tr><td style="color:#7B2D8E;font-weight:700">L</td><td>Challenge lost (call upheld)</td></tr>
+            <tr><td><span style="display:inline-block;background:#7B2D8E;color:#fff;font-weight:700;width:1.4em;height:1.4em;line-height:1.4em;text-align:center;font-size:0.85em;">W</span></td><td>Challenge won (call overturned)</td></tr>
+            <tr><td><span style="display:inline-block;background:#7B2D8E;color:#fff;font-weight:700;width:1.4em;height:1.4em;line-height:1.4em;text-align:center;font-size:0.85em;">L</span></td><td>Challenge lost (call upheld)</td></tr>
           </table>
         </div>
 
         <div class="legend-section" id="diamond">
           <h3>Diamond &amp; Base Paths</h3>
           <table class="legend-table">
-            <tr><td>|</td><td>Single (1 hash mark on HP&rarr;1B)</td></tr>
-            <tr><td>| |</td><td>Double (2 hash marks on HP&rarr;1B)</td></tr>
-            <tr><td>| | |</td><td>Triple (3 hash marks on HP&rarr;1B)</td></tr>
-            <tr><td style="font-weight:900">&#9670;</td><td>Home run (filled diamond with white HR text)</td></tr>
+            <tr><td>|</td><td><a href="#diamond-states">Single</a> (1 hash mark on HP&rarr;1B)</td></tr>
+            <tr><td>| |</td><td><a href="#diamond-states">Double</a> (2 hash marks on HP&rarr;1B)</td></tr>
+            <tr><td>| | |</td><td><a href="#diamond-states">Triple</a> (3 hash marks on HP&rarr;1B)</td></tr>
+            <tr><td style="font-weight:900">&#9670;</td><td><a href="#diamond-states">Home run</a> (filled diamond with white HR text)</td></tr>
             <tr><td style="color:var(--sc-text)">&mdash;</td><td>Thick line = runner advanced along base path</td></tr>
             <tr><td style="font-weight:900">&#9670;</td><td>RBI diamond (one per run batted in)</td></tr>
-            <tr><td>&#9312;</td><td>Numbered out marker (1st, 2nd, 3rd out of inning)</td></tr>
+            <tr><td><svg width="20" height="20" viewBox="0 0 20 20" style="vertical-align:middle;"><circle cx="10" cy="10" r="9" fill="var(--sc-out-badge)"/><text x="10" y="10" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="700" font-family="Arial" fill="var(--sc-cell-bg)">2</text></svg></td><td>Numbered out marker (1st, 2nd, 3rd out of inning)</td></tr>
           </table>
         </div>
 
@@ -235,7 +697,7 @@
             <tr><td style="color:var(--sc-sub)">&#9632; &#9632;</td><td>Pitching change (square blocks on cell boundary)</td></tr>
             <tr><td style="color:var(--sc-sub)">&#9474;</td><td>Pinch hitter (solid left line)</td></tr>
             <tr><td style="color:var(--sc-sub)">&#9474;</td><td>Pinch runner (solid right line)</td></tr>
-            <tr><td style="background:var(--sc-active-cell);padding:2px 6px;">&#9632;</td><td>Active batter cell (live games)</td></tr>
+            <tr><td style="padding:2px 6px;"><svg width="24" height="24" viewBox="0 0 24 24"><rect x="1" y="1" width="22" height="22" fill="var(--sc-active-cell)" stroke="var(--sc-active-border, #b8960c)" stroke-width="2.5"/></svg></td><td>Active batter cell (live games)</td></tr>
           </table>
         </div>
 
@@ -243,7 +705,6 @@
           <h3>Count &amp; Strike Zone</h3>
           <table class="legend-table">
             <tr><td>1-2</td><td>Count: 1 ball, 2 strikes</td></tr>
-            <tr><td>SZ</td><td>Mini strike zone plot showing pitch locations</td></tr>
           </table>
         </div>
 
@@ -271,17 +732,17 @@
           <div class="formula-entry" id="formula-ops">
             <dt>OPS</dt>
             <dd class="formula-cell">\(OBP + SLG\)</dd>
-            <dd>Quick combined measure of getting on base and hitting for power. Simple and widely used.</dd>
+            <dd>Quick combined measure of <a href="#formula-obp">OBP</a> and <a href="#formula-slg">SLG</a>. Simple and widely used.</dd>
           </div>
           <div class="formula-entry" id="formula-woba">
             <dt>wOBA</dt>
             <dd class="formula-cell">\(\displaystyle \frac{0.696 \cdot uBB + 0.726 \cdot HBP + 0.883 \cdot 1B + 1.244 \cdot 2B + 1.569 \cdot 3B + 2.004 \cdot HR}{AB + BB - IBB + SF + HBP}\)</dd>
-            <dd>Weights each offensive event by its actual run value using linear weights. More accurate than OPS because it properly values walks vs. doubles vs. home runs.</dd>
+            <dd>Weights each offensive event by its actual run value using linear weights. More accurate than OPS because it properly values walks vs. doubles vs. home runs. Linear weights are updated annually by FanGraphs based on the run environment; the values shown here are from the 2024 season.</dd>
           </div>
           <div class="formula-entry" id="formula-wrc">
             <dt>wRC+</dt>
             <dd class="formula-cell">\(\displaystyle \frac{\frac{wRAA}{PA} + \frac{R_{lg}}{PA_{lg}}}{\frac{wRC_{lg}}{PA_{lg}}} \times 100\)</dd>
-            <dd>Park- and league-adjusted version of wOBA scaled to 100. A wRC+ of 120 means 20% better than league average. The gold standard for comparing hitters across eras and ballparks.</dd>
+            <dd>Park- and league-adjusted version of <a href="#formula-woba">wOBA</a> scaled to 100. A wRC+ of 120 means 20% better than league average. The gold standard for comparing hitters across eras and ballparks. Requires league-average data not available from the MLB Stats API; when FanGraphs data is integrated, wRC+ will be displayed alongside wOBA.</dd>
           </div>
           <div class="formula-entry" id="formula-babip">
             <dt>BABIP</dt>
@@ -337,28 +798,9 @@
         </dl>
       </div>
 
-      <div class="stats-section" id="notes">
-        <h2>Notes</h2>
-        <table class="pitcher-stats-table">
-          <tbody>
-            <tr>
-              <td class="pitcher-name">wOBA Weights</td>
-              <td>Linear weights are updated annually by FanGraphs based on the run environment. The values shown here are from the 2024 season. Small year-to-year differences have minimal impact.</td>
-            </tr>
-            <tr>
-              <td class="pitcher-name">wRC+</td>
-              <td>Requires league-average data that is not available from the MLB Stats API. When FanGraphs data is integrated, wRC+ will be displayed alongside wOBA.</td>
-            </tr>
-            <tr>
-              <td class="pitcher-name">\(C_{FIP}\)</td>
-              <td>The FIP constant is typically around 3.10 and is recalculated each season to align FIP with league-average ERA.</td>
-            </tr>
-            <tr>
-              <td class="pitcher-name">Data Source</td>
-              <td>All stats are sourced from the MLB Stats API (statsapi.mlb.com). Advanced stats like wOBA are calculated client-side from the raw components provided by the API.</td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="stats-section" id="data-source" style="margin-top:48px;">
+        <h2>Data Source</h2>
+        <p style="line-height:1.7; max-width:65ch;">All stats are sourced from the MLB Stats API (statsapi.mlb.com). Advanced metrics like wOBA are calculated client-side from the raw components provided by the API. Season-level stats (AVG, OPS, ERA, WHIP, etc.) come directly from the API's boxscore and player endpoints.</p>
       </div>
 
     </main>

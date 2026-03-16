@@ -1,12 +1,15 @@
 // Global navigation + footer - injected dynamically on every page
 // Same header on every page: site title + nav links, classic HTML link style
 
-const VERSION = '0.3.4';
+const VERSION = '0.4.0';
+
+const IS_LOCAL = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
 const NAV_ITEMS = [
-  { href: '/', label: 'Scorecards' },
-  { href: '/reference.html', label: 'Reference' },
+  { href: '/', label: 'Today\'s Games' },
   { href: '/standings.html', label: 'Standings' },
+  { href: '/reference.html', label: 'Guide' },
+  ...(IS_LOCAL ? [{ href: '/design-system.html', label: 'Design System', dev: true }] : []),
 ];
 
 const FOOTER_LINKS = [
@@ -47,16 +50,26 @@ function initNav() {
   const top = document.createElement('div');
   top.className = 'header-top';
 
+  const brand = document.createElement('div');
+  brand.className = 'header-brand';
+
+  const logo = document.createElement('img');
+  logo.src = '/img/bs-logo.svg';
+  logo.alt = 'BaseballScorecard.org logo';
+  logo.className = 'header-logo';
+  brand.appendChild(logo);
+
   const h1 = document.createElement('h1');
   h1.textContent = 'BaseballScorecard.org';
-  top.appendChild(h1);
+  brand.appendChild(h1);
 
-  // Version badge (top right, links to releases)
-  const versionBadge = document.createElement('a');
-  versionBadge.className = 'header-version';
-  versionBadge.href = '/releases.html';
-  versionBadge.textContent = `v${VERSION}`;
-  top.appendChild(versionBadge);
+  const tagline = document.createElement('span');
+  tagline.className = 'header-tagline';
+  tagline.textContent = 'Every game tells a story.';
+  brand.appendChild(tagline);
+
+  top.appendChild(brand);
+
 
   // Hamburger button (mobile only)
   const hamburger = document.createElement('button');
@@ -78,6 +91,10 @@ function initNav() {
     const a = document.createElement('a');
     a.href = item.href;
     a.textContent = item.label;
+    if (item.dev) {
+      a.style.opacity = '0.5';
+      a.style.fontSize = '0.85em';
+    }
     if (item.external) {
       a.target = '_blank';
       a.rel = 'noopener';
@@ -133,7 +150,7 @@ function initFooter() {
 
   footer.innerHTML = `
     <div class="footer-content">
-      <span class="footer-brand">BaseballScorecard.org <a href="/releases.html" class="footer-version">v${VERSION}</a></span>
+      <span class="footer-brand"><img src="/img/bs-logo.svg" alt="" class="footer-logo">BaseballScorecard.org <span class="footer-tagline">Every game tells a story.</span></span>
       <nav class="footer-links">${links}</nav>
     </div>`;
 
@@ -170,6 +187,46 @@ function initScrollSpy() {
   }
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
+
+  // Click highlight: highlight both nav link + target heading until next click
+  function clearHighlights() {
+    document.querySelectorAll('.target-highlight').forEach(el => el.classList.remove('target-highlight'));
+  }
+
+  function highlightTarget(href) {
+    clearHighlights();
+    const target = document.querySelector(href);
+    if (!target) return;
+
+    // Highlight the most specific element possible:
+    // - If the target IS a heading, highlight it
+    // - If the target is a tr/td/dt/dd/strong/span/li, highlight it directly (specific term)
+    // - If the target is a section/div wrapper, find its heading child
+    const tag = target.tagName;
+    if (tag.match(/^H[2-6]$/i) || tag.match(/^(TR|TD|TH|DT|DD|STRONG|SPAN|LI|P)$/i)) {
+      target.classList.add('target-highlight');
+    } else {
+      const heading = target.querySelector('h2, h3, h4, h5, h6');
+      if (heading) heading.classList.add('target-highlight');
+      else target.classList.add('target-highlight');
+    }
+
+    // Also highlight the matching subnav link if one exists
+    links.forEach(navLink => {
+      if (navLink.getAttribute('href') === href) navLink.classList.add('target-highlight');
+    });
+  }
+
+  // Subnav links
+  links.forEach(a => {
+    a.addEventListener('click', () => highlightTarget(a.getAttribute('href')));
+  });
+
+  // Any in-page anchor link in the content area
+  document.querySelector('.page-content')?.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href^="#"]');
+    if (a) highlightTarget(a.getAttribute('href'));
+  });
 }
 
 // Global progress bar API — only shows after 1s delay

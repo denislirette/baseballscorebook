@@ -30,6 +30,14 @@
   <div class="page-with-subnav">
     <aside class="subnav">
       <nav aria-label="Page sections">
+        <p class="subnav-group">v0.4.0</p>
+        <ul>
+          <li class="subnav-indent"><a href="#v040-design-system">Design System</a></li>
+          <li class="subnav-indent"><a href="#v040-thumbnails">Thumbnails</a></li>
+          <li class="subnav-indent"><a href="#v040-guide">Guide</a></li>
+          <li class="subnav-indent"><a href="#v040-play-cell">Play Cell</a></li>
+          <li class="subnav-indent"><a href="#v040-site">Site</a></li>
+        </ul>
         <p class="subnav-group">v0.3.4</p>
         <ul>
           <li class="subnav-indent"><a href="#v034-scorecard">Scorecard</a></li>
@@ -68,8 +76,64 @@
     <main class="page-content">
       <h1>Release History</h1>
 
+      <div class="release" id="v0.4.0">
+        <h2>v0.4.0 <span class="release-date">16-03-2026</span></h2>
+
+        <h3 id="v040-design-system">Design System</h3>
+        <ul>
+          <li>New design system page with live color editing, preview grid, and full palette audit</li>
+          <li>Consolidated near-duplicate colors across light and dark themes</li>
+          <li>Swapped pitch colors: green for in-play (success), blue for substitutions</li>
+        </ul>
+
+        <h3 id="v040-thumbnails">Thumbnails</h3>
+        <ul>
+          <li>Cells are 27% larger for better legibility</li>
+          <li>Hash marks now render on the HP-to-1B segment (1/2/3 for single/double/triple)</li>
+          <li>Hash marks only appear for base hits — not HBP, BB, FC, or errors</li>
+          <li>HR diamond is larger and vertically centered</li>
+          <li>Scored runners show full base path outlines instead of a solid filled diamond</li>
+          <li>Active cell now has a gold border matching the full scorecard</li>
+          <li>Games grid uses full browser width with auto-fill layout</li>
+        </ul>
+
+        <h3 id="v040-guide">Guide</h3>
+        <ul>
+          <li>Renamed from "References" to "Guide"</li>
+          <li>Annotated play cell anatomy diagram with numbered callouts and legend table</li>
+          <li>Diamond states section showing single, double, triple, and home run</li>
+          <li>Substitution diagrams for pinch hitter, pinch runner, and pitching change</li>
+          <li>Cross-linked glossary: clicking a term (e.g., "SS (6)") highlights the specific row</li>
+          <li>Click-to-highlight on sidebar navigation and in-page links</li>
+          <li>Single-column layout for all reference tables</li>
+        </ul>
+
+        <h3 id="v040-play-cell">Play Cell</h3>
+        <ul>
+          <li>Thicker base paths and hash marks to match notation stroke weight</li>
+          <li>Out badges 45% larger with coal (#292524) fill instead of pure black</li>
+          <li>In-play pitch rendered bold and green</li>
+          <li>ABS challenge [W]/[L] badge always renders on top of substitution lines</li>
+          <li>Active cell gets a 3px dark gold border</li>
+          <li>Removed dashes from scoring notation (G43 instead of G4-3)</li>
+          <li>Scrollable pitch list for at-bats with 10+ pitches</li>
+          <li>Cancelled games styled with red text and light red background</li>
+        </ul>
+
+        <h3 id="v040-site">Site</h3>
+        <ul>
+          <li>Nav order: Today's Games, Standings, Guide</li>
+          <li>Mobile header simplified to logo + hamburger menu</li>
+          <li>Version removed from header; tagline moved to footer</li>
+          <li>Accessibility page rewritten with honest, human tone</li>
+          <li>Contact form accepts URL params to pre-select subject</li>
+          <li>Mobile footer flush-left aligned</li>
+          <li>Updated favicon</li>
+        </ul>
+      </div>
+
       <div class="release" id="v0.3.4">
-        <h2>v0.3.4 <span class="release-date">16 March 2026</span></h2>
+        <h2>v0.3.4 <span class="release-date">16-03-2026</span></h2>
 
         <h3 id="v034-scorecard">Scorecard</h3>
         <ul>
@@ -86,7 +150,7 @@
       </div>
 
       <div class="release" id="v0.3.3">
-        <h2>v0.3.3 <span class="release-date">15 March 2026</span></h2>
+        <h2>v0.3.3 <span class="release-date">15-03-2026</span></h2>
 
         <h3 id="v033-contact">Contact</h3>
         <ul>
@@ -97,7 +161,7 @@
       </div>
 
       <div class="release" id="v0.3.2">
-        <h2>v0.3.2 <span class="release-date">15 March 2026</span></h2>
+        <h2>v0.3.2 <span class="release-date">15-03-2026</span></h2>
 
         <h3 id="v032-ux">User Experience</h3>
         <ul>
@@ -119,7 +183,7 @@
       </div>
 
       <div class="release" id="v0.3.0">
-        <h2>v0.3.0 <span class="release-date">15 March 2026</span></h2>
+        <h2>v0.3.0 <span class="release-date">15-03-2026</span></h2>
 
         <h3 id="v030-design">Design</h3>
         <ul>
@@ -155,7 +219,7 @@
       </div>
 
       <div class="release" id="v0.2.0">
-        <h2>v0.2.0 <span class="release-date">14 March 2026</span></h2>
+        <h2>v0.2.0 <span class="release-date">14-03-2026</span></h2>
 
         <h3 id="v020-scorecard">Scorecard</h3>
         <ul>
@@ -198,7 +262,7 @@
       </div>
 
       <div class="release" id="v0.1.0">
-        <h2>v0.1.0 <span class="release-date">7 March 2026</span></h2>
+        <h2>v0.1.0 <span class="release-date">07-03-2026</span></h2>
 
         <h3 id="v010-initial">Initial Release</h3>
         <ul>
