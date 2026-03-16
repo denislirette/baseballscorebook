@@ -221,7 +221,7 @@ strong, b { font-weight: 600; }
 .header-top {
   display: flex;
   align-items: center;
-  padding: 7px var(--container-pad);
+  padding: 7px var(--container-pad) 7px calc(var(--container-pad) + 14px);
   gap: 12px;
 }
 
@@ -258,22 +258,25 @@ strong, b { font-weight: 600; }
 }
 
 
-.header-theme-toggle {
-  background: none;
-  border: 1px solid var(--grid-line);
-  cursor: pointer;
-  color: var(--bg);
-  padding: 8px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 44px;
-  min-height: 44px;
-  margin-bottom: -1px;
-  align-self: stretch;
+.header-version {
+  color: color-mix(in srgb, var(--bg) 60%, transparent);
+  font-size: 0.75em;
+  font-weight: 400;
+  align-self: center;
 }
 
-.header-theme-toggle:hover { background: color-mix(in srgb, var(--bg) 15%, transparent); }
+.nav-theme-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text);
+  padding: 8px 14px;
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.nav-theme-btn:hover { background: var(--surface); }
 
 /* Hamburger hidden on desktop, shown on mobile */
 .nav-hamburger {

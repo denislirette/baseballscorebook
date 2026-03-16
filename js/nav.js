@@ -1,7 +1,7 @@
 // Global navigation + footer - injected dynamically on every page
 // Same header on every page: site title + nav links, classic HTML link style
 
-const VERSION = '0.3.0';
+const VERSION = '0.3.1';
 
 const NAV_ITEMS = [
   { href: '/', label: 'Scorecards' },
@@ -38,15 +38,14 @@ function initNav() {
   top.className = 'header-top';
 
   const h1 = document.createElement('h1');
-  h1.textContent = '◆ BaseballScorecard.org';
+  h1.textContent = 'BaseballScorecard.org';
   top.appendChild(h1);
 
-  // Theme toggle (top right)
-  const themeBtn = document.createElement('button');
-  themeBtn.id = 'theme-toggle';
-  themeBtn.className = 'header-theme-toggle';
-  themeBtn.setAttribute('aria-label', 'Toggle dark mode');
-  top.appendChild(themeBtn);
+  // Version badge (top right)
+  const versionBadge = document.createElement('span');
+  versionBadge.className = 'header-version';
+  versionBadge.textContent = `v${VERSION}`;
+  top.appendChild(versionBadge);
 
   // Hamburger button (mobile only)
   const hamburger = document.createElement('button');
@@ -78,6 +77,13 @@ function initNav() {
     }
     nav.appendChild(a);
   }
+
+  // Theme toggle (in nav bar)
+  const themeBtn = document.createElement('button');
+  themeBtn.id = 'theme-toggle';
+  themeBtn.className = 'nav-theme-btn';
+  themeBtn.setAttribute('aria-label', 'Toggle dark mode');
+  nav.appendChild(themeBtn);
 
   header.appendChild(nav);
 
@@ -116,7 +122,7 @@ function initFooter() {
 
   footer.innerHTML = `
     <div class="footer-content">
-      <span class="footer-brand">◆ BaseballScorecard.org <span class="footer-version">v${VERSION}</span></span>
+      <span class="footer-brand">BaseballScorecard.org <span class="footer-version">v${VERSION}</span></span>
       <nav class="footer-links">${links}</nav>
     </div>`;
 
