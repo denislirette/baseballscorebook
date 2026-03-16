@@ -1,6 +1,6 @@
 // Shared mutable configuration for layout constants.
-// Used by svg-renderer.js at render time.
-// The styles editor updates these via postMessage.
+// Used by svg-renderer.js and svg-thumbnail.js at render time.
+// The cell editor updates these via /api/save-layout.
 
 export const DEFAULTS = Object.freeze({
   MARGIN_LEFT: 380,
@@ -23,7 +23,20 @@ export const DEFAULTS = Object.freeze({
   SUB_CIRCLE_VPOS: 0.75,    // Sub circle vertical position on play cell bar (fraction of ROW_HEIGHT)
 });
 
+export const THUMBNAIL_DEFAULTS = Object.freeze({
+  TH_CELL_SIZE: 41,         // cell size (viewBox units)
+  TH_DIAMOND_R: 11,         // diamond radius
+  TH_PATH_STROKE_W: 2,      // base path stroke width
+  TH_GRID_STROKE_W: 0.5,    // grid line stroke width
+  TH_FONT_SIZE: 16,         // notation font size (no diamond)
+  TH_FONT_SIZE_SM: 11,      // smaller font when diamond shown
+  TH_DOT_R: 2.5,            // out dot radius
+  TH_GAP: 12,               // gap between away/home grids
+  TH_PAD: 3,                // inner cell padding
+});
+
 const config = { ...DEFAULTS };
+const thumbnailConfig = { ...THUMBNAIL_DEFAULTS };
 
 export function getConfig() {
   return config;
@@ -35,4 +48,16 @@ export function updateConfig(overrides) {
 
 export function resetConfig() {
   Object.assign(config, DEFAULTS);
+}
+
+export function getThumbnailConfig() {
+  return thumbnailConfig;
+}
+
+export function updateThumbnailConfig(overrides) {
+  Object.assign(thumbnailConfig, overrides);
+}
+
+export function resetThumbnailConfig() {
+  Object.assign(thumbnailConfig, THUMBNAIL_DEFAULTS);
 }

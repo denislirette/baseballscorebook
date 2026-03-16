@@ -3,19 +3,9 @@
 // Uses CSS classes (th-*) for colors so dark/light theme changes apply instantly.
 
 import { buildTeamLineup, buildScorecardGrid, getInningCount, buildSubstitutionMap } from './game-data.js';
+import { getThumbnailConfig } from './layout-config.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
-
-// Thumbnail cell dimensions (viewBox units)
-const CS = 41;     // cell size (20% larger for readability)
-const DR = 11;     // diamond radius
-const PSW = 2;     // base path stroke width
-const GSW = 0.5;   // grid line stroke width
-const FS = 16;     // notation font size (no diamond)
-const FS_SM = 11;  // smaller font when diamond is also shown
-const DOTR = 2.5;  // out dot radius
-const GAP = 12;    // gap between away/home grids
-const PAD = 3;     // inner cell padding
 
 // Notations that split across two lines: prefix on top, positions below
 // Only split DP and TP across two lines; everything else stays on one line
@@ -49,6 +39,7 @@ function dPts(cx, cy, R) {
 // ─── Public API ──────────────────────────────────────────────────
 
 export function renderThumbnail(data) {
+  const { TH_CELL_SIZE: CS, TH_GAP: GAP } = getThumbnailConfig();
   const innings = getInningCount(data.liveData.linescore);
   const w = innings * CS;
   const h = 9 * CS * 2 + GAP;
@@ -69,6 +60,7 @@ export function renderThumbnail(data) {
 }
 
 export function renderEmptyGrid(innings = 9) {
+  const { TH_CELL_SIZE: CS, TH_GAP: GAP } = getThumbnailConfig();
   const w = innings * CS;
   const h = 9 * CS * 2 + GAP;
 
@@ -90,6 +82,8 @@ export function renderEmptyGrid(innings = 9) {
 // ─── Grid lines ─────────────────────────────────────────────────
 
 function drawGrid(svg, ox, oy, cols, grid) {
+  const { TH_CELL_SIZE: CS, TH_GRID_STROKE_W: GSW } = getThumbnailConfig();
+
   // Cell backgrounds: gray for cells without at-bats
   if (grid) {
     for (let slot = 1; slot <= 9; slot++) {
@@ -129,6 +123,7 @@ function drawGrid(svg, ox, oy, cols, grid) {
 // ─── Team rendering ─────────────────────────────────────────────
 
 function renderTeam(svg, data, side, ox, oy, cols) {
+  const { TH_CELL_SIZE: CS, TH_GAP: GAP } = getThumbnailConfig();
   const boxscore = data.liveData.boxscore;
   const allPlays = data.liveData.plays.allPlays;
   const halfInning = side === 'away' ? 'top' : 'bottom';
@@ -189,7 +184,12 @@ function renderTeam(svg, data, side, ox, oy, cols) {
 
 // ─── Cell rendering ─────────────────────────────────────────────
 
-function drawCell(svg, cellX, cellY, ab) {
+export function drawCell(svg, cellX, cellY, ab) {
+  const {
+    TH_CELL_SIZE: CS, TH_DIAMOND_R: DR, TH_PATH_STROKE_W: PSW,
+    TH_FONT_SIZE: FS, TH_FONT_SIZE_SM: FS_SM, TH_DOT_R: DOTR, TH_PAD: PAD,
+  } = getThumbnailConfig();
+
   const cx = cellX + CS / 2;
   const cy = cellY + CS / 2;
   const notation = ab.notation || '';

@@ -1,7 +1,7 @@
 // Global navigation + footer - injected dynamically on every page
 // Same header on every page: site title + nav links, classic HTML link style
 
-const VERSION = '0.3.3';
+const VERSION = '0.3.4';
 
 const NAV_ITEMS = [
   { href: '/', label: 'Scorecards' },

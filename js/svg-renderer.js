@@ -308,19 +308,6 @@ function drawSubIndicator(g, CLR, x, y, subType, subNum, pStats) {
         'text-anchor': 'middle', 'dominant-baseline': 'central',
         'font-size': circleFontSize, 'font-weight': '700', 'font-family': L.FONT, fill: CLR.bg,
       }));
-      // Type label square (PH/PR)
-      if (hasType) {
-        const typeW = sqSize + 8;
-        g.appendChild(svgEl('rect', {
-          x: subCircleX - typeW / 2, y: typeCy - circleR,
-          width: typeW, height: typeH,
-          fill: CLR.sub, stroke: 'none',
-        }));
-        g.appendChild(svgText(typeLabel, subCircleX, typeCy, {
-          'text-anchor': 'middle', 'dominant-baseline': 'central',
-          'font-size': circleFontSize, 'font-weight': '700', 'font-family': L.FONT, fill: CLR.bg,
-        }));
-      }
     } else {
       // No sub letter: draw full line
       g.appendChild(svgEl('line', {
@@ -515,46 +502,6 @@ function drawLineup(svg, CLR, lineup, rowOffsets, boxscore, gameData, side, subM
   const team = boxscore.teams[side];
   const players = team.players;
 
-  // Build player ID → sub type label (PH/PR) for every substitute
-  // 1. From subMap: offensive subs have explicit PH/PR type
-  // 2. From boxscore: position === 'PH' or 'PR'
-  // 3. Defensive subs: inherit PH/PR from the player they replaced in the same slot
-  const playerSubType = new Map();
-  if (subMap) {
-    for (const subs of subMap.values()) {
-      for (const s of subs) {
-        if (s.type === 'PH' || s.type === 'PR') {
-          playerSubType.set(s.playerId, s.type);
-        }
-      }
-    }
-  }
-  // Fill in missing subs: check boxscore position, then inherit from prior sub in slot
-  for (const slot of lineup) {
-    let lastSubType = null;
-    for (const p of slot.players) {
-      if (!p.isSubstitute) continue;
-      if (playerSubType.has(p.id)) {
-        lastSubType = playerSubType.get(p.id);
-      } else {
-        // Check boxscore position
-        const pd = players[`ID${p.id}`];
-        const pos = pd?.position?.abbreviation;
-        if (pos === 'PH' || pos === 'PR') {
-          playerSubType.set(p.id, pos);
-          lastSubType = pos;
-        } else if (lastSubType) {
-          // Inherit from prior sub in same slot (e.g., defensive replacement for a PH)
-          playerSubType.set(p.id, lastSubType);
-        } else {
-          // Default: PH
-          playerSubType.set(p.id, 'PH');
-          lastSubType = 'PH';
-        }
-      }
-    }
-  }
-
   let subCount = 0; // running count across all slots for the entire team
 
   for (let slotIdx = 0; slotIdx < lineup.length; slotIdx++) {
@@ -579,9 +526,9 @@ function drawLineup(svg, CLR, lineup, rowOffsets, boxscore, gameData, side, subM
       const nameWeight = isSub ? '600' : '800';
 
       // Font size scales down when there are many subs
-      const nameFontSize = numPlayers <= 2 ? '19' : numPlayers <= 3 ? '16' : '13';
-      const subFontSize = numPlayers <= 2 ? '17' : numPlayers <= 3 ? '14' : '12';
-      const statFontSize = nameFontSize; // same size for both lines
+      const nameFontSize = numPlayers <= 2 ? '22' : numPlayers <= 3 ? '18' : '14';
+      const subFontSize = numPlayers <= 2 ? '19' : numPlayers <= 3 ? '15' : '13';
+      const statFontSize = numPlayers <= 2 ? '18' : numPlayers <= 3 ? '15' : '12';
 
       const jerseyNum = player.jerseyNumber || '';
 
@@ -613,110 +560,45 @@ function drawLineup(svg, CLR, lineup, rowOffsets, boxscore, gameData, side, subM
           'text-anchor': 'middle', 'dominant-baseline': 'central',
           'font-size': cFS, 'font-weight': '700', 'font-family': L.FONT, fill: CLR.bg,
         }));
-        // PH/PR label square next to the letter square (only for PH/PR subs)
-        const subTypeLabel = playerSubType.get(player.id);
-        if (subTypeLabel) {
-          const typeGap = 16;
-          const typeCx = circleCx + cR + typeGap + cR + 4;
-          const typeW = cR * 2 + 8; // wider to fit "PH"/"PR"
-          // Middle segment: from after letter square to before type square
-          g.appendChild(svgEl('line', {
-            x1: circleCx + cR + gap, y1: lineY, x2: typeCx - typeW / 2 - gap, y2: lineY,
-            stroke: CLR.sub, 'stroke-width': L.SUB_LINE_W,
-          }));
-          g.appendChild(svgEl('rect', {
-            x: typeCx - typeW / 2, y: lineY - cR,
-            width: typeW, height: sqSize,
-            fill: CLR.sub, stroke: 'none',
-          }));
-          g.appendChild(svgText(subTypeLabel, typeCx, lineY, {
-            'text-anchor': 'middle', 'dominant-baseline': 'central',
-            'font-size': cFS, 'font-weight': '700', 'font-family': L.FONT, fill: CLR.bg,
-          }));
-          // Right segment: from after type square to right edge
-          g.appendChild(svgEl('line', {
-            x1: typeCx + typeW / 2 + gap, y1: lineY, x2: lineEndX, y2: lineY,
-            stroke: CLR.sub, 'stroke-width': L.SUB_LINE_W,
-          }));
-        } else {
-          // No type label — right segment from after letter square to right edge
-          g.appendChild(svgEl('line', {
-            x1: circleCx + cR + gap, y1: lineY, x2: lineEndX, y2: lineY,
-            stroke: CLR.sub, 'stroke-width': L.SUB_LINE_W,
-          }));
-        }
+        // Right segment: from after letter square to right edge
+        g.appendChild(svgEl('line', {
+          x1: circleCx + cR + gap, y1: lineY, x2: lineEndX, y2: lineY,
+          stroke: CLR.sub, 'stroke-width': L.SUB_LINE_W,
+        }));
       }
 
       // Align sub player text with the right edge of the circle
       const textX = isSub ? Math.round(L.MARGIN_LEFT * L.SUB_TEXT_POS) : 8;
       const posNum = POS_ABBREV[player.position];
-      const posStr = posNum !== undefined ? String(posNum) : player.position;
-      const posAbbrev = player.position || '';
+      const posStr = posNum !== undefined ? String(posNum) : '';
       const batSide = getPlayerBatSide(gameData, player.id);
-      const sideStr = batSide ? `, ${batSide}` : '';
 
-      // Line 1: "Parker Meadows | #22 CF, L"
-      const metaParts = [];
-      if (jerseyNum) metaParts.push(`#${jerseyNum}`);
-      if (posAbbrev) metaParts.push(posAbbrev);
-      const metaStr = metaParts.join(' ') + sideStr;
-      const nameLine = `${player.name}`;
-      const metaLine = metaStr ? ` | ${metaStr}` : '';
+      // Line 1: "8 Joey Wiemer, R #21"
+      const nameParts = [];
+      if (posStr) nameParts.push(posStr);
+      nameParts.push(player.name);
+      let nameLine = nameParts.join(' ');
+      if (batSide) nameLine += `, ${batSide}`;
+      if (jerseyNum) nameLine += ` #${jerseyNum}`;
 
-      // Approximate max chars that fit (monospace ~0.6 * fontSize per char)
-      const nfs = parseInt(nameFontSize);
-      const availW = L.MARGIN_LEFT - textX - 4;
-      const maxChars = Math.floor(availW / (nfs * 0.6));
-      const fullLine = nameLine + metaLine;
-      const nameIsLong = fullLine.length > maxChars;
-
-      // Season stats line: ".222 AVG, .808 OPS"
+      // Line 2: ".111 AVG / .448 OPS"
       const ops = seasonBatting?.ops || '';
       const statParts = [];
       if (avg) statParts.push(`${avg} AVG`);
       if (ops) statParts.push(`${ops} OPS`);
-      const statLine = statParts.join(', ');
+      const statLine = statParts.join(' / ');
 
-      if (nameIsLong) {
-        // Three-line layout: "Parker Meadows" / "| #22 CF, L" / ".222 AVG, .808 OPS"
-        const line1Y = bandMidY - 24;
-        const line2Y = bandMidY;
-        const line3Y = bandMidY + 24;
-        g.appendChild(svgText(nameLine, textX, line1Y, {
-          'font-size': nameFontSize, 'font-weight': nameWeight, 'font-family': L.MONO, fill: nameColor,
-          'dominant-baseline': 'central',
-        }));
-        g.appendChild(svgText(metaLine.trim(), textX, line2Y, {
-          'font-size': statFontSize, 'font-family': L.MONO, fill: CLR.textLight,
-          'dominant-baseline': 'central',
-        }));
-        g.appendChild(svgText(statLine, textX, line3Y, {
-          'font-size': statFontSize, 'font-family': L.MONO, fill: CLR.textLight,
-          'dominant-baseline': 'central',
-        }));
-      } else {
-        // Two-line layout: "Parker Meadows | #22 CF, L" / ".222 AVG, .808 OPS"
-        const nameY = bandMidY - 12;
-        const statY = bandMidY + 12;
-        // Name bold, meta lighter weight
-        const nameEl = svgText('', textX, nameY, {
-          'font-size': nameFontSize, 'font-family': L.MONO, fill: nameColor,
-          'dominant-baseline': 'central',
-        });
-        const nameSpan = svgEl('tspan', { 'font-weight': nameWeight });
-        nameSpan.textContent = nameLine;
-        nameEl.appendChild(nameSpan);
-        if (metaLine) {
-          const metaSpan = svgEl('tspan', { 'font-weight': '400', fill: CLR.textLight });
-          metaSpan.textContent = metaLine;
-          nameEl.appendChild(metaSpan);
-        }
-        g.appendChild(nameEl);
-        g.appendChild(svgText(statLine, textX, statY, {
-          'font-size': statFontSize, 'font-family': L.MONO, fill: CLR.textLight,
-          'dominant-baseline': 'central',
-        }));
-      }
+      // Two-line layout
+      const nameY = bandMidY - 14;
+      const statY = bandMidY + 14;
+      g.appendChild(svgText(nameLine, textX, nameY, {
+        'font-size': nameFontSize, 'font-weight': nameWeight, 'font-family': L.MONO, fill: nameColor,
+        'dominant-baseline': 'central',
+      }));
+      g.appendChild(svgText(statLine, textX, statY, {
+        'font-size': statFontSize, 'font-family': L.MONO, fill: CLR.textLight,
+        'dominant-baseline': 'central',
+      }));
     }
   }
 
