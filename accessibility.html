@@ -20,28 +20,28 @@
 <body>
 
   <main class="a11y-page">
-    <h1>Accessibility</h1>
+<h1>Accessibility</h1>
 
-    <p>I want everyone to be able to use this site. Whether you rely on a screen reader, navigate by keyboard, zoom in to 400%, or just happen to be on a slow connection at the ballpark — the experience should work for you.</p>
+    <p>I want everyone to be able to use this site. Whether you rely on a screen reader, navigate by keyboard, zoom in to 400%, or just happen to be on a slow connection at the ballpark, the experience should work for you.</p>
 
     <p>I'm not going to pretend it's perfect. Scorecards are inherently visual, and making dense SVG grids truly accessible is hard. But I care about getting it right, and I'm working on it.</p>
 
     <h2>Where things stand</h2>
     <p>The site targets <a href="https://www.w3.org/WAI/standards-guidelines/wcag/" target="_blank" rel="noopener">WCAG 2.2 Level AA</a>. In practice, that means:</p>
     <ul>
-      <li>Keyboard navigation works everywhere — date picker, game cards, theme toggle, all of it</li>
+      <li>Keyboard navigation works everywhere: date picker, game cards, theme toggle, all of it</li>
       <li>Colour contrast meets AA in both light and dark themes</li>
       <li>Colour alone never carries meaning. Pitch types, outs, and play results always have text alongside the visual indicators</li>
       <li>The whole thing is plain HTML, CSS, and vanilla JS. No heavy framework. It loads fast and works on anything with a browser</li>
     </ul>
 
     <h2>What I know isn't great yet</h2>
-    <p>The SVG scorecards are the biggest gap. Each play cell packs a lot of visual information into a small space — pitch sequences, base paths, notation — and right now a screen reader can't meaningfully navigate that data cell by cell. I'm figuring out the best way to expose it without making the markup a mess.</p>
+    <p>The SVG scorecards are the biggest gap. Each play cell packs a lot of visual information into a small space (pitch sequences, base paths, notation) and right now a screen reader can't meaningfully navigate that data cell by cell. I'm figuring out the best way to expose it without making the markup a mess.</p>
 
     <p>External links (MLB data, GitHub) are outside my control and may not meet the same bar.</p>
 
     <h2>Tell me what's broken</h2>
-    <p>If something doesn't work for you, I want to hear about it. <a href="/contact.html?subject=accessibility">Send me a message</a> — it goes straight to me, not a form that disappears into nothing. If you can mention what assistive tech you're using and what went wrong, that helps me fix it faster. But even a quick "this didn't work" is useful.</p>
+    <p>If something doesn't work for you, I want to hear about it. <a href="/contact.html?subject=accessibility">Send me a message</a>; it goes straight to me, not a form that disappears into nothing. If you can mention what assistive tech you're using and what went wrong, that helps me fix it faster. But even a quick "this didn't work" is useful.</p>
   </main>
 
   <script type="module" src="/js/nav.js"></script>

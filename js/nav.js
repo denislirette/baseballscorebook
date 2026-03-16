@@ -70,18 +70,7 @@ function initNav() {
 
   top.appendChild(brand);
 
-
-  // Hamburger button (mobile only)
-  const hamburger = document.createElement('button');
-  hamburger.className = 'nav-hamburger';
-  hamburger.setAttribute('aria-label', 'Open navigation menu');
-  hamburger.setAttribute('aria-expanded', 'false');
-  hamburger.innerHTML = HAMBURGER_SVG;
-  top.appendChild(hamburger);
-
-  header.appendChild(top);
-
-  // ── Nav bar: second row ──
+  // ── Nav bar: same row as logo, pushed right ──
   const nav = document.createElement('nav');
   nav.className = 'nav-bar';
   nav.setAttribute('role', 'navigation');
@@ -113,7 +102,17 @@ function initNav() {
   themeBtn.setAttribute('aria-label', 'Toggle dark mode');
   nav.appendChild(themeBtn);
 
-  header.appendChild(nav);
+  top.appendChild(nav);
+
+  // Hamburger button (mobile only)
+  const hamburger = document.createElement('button');
+  hamburger.className = 'nav-hamburger';
+  hamburger.setAttribute('aria-label', 'Open navigation menu');
+  hamburger.setAttribute('aria-expanded', 'false');
+  hamburger.innerHTML = HAMBURGER_SVG;
+  top.appendChild(hamburger);
+
+  header.appendChild(top);
 
   // Insert at top of body
   document.body.insertBefore(header, document.body.firstChild);

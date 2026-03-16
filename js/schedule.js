@@ -77,8 +77,12 @@ async function loadGames() {
       return;
     }
 
+    // Separate cancelled/postponed games from active ones
+    const cancelled = games.filter(g => /cancel|postpone|suspend/i.test(g.status.detailedState));
+    const active = games.filter(g => !cancelled.includes(g));
+
     // Sort: active/finished games first, then by start time
-    games.sort((a, b) => {
+    active.sort((a, b) => {
       const aActive = isGameActive(a);
       const bActive = isGameActive(b);
       if (aActive !== bActive) return bActive - aActive;
@@ -87,10 +91,28 @@ async function loadGames() {
 
     gamesGrid.innerHTML = '';
     const cards = [];
-    for (const game of games) {
+    for (const game of active) {
       const card = renderGameCard(game, dateStr);
       gamesGrid.appendChild(card);
       cards.push({ game, card });
+    }
+
+    // Cancelled games in a separate smaller section at the bottom
+    if (cancelled.length > 0) {
+      const section = document.createElement('div');
+      section.className = 'cancelled-section';
+      const heading = document.createElement('h3');
+      heading.className = 'cancelled-heading';
+      heading.textContent = 'Cancelled / Postponed';
+      section.appendChild(heading);
+      const cancelledGrid = document.createElement('div');
+      cancelledGrid.className = 'cancelled-grid';
+      for (const game of cancelled) {
+        const card = renderGameCard(game, dateStr);
+        cancelledGrid.appendChild(card);
+      }
+      section.appendChild(cancelledGrid);
+      gamesGrid.appendChild(section);
     }
 
     // Load thumbnails for completed/live games
@@ -116,7 +138,7 @@ function renderGameCard(game, dateStr) {
   const homeRecord = home.leagueRecord ? ` (${home.leagueRecord.wins}-${home.leagueRecord.losses})` : '';
 
   const a = document.createElement('a');
-  a.className = 'game-card';
+  a.className = `game-card${!showScore && !isCancelled ? ' game-card-compact' : ''}`;
   a.href = `/game.html?gamePk=${game.gamePk}&date=${dateStr}${devParam()}`;
 
   a.innerHTML = `

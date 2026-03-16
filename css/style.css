@@ -271,63 +271,63 @@ strong, b { font-weight: 600; }
 /* Top bar: site title row */
 .site-header {
   position: relative;
-  background: var(--text);
+  background: var(--bg);
   border-bottom: 1px solid var(--grid-line);
 }
 
 .header-top {
   display: flex;
   align-items: center;
-  padding: 14px var(--container-pad) 14px calc(var(--container-pad) + 14px);
+  padding: 32px var(--container-pad) 32px var(--container-pad);
   gap: 12px;
 }
 
 .header-brand {
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex: 1;
+  gap: 10px;
 }
 
 .header-logo {
-  height: 22px;
-  width: 22px;
-  filter: brightness(0) invert(1);
+  height: 28px;
+  width: 28px;
 }
 [data-theme="dark"] .header-logo {
-  filter: brightness(0);
+  filter: invert(1);
 }
 
 .header-tagline {
-  font-size: 0.75em;
-  font-weight: 400;
-  color: var(--bg);
-  margin-left: 8px;
+  display: none;
 }
 
 .header-top h1 {
-  font-size: 0.875em;
+  font-size: 1.1em;
   font-weight: 700;
   margin: 0;
-  color: var(--bg);
+  color: var(--text);
 }
 
-/* Nav bar: second row */
+/* Nav bar: same line as logo, pushed right */
 .nav-bar {
   display: flex;
   align-items: center;
   gap: 0;
-  border-top: 1px solid var(--grid-line);
-  padding: 0 var(--container-pad);
-  background: var(--bg);
+  margin-left: auto;
+  padding: 0;
+  background: transparent;
 }
 
 .nav-bar a {
   display: inline-flex;
   align-items: center;
-  padding: 8px 14px;
-  font-size: 0.875em;
+  padding: 6px 14px;
+  font-size: 0.9em;
   white-space: nowrap;
+  color: var(--text-secondary);
+}
+
+.nav-bar a:hover {
+  color: var(--text);
 }
 
 .nav-bar a.nav-active {
@@ -342,14 +342,14 @@ strong, b { font-weight: 600; }
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--text);
-  padding: 8px 14px;
+  color: var(--text-secondary);
+  padding: 6px 10px;
   display: inline-flex;
   align-items: center;
-  margin-left: auto;
+  margin-left: 8px;
 }
 
-.nav-theme-btn:hover { background: var(--surface); }
+.nav-theme-btn:hover { color: var(--text); }
 
 /* Hamburger hidden on desktop, shown on mobile */
 .nav-hamburger {
@@ -357,17 +357,15 @@ strong, b { font-weight: 600; }
   background: none;
   border: 1px solid var(--grid-line);
   cursor: pointer;
-  color: var(--bg);
+  color: var(--text);
   padding: 8px;
   align-items: center;
   justify-content: center;
   min-width: 44px;
   min-height: 44px;
-  margin-bottom: -1px;
-  align-self: stretch;
 }
 
-.nav-hamburger:hover { background: color-mix(in srgb, var(--bg) 15%, transparent); }
+.nav-hamburger:hover { background: var(--surface); }
 .nav-hamburger svg { display: block; }
 
 /* Legacy classes kept for compatibility */
@@ -598,6 +596,36 @@ strong, b { font-weight: 600; }
 .status-final      { color: var(--text-secondary); }
 .status-cancelled  { color: var(--sc-out); font-weight: 700; }
 .game-card:has(.status-cancelled) { background: color-mix(in srgb, var(--sc-out) 8%, var(--card-bg)); }
+
+.game-card-compact {
+  font-size: 13px;
+  padding: 10px 12px;
+}
+
+.cancelled-section {
+  grid-column: 1 / -1;
+  margin-top: 8px;
+}
+
+.cancelled-heading {
+  font-size: 0.85em;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cancelled-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
+}
+
+.cancelled-grid .game-card {
+  font-size: 12px;
+  padding: 8px 10px;
+}
 
 /* ═══════════════════════════════════════════════════════
    7. REFRESH CONTROLS
@@ -1334,6 +1362,9 @@ tr.target-highlight td {
   .header-tagline { display: none; }
   .header-version { display: none; }
 
+  /* Mobile header: less padding */
+  .header-top { padding: 16px var(--container-pad) 16px; }
+
   /* Hamburger nav */
   .nav-hamburger { display: inline-flex; }
   .nav-bar {
@@ -1341,7 +1372,14 @@ tr.target-highlight td {
     flex-direction: column;
     align-items: stretch;
     padding: 0;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg);
     border-top: 1px solid var(--grid-line);
+    border-bottom: 1px solid var(--grid-line);
+    z-index: 100;
   }
   .nav-bar.nav-open { display: flex; }
   .nav-bar a, .nav-bar button {
