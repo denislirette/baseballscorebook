@@ -1586,11 +1586,15 @@ function weatherIcon(condition) {
   return 'wi-na';
 }
 
-function expandWind(wind) {
+function formatWind(wind) {
   if (!wind) return '';
-  // Extract just the mph value, drop direction
-  const match = wind.match(/(\d+)\s*mph/i);
-  return match ? `${match[1]} mph` : wind;
+  // Convert mph to km/h, keep direction
+  const match = wind.match(/(\d+)\s*mph[,]?\s*(.*)/i);
+  if (!match) return wind;
+  const mph = parseInt(match[1], 10);
+  const kmh = Math.round(mph * 1.609);
+  const dir = match[2] ? `, ${match[2].trim()}` : '';
+  return `${kmh} km/h / ${mph} mph${dir}`;
 }
 
 // Division short names for column headers
@@ -1805,7 +1809,7 @@ export function renderGameHeaderHTML(data) {
   // Weather table rows
   const weatherRows = [
     info.weather ? `<tr><td class="pitcher-name"><i class="wi ${weatherIcon(info.weatherCondition)}"></i> Temp</td><td>${info.weather}</td></tr>` : '',
-    info.wind ? `<tr><td class="pitcher-name"><i class="wi wi-strong-wind"></i> Wind</td><td>${expandWind(info.wind)}</td></tr>` : '',
+    info.wind ? `<tr><td class="pitcher-name"><i class="wi wi-strong-wind"></i> Wind</td><td>${formatWind(info.wind)}</td></tr>` : '',
   ].filter(Boolean).join('');
 
   return `

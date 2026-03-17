@@ -1057,14 +1057,27 @@ export function getGameInfo(gameData) {
   const venue = gameData.venue || {};
   const dt = gameData.datetime || {};
 
+  // Temperature: show Celsius first, then Fahrenheit
+  let tempStr = '';
+  if (weather.temp) {
+    const f = parseInt(weather.temp, 10);
+    const c = Math.round((f - 32) * 5 / 9);
+    tempStr = `${c}\u00B0C / ${f}\u00B0F`;
+  }
+
+  // Roof type: append to venue name for retractable/dome parks
+  const roofType = venue.fieldInfo?.roofType || '';
+  const isRoof = roofType && roofType !== 'Open';
+  const venueStr = isRoof ? `${venue.name || ''}, ${roofType} roof` : (venue.name || '');
+
   return {
     firstPitch: info.firstPitch || null,
     attendance: info.attendance || null,
     durationMinutes: info.gameDurationMinutes || null,
-    weather: weather.condition ? `${Math.round((weather.temp - 32) * 5 / 9)}\u00B0C, ${weather.condition}` : '',
+    weather: tempStr && weather.condition ? `${tempStr}, ${weather.condition}` : (tempStr || ''),
     weatherCondition: weather.condition || '',
     wind: weather.wind || '',
-    venue: venue.name || '',
+    venue: venueStr,
     venueCapacity: venue.fieldInfo?.capacity || null,
     date: dt.officialDate || '',
     time: dt.time ? `${dt.time} ${dt.ampm || ''}`.trim() : '',
