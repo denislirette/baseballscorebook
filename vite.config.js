@@ -105,7 +105,6 @@ export default defineConfig({
         game: 'game.html',
         reference: 'reference.html',
         standings: 'standings.html',
-        releases: 'releases.html',
         contact: 'contact.html',
         contactSuccess: 'contact-success.html',
         accessibility: 'accessibility.html',

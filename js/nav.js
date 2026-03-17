@@ -1,7 +1,7 @@
 // Global navigation + footer - injected dynamically on every page
 // Same header on every page: site title + nav links, classic HTML link style
 
-const VERSION = '0.4.0';
+const VERSION = '0.5.0';
 
 const IS_LOCAL = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
@@ -29,6 +29,17 @@ function initNav() {
   // Don't double-init
   if (document.querySelector('.site-header')) return;
 
+  // Skip-to-content link (first focusable element on the page)
+  const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+  if (mainEl) {
+    if (!mainEl.id) mainEl.id = 'main-content';
+    const skip = document.createElement('a');
+    skip.href = `#${mainEl.id}`;
+    skip.className = 'skip-link';
+    skip.textContent = 'Skip to content';
+    document.body.insertBefore(skip, document.body.firstChild);
+  }
+
   const currentPath = window.location.pathname;
 
   // Build header
@@ -55,7 +66,11 @@ function initNav() {
 
 
   const h1 = document.createElement('h1');
-  h1.textContent = 'BaseballScorecard.org';
+  const homeLink = document.createElement('a');
+  homeLink.href = '/';
+  homeLink.textContent = 'BaseballScorecard.org';
+  homeLink.setAttribute('aria-label', 'BaseballScorecard.org — go to home page');
+  h1.appendChild(homeLink);
   brand.appendChild(h1);
 
   const tagline = document.createElement('span');
@@ -79,25 +94,21 @@ function initNav() {
       a.style.opacity = '0.5';
       a.style.fontSize = '0.85em';
     }
-    if (item.external) {
-      a.target = '_blank';
-      a.rel = 'noopener';
-    }
     const itemPath = item.href;
-    if (!item.external && (currentPath === itemPath || (itemPath !== '/' && currentPath.startsWith(itemPath)))) {
+    if (currentPath === itemPath || (itemPath !== '/' && currentPath.startsWith(itemPath))) {
       a.className = 'nav-active';
     }
     nav.appendChild(a);
   }
 
-  // Theme toggle (in nav bar)
+  top.appendChild(nav);
+
+  // Theme toggle (always visible, before hamburger)
   const themeBtn = document.createElement('button');
   themeBtn.id = 'theme-toggle';
   themeBtn.className = 'nav-theme-btn';
   themeBtn.setAttribute('aria-label', 'Toggle dark mode');
-  nav.appendChild(themeBtn);
-
-  top.appendChild(nav);
+  top.appendChild(themeBtn);
 
   // Hamburger button (mobile only)
   const hamburger = document.createElement('button');
@@ -142,14 +153,30 @@ function initFooter() {
     return `<a href="${item.href}"${attrs}>${item.label}</a>`;
   }).join('');
 
+  const releasesURL = 'https://github.com/denislirette/baseballscorecard/releases';
+
   footer.innerHTML = `
     <div class="footer-content">
       <div class="footer-brand-block">
-        <span class="footer-brand">BaseballScorecard.org <span class="footer-tagline">Every game tells a story.</span></span>
-        <a href="/releases.html" class="footer-version">Version ${VERSION}</a>
+        <span class="footer-brand">BaseballScorecard.org</span>
+        <a href="${releasesURL}" target="_blank" rel="noopener" class="footer-version" id="footer-version">v${VERSION}</a>
       </div>
       <nav class="footer-links">${links}</nav>
     </div>`;
+
+  // Keep the version link up to date with the latest GitHub release
+  fetch('https://api.github.com/repos/denislirette/baseballscorecard/releases/latest')
+    .then(r => r.ok ? r.json() : null)
+    .then(data => {
+      if (!data?.tag_name) return;
+      const tag = data.tag_name.replace(/^v/, '');
+      const link = document.getElementById('footer-version');
+      if (link) {
+        link.textContent = `v${tag}`;
+        link.href = data.html_url;
+      }
+    })
+    .catch(() => {});
 
   document.body.appendChild(footer);
 }

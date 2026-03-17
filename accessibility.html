@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Accessibility - BaseballScorecard.org</title>
+  <meta name="description" content="Accessibility statement for BaseballScorecard.org. WCAG 2.2 Level AA target, known issues, and how to report problems.">
+  <meta property="og:title" content="Accessibility - BaseballScorecard.org">
+  <meta property="og:description" content="Accessibility statement. WCAG 2.2 Level AA target, known issues, and how to report problems.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://baseballscorecard.org/accessibility.html">
+  <link rel="canonical" href="https://baseballscorecard.org/accessibility.html">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="stylesheet" href="/css/style.css">
   <script>
@@ -14,7 +20,8 @@
   <style>
     .a11y-page { max-width: 65ch; padding: 2em var(--container-pad) 4em; }
     .a11y-page p, .a11y-page li { line-height: 1.7; margin-bottom: 0.75em; }
-    .a11y-page ul { padding-left: 1.25em; }
+    .a11y-page ul, .a11y-page ol { padding-left: 1.25em; }
+    .a11y-page h3 { margin-top: 1.5em; }
   </style>
 </head>
 <body>
@@ -35,8 +42,18 @@
       <li>The whole thing is plain HTML, CSS, and vanilla JS. No heavy framework. It loads fast and works on anything with a browser</li>
     </ul>
 
-    <h2>What I know isn't great yet</h2>
-    <p>The SVG scorecards are the biggest gap. Each play cell packs a lot of visual information into a small space (pitch sequences, base paths, notation) and right now a screen reader can't meaningfully navigate that data cell by cell. I'm figuring out the best way to expose it without making the markup a mess.</p>
+    <h2>Known issues</h2>
+    <p>I track all known accessibility gaps as GitHub issues. You can see what's open, what's being worked on, and what's been fixed on the <a href="https://github.com/denislirette/baseballscorecard/issues?q=is%3Aissue+label%3Aaccessibility" target="_blank" rel="noopener">accessibility issues board</a>.</p>
+
+    <h2>What works well</h2>
+    <ul>
+      <li>Date picker: full ARIA grid pattern with arrow keys, Home/End, Page Up/Down, Escape to close</li>
+      <li>Collapsible sections: <code>&lt;details&gt;</code>/<code>&lt;summary&gt;</code> with arrow key open/close</li>
+      <li>Theme toggle: label updates to describe the target state ("Switch to dark mode" / "Switch to light mode")</li>
+      <li>Mobile nav: hamburger button announces expanded/collapsed state</li>
+      <li>Focus indicators: 3px solid outlines on all interactive elements</li>
+      <li>Thumbnail SVGs: have <code>role="img"</code> and <code>aria-label</code></li>
+    </ul>
 
     <p>External links (MLB data, GitHub) are outside my control and may not meet the same bar.</p>
 

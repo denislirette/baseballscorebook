@@ -85,6 +85,9 @@
   --sc-pitch-in-play: #377049;
   --sc-pitch-hbp:     #1c1918;
 
+  /* ── ABS challenge ── */
+  --sc-challenge:     #7B2D8E;
+
   /* ── Layout grid ── */
   --grid-cols:        12;
   --grid-gap:         16px;
@@ -134,6 +137,9 @@
   --sc-pitch-strike:  #e08887;
   --sc-pitch-in-play: #7bbf91;
   --sc-pitch-hbp:     #f5f2e9;
+
+  /* ── ABS challenge ── */
+  --sc-challenge:     #b06dd6;
 }
 
 
@@ -161,6 +167,22 @@ html { font-size: 16px; }
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 16px;
+  z-index: 10000;
+  padding: 8px 16px;
+  background: var(--text);
+  color: var(--bg);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 8px;
 }
 
 body {
@@ -284,21 +306,15 @@ strong, b { font-weight: 600; }
 
 .header-brand {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 10px;
-}
-
-.header-logo {
-  display: inline-flex;
-  align-items: center;
-  color: var(--text);
-}
-.header-logo svg {
-  display: block;
+  flex-wrap: wrap;
 }
 
 .header-tagline {
-  display: none;
+  font-size: 0.75em;
+  font-weight: 400;
+  color: var(--text-secondary);
 }
 
 .header-top h1 {
@@ -306,6 +322,14 @@ strong, b { font-weight: 600; }
   font-weight: 700;
   margin: 0;
   color: var(--text);
+}
+
+.header-top h1 a,
+.header-top h1 a:visited,
+.header-top h1 a:hover,
+.header-top h1 a:active {
+  color: inherit;
+  text-decoration: none;
 }
 
 /* Nav bar: same line as logo, pushed right */
@@ -369,7 +393,7 @@ strong, b { font-weight: 600; }
 .nav-hamburger:hover { background: var(--surface); }
 .nav-hamburger svg { display: block; }
 
-/* Legacy classes kept for compatibility */
+/* Hide old HTML headers immediately (before nav.js replaces them) */
 .app-header { display: none; }
 
 .header-btn {
@@ -556,7 +580,8 @@ strong, b { font-weight: 600; }
   font-size: 14px;
 }
 
-.game-card:hover { border-color: var(--text); border-width: 2px; }
+.game-card:hover,
+.game-card:focus-visible { box-shadow: inset 0 0 0 1px var(--text); background: var(--surface); }
 
 .game-card-header { display: flex; flex-direction: column; gap: 10px; }
 
@@ -823,10 +848,12 @@ strong, b { font-weight: 600; }
 .pitcher-stats-table .pitcher-pitches { text-align: left; font-size: 0.9em; color: var(--text-secondary); white-space: nowrap; }
 
 .pitcher-stats-table tr.pitcher-season-row td {
-  font-size: 0.9em;
-  color: var(--text-secondary);
+  font-size: 0.75em;
+  line-height: 1.3;
+  color: var(--text);
   background: var(--surface);
   padding: 2px 6px;
+  opacity: 0.65;
 }
 .pitcher-stats-table tr.pitcher-spacer td {
   border-left: none;
@@ -907,32 +934,7 @@ strong, b { font-weight: 600; }
 
 
 /* ═══════════════════════════════════════════════════════
-   14. PITCH LEGEND
-   ═══════════════════════════════════════════════════════ */
-
-.pitch-legend {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 16px;
-  padding: 8px 0;
-  color: var(--text-secondary);
-  font-weight: 600;
-  flex-wrap: wrap;
-  border-bottom: 1px solid var(--grid-line);
-  margin-bottom: 12px;
-}
-
-.pitch-legend-item   { display: flex; align-items: center; gap: 4px; }
-.pitch-legend-swatch { display: inline-block; width: 12px; height: 12px; border-radius: 0; }
-.pitch-legend-swatch.ball    { background: var(--sc-pitch-ball); }
-.pitch-legend-swatch.strike  { background: var(--sc-pitch-strike); }
-.pitch-legend-swatch.in-play { background: var(--sc-pitch-in-play); }
-.pitch-legend-types  { color: var(--text-secondary); }
-
-
-/* ═══════════════════════════════════════════════════════
-   15. STARTING PITCHER INFO
+   14. STARTING PITCHER INFO
    ═══════════════════════════════════════════════════════ */
 
 .starting-pitcher-info {
@@ -946,7 +948,7 @@ strong, b { font-weight: 600; }
 
 .hand-indicator { font-weight: 700; color: var(--text-secondary); }
 .sp-record      { color: var(--text); margin-left: 8px; font-weight: 600; }
-.sp-season      { color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.sp-season      { color: var(--text); font-variant-numeric: tabular-nums; font-size: 0.75em; opacity: 0.65; }
 .sp-repertoire  { color: var(--text-secondary); font-weight: 600; }
 
 
@@ -990,64 +992,8 @@ strong, b { font-weight: 600; }
 
 
 /* ═══════════════════════════════════════════════════════
-   18. OVERLAYS (standings / legend)
+   18. BENCH & BULLPEN
    ═══════════════════════════════════════════════════════ */
-
-.standings-overlay,
-.legend-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  background: rgba(0, 0, 0, 0.5);
-  justify-content: center;
-  align-items: flex-start;
-  padding: 40px 16px;
-  overflow-y: auto;
-}
-
-.standings-overlay.visible,
-.legend-overlay.visible { display: flex; }
-
-.standings-overlay-content,
-.legend-overlay-content {
-  background: var(--bg);
-  border: 1px solid var(--grid-line);
-  border-radius: 0;
-  padding: 20px;
-  max-width: 900px;
-  width: 100%;
-}
-
-.legend-grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
-
-.legend-section h3 {
-  font-size: 0.9em;
-  font-weight: 700;
-  border-bottom: 1px solid var(--grid-line);
-  padding-bottom: 4px;
-  margin-bottom: 8px;
-}
-
-.legend-table            { width: 100%; border-collapse: collapse; font-size: 0.85em; }
-.legend-table td         { padding: 3px 8px; vertical-align: top; }
-.legend-table td:first-child { font-weight: 700; font-family: Arial, Helvetica, sans-serif; white-space: nowrap; width: 60px; }
-.legend-table tr:nth-child(even) { background: var(--surface); }
-.legend-color            { display: inline-block; width: 10px; height: 10px; border-radius: 0; margin-right: 4px; vertical-align: middle; }
-
-
-/* ═══════════════════════════════════════════════════════
-   19. BENCH & BULLPEN
-   ═══════════════════════════════════════════════════════ */
-
-.bench-bullpen-row {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  margin: 12px 0;
-}
-
-.bench-bullpen-row > * { flex: 1; min-width: 280px; overflow-x: auto; }
 
 /* Roster card list (bench/bullpen) */
 .roster-card-list {
@@ -1111,8 +1057,9 @@ strong, b { font-weight: 600; }
 
 .footer-brand-block {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .footer-tagline {
@@ -1122,17 +1069,7 @@ strong, b { font-weight: 600; }
 }
 
 .footer-version {
-  font-size: 0.75em;
-  font-weight: 400;
-  opacity: 0.5;
-}
-
-.footer-logo {
-  display: inline-flex;
-  align-items: center;
-}
-.footer-logo svg {
-  display: block;
+  color: var(--text-secondary);
 }
 
 .footer-links {
@@ -1144,147 +1081,7 @@ strong, b { font-weight: 600; }
 
 
 /* ═══════════════════════════════════════════════════════
-   21. FEEDBACK FORM
-   ═══════════════════════════════════════════════════════ */
-
-.feedback-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 10000;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-}
-
-.feedback-form {
-  background: var(--card-bg);
-  border: 1px solid var(--grid-line);
-  padding: 24px;
-  max-width: 500px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-}
-
-.feedback-form h3 {
-  margin-bottom: 8px;
-}
-
-.feedback-preview-label {
-  color: var(--text-secondary);
-  margin-bottom: 12px;
-}
-
-.feedback-preview {
-  margin-bottom: 16px;
-  border: 1px solid var(--grid-line);
-  max-height: 200px;
-  overflow: hidden;
-}
-
-.feedback-preview img {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.feedback-form label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 6px;
-}
-
-.feedback-form textarea {
-  width: 100%;
-  padding: 8px;
-  font: inherit;
-  border: 1px solid var(--grid-line);
-  background: var(--bg);
-  color: var(--text);
-  resize: vertical;
-  margin-bottom: 16px;
-}
-
-.feedback-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-.feedback-cancel,
-.feedback-submit {
-  padding: 8px 20px;
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-  border: 1px solid var(--grid-line);
-  background: var(--surface);
-  color: var(--text);
-}
-
-.feedback-submit {
-  background: var(--text);
-  color: var(--bg);
-}
-
-.feedback-cancel:hover { background: var(--grid-line); }
-.feedback-submit:hover { opacity: 0.85; }
-
-.feedback-skip {
-  padding: 8px 20px;
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-  border: 1px solid var(--grid-line);
-  background: var(--surface);
-  color: var(--text);
-}
-
-.feedback-skip:hover { background: var(--grid-line); }
-
-.feedback-capturing {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10001;
-  background: var(--text);
-  color: var(--bg);
-  padding: 10px 20px;
-  font-weight: 600;
-}
-
-.feedback-annotator {
-  background: var(--card-bg);
-  border: 1px solid var(--grid-line);
-  padding: 24px;
-  max-width: 540px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-}
-
-.feedback-annotator-header h3 { margin-bottom: 4px; }
-.feedback-annotator-header p { color: var(--text-secondary); margin-bottom: 16px; }
-
-.feedback-annotator-canvas-wrap {
-  border: 1px solid var(--grid-line);
-  margin-bottom: 16px;
-  cursor: crosshair;
-  line-height: 0;
-}
-
-.feedback-annotator-canvas-wrap canvas {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-
-/* ═══════════════════════════════════════════════════════
-   22. PAGE SUBNAV SIDEBAR
+   20. PAGE SUBNAV SIDEBAR
    ═══════════════════════════════════════════════════════ */
 
 .page-with-subnav {
@@ -1363,7 +1160,7 @@ tr.target-highlight td {
 
 
 /* ═══════════════════════════════════════════════════════
-   22. RESPONSIVE BREAKPOINTS
+   21. RESPONSIVE BREAKPOINTS
    ═══════════════════════════════════════════════════════ */
 
 /* Tablet (≤ 768px) */
@@ -1372,15 +1169,15 @@ tr.target-highlight td {
   .standings-container { grid-template-columns: repeat(2, 1fr); }
   .game-header-grid    { flex-direction: column; }
 
-  /* Simplified mobile header: logo + hamburger only */
-  .header-tagline { display: none; }
-  .header-version { display: none; }
+  /* Mobile header: tagline wraps below site name */
+  .header-brand { gap: 0; }
+  .header-tagline { flex-basis: 100%; font-size: 0.7em; }
 
   /* Mobile header: less padding */
   .header-top { padding: 16px var(--container-pad) 16px; }
 
-  /* Hamburger nav */
-  .nav-hamburger { display: inline-flex; }
+  /* Hamburger nav — push to right edge */
+  .nav-hamburger { display: inline-flex; margin-left: auto; }
   .nav-bar {
     display: none;
     flex-direction: column;
@@ -1415,12 +1212,9 @@ tr.target-highlight td {
   :root { --container-pad: 8px; --grid-gap: 8px; }
   .standings-container { grid-template-columns: 1fr; }
   .standings-row       { grid-template-columns: 40px 62px 36px 32px; }
-  .pitch-legend        { gap: 10px; }
   .scorecard-section-header img { width: 36px; height: 36px; }
   .scorecard-section-header h2  { font-size: 1.25em; }
-  .bench-bullpen-row   { flex-direction: column; }
   .refresh-controls    { padding: 6px var(--container-pad); gap: 8px; }
-  .legend-grid         { grid-template-columns: 1fr; }
 
   /* Footer mobile */
   .footer-links { flex-wrap: wrap; gap: 10px; }

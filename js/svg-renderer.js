@@ -344,14 +344,11 @@ function drawSubIndicator(g, CLR, x, y, subType, subNum, pStats) {
       }
     }
   } else if (subType === 'PH') {
-    const lineX = x - 3;
-    drawVerticalSubLine(lineX, lineX);
+    drawVerticalSubLine(x - 3);
   } else if (subType === 'PR') {
-    const lineX = x + L.COL_WIDTH + 3;
-    drawVerticalSubLine(lineX, lineX);
+    drawVerticalSubLine(x + L.COL_WIDTH + 3);
   } else if (subType === 'defensive') {
-    const lineX = x + L.COL_WIDTH + 3;
-    drawVerticalSubLine(lineX, lineX);
+    drawVerticalSubLine(x + L.COL_WIDTH + 3);
   }
 }
 
@@ -505,7 +502,7 @@ function drawLineup(svg, CLR, lineup, rowOffsets, boxscore, gameData, side, subM
       // Font size scales down when there are many subs
       const nameFontSize = numPlayers <= 2 ? '22' : numPlayers <= 3 ? '18' : '14';
       const subFontSize = numPlayers <= 2 ? '19' : numPlayers <= 3 ? '15' : '13';
-      const statFontSize = numPlayers <= 2 ? '18' : numPlayers <= 3 ? '15' : '12';
+      const statFontSize = numPlayers <= 2 ? '14' : numPlayers <= 3 ? '12' : '12';
 
       const jerseyNum = player.jerseyNumber || '';
 
@@ -551,8 +548,8 @@ function drawLineup(svg, CLR, lineup, rowOffsets, boxscore, gameData, side, subM
         'dominant-baseline': 'central',
       }));
       g.appendChild(svgText(statLine, textX, statY, {
-        'font-size': statFontSize, 'font-family': L.MONO, fill: CLR.textLight,
-        'dominant-baseline': 'central',
+        'font-size': statFontSize, 'font-family': L.MONO, fill: CLR.text,
+        'dominant-baseline': 'central', opacity: '0.65',
       }));
     }
   }
@@ -1237,11 +1234,6 @@ function drawHitHashMarks(g, CLR, hp, b1, count, R) {
   }
 }
 
-function baseCoords(cx, cy, baseName) {
-  const b = L.BASES[baseName] || L.BASES.HP;
-  return { x: cx + b.dx, y: cy + b.dy };
-}
-
 function computeBasePathSegments(ab, CLR) {
   const segments = [];
   for (const runner of ab.runners) {
@@ -1274,90 +1266,6 @@ function getBasePath(from, to, isScore) {
     path.push([order[i], order[(i + 1) % 4]]);
   }
   return path;
-}
-
-function getReachedBases(ab, CLR) {
-  return ab.runners
-    .filter(r => !r.isOut && r.end && r.end !== 'score')
-    .map(r => ({ base: r.end, color: CLR.text }));
-}
-
-function drawRunnerAnnotations(g, CLR, cellX, cellY, ab, diamondCx, diamondCy) {
-  const order = ['HP', '1B', '2B', '3B'];
-  const label = { HP: 'H', '1B': '1', '2B': '2', '3B': '3' };
-  // Use cumulative runners if available, else per-AB runners
-  const runners = ab.cumulativeRunners || ab.runners;
-  const anns = [];
-
-  const ADV_LABELS = { sb: 'SB', cs: 'CS', po: 'PO', wp: 'WP', pb: 'PB', bk: 'BK' };
-  for (const runner of runners) {
-    if (runner.segments) {
-      if (runner.segments.length === 0) continue;
-      const firstBase = runner.segments[0].from;
-      // Group consecutive segments by advanceType, show special labels for non-hit advances
-      const specialAdvances = runner.segments
-        .filter(s => s.advanceType && s.advanceType !== 'hit')
-        .map(s => ADV_LABELS[s.advanceType] || s.advanceType.toUpperCase());
-      // Remove duplicates
-      const unique = [...new Set(specialAdvances)];
-      let text;
-      if (unique.length > 0) {
-        text = unique.join('+');
-      } else {
-        // Default: show base path (H12 etc)
-        const parts = [label[firstBase]];
-        for (const seg of runner.segments) parts.push(label[seg.to]);
-        text = parts.join('');
-      }
-      anns.push({ text, start: firstBase });
-    } else {
-      // Fallback per-AB runner, no dashes
-      if (!runner.start || !runner.end || runner.end === runner.start) continue;
-      const startIdx = order.indexOf(runner.start);
-      const endBase = runner.end === 'score' ? 'HP' : runner.end;
-      const steps = runner.end === 'score' ? 4 - startIdx : order.indexOf(endBase) - startIdx;
-      if (steps <= 0) continue;
-      const parts = [];
-      for (let i = 0; i <= steps; i++) parts.push(label[order[(startIdx + i) % 4]]);
-      anns.push({ text: parts.join(''), start: runner.start || 'HP' });
-    }
-  }
-  if (anns.length === 0) return;
-
-  // Place annotation OUTSIDE the diamond at midpoint of first segment
-  // Clamp within cell boundaries to prevent overflow
-  const R = L.DIAMOND_R;
-  const nudge = 12;
-  const cellRight = cellX + L.COL_WIDTH - 2;
-  const cellLeft = cellX + L.PITCH_COL_W + 2;
-  const cellTop = cellY + 2;
-  const cellBot = cellY + L.ROW_HEIGHT - 2;
-  const seg = {
-    HP:   { mx:  0.5, my:  0.5, nx:  1, ny:  1 },  // bottom-right
-    '1B': { mx:  0.5, my: -0.5, nx:  1, ny: -1 },  // top-right
-    '2B': { mx: -0.5, my: -0.5, nx: -1, ny: -1 },  // top-left
-    '3B': { mx: -0.5, my:  0.5, nx: -1, ny:  1 },  // bottom-left
-  };
-  for (const ann of anns) {
-    const b = seg[ann.start] || seg.HP;
-    const mx = diamondCx + R * b.mx;
-    const my = diamondCy + R * b.my;
-    let ax = mx + nudge * b.nx * 0.707;
-    let ay = my + nudge * b.ny * 0.707;
-    // Scale font for long annotations
-    const fontSize = ann.text.length <= 3 ? 14 : ann.text.length <= 4 ? 12 : 10;
-    const textW = ann.text.length * fontSize * 0.6;
-    const anchor = b.nx > 0 ? 'start' : 'end';
-    // Clamp horizontal: right-side text must not exceed cellRight
-    if (anchor === 'start' && ax + textW > cellRight) ax = cellRight - textW;
-    if (anchor === 'end' && ax - textW < cellLeft) ax = cellLeft + textW;
-    // Clamp vertical
-    ay = Math.max(cellTop + fontSize / 2, Math.min(cellBot - fontSize / 2, ay));
-    g.appendChild(svgText(ann.text, ax, ay, {
-      'text-anchor': anchor, 'dominant-baseline': 'central',
-      'font-size': String(fontSize), 'font-weight': '800', 'font-family': L.MONO, fill: CLR.text,
-    }));
-  }
 }
 
 // ─── Batter stats ────────────────────────────────────────────────
@@ -1503,9 +1411,10 @@ export function renderPitcherStatsHTML(data, side, teamAbbrev) {
     const pitchCodes = formatRepertoire(p.repertoire);
     const spacer = i > 0 ? `<tr class="pitcher-spacer"><td colspan="12"></td></tr>` : '';
     // Season stats row (above game row, smaller font)
+    const yr = new Date().getFullYear();
     const seasonRow = `${spacer}
       <tr class="pitcher-season-row">
-        <td class="pitcher-season-label" colspan="2">Season Stats</td>
+        <td class="pitcher-season-label" colspan="2">${yr} Stats</td>
         <td>${v(ss.inningsPitched)}</td>
         <td>${v(ss.hits)}</td>
         <td>${v(ss.runs)}</td>
@@ -1558,7 +1467,7 @@ export function renderStartingPitcherHTML(data, side, teamAbbrev) {
       <strong>${info.name}</strong><span class="hand-indicator">, ${info.hand || '?'}</span>
       <span class="sp-record">${s.w}-${s.l}, ${s.era} ERA, ${s.whip} WHIP</span>
       <br>
-      <span class="sp-season">Season: ${s.ip} IP, ${s.h} H, ${s.r} R, ${s.er} ER, ${s.bb} BB, ${s.k} K</span>
+      <span class="sp-season">${new Date().getFullYear()}: ${s.ip} IP, ${s.h} H, ${s.r} R, ${s.er} ER, ${s.bb} BB, ${s.k} K</span>
       <br>
       <span class="sp-repertoire">Pitches: ${rep}</span>
     </div>`;

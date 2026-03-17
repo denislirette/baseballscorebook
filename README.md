@@ -76,7 +76,6 @@ baseballscorebook/
 ├── game.html               # Scorecard view: SVG rendering
 ├── reference.html          # Legend + advanced stats formulas
 ├── standings.html          # Division standings
-├── releases.html           # Release history
 ├── contact.html            # Contact info
 ├── accessibility.html      # Accessibility policy
 ├── analytics.html          # Analytics disclosure

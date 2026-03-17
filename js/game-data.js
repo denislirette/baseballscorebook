@@ -1014,25 +1014,6 @@ export function getDefenseWithSubs(boxscore, side) {
 }
 
 /**
- * Extract 1B and 3B coaches from a coaches API response.
- */
-export function extractBaseCoaches(coachData) {
-  const roster = coachData?.roster || [];
-  let firstBase = null;
-  let thirdBase = null;
-
-  for (const c of roster) {
-    if (c.jobId === 'COA1' && !firstBase) {
-      firstBase = c.person?.fullName || '';
-    }
-    if (c.jobId === 'COA3' && !thirdBase) {
-      thirdBase = c.person?.fullName || '';
-    }
-  }
-  return { firstBase, thirdBase };
-}
-
-/**
  * Compute a team's rank (1-30) for a given stat across all teams.
  * @param {number|string} teamId
  * @param {string} statKey - key in allTeamStats entry (e.g. 'era', 'errors', 'fielding', 'doublePlays')
