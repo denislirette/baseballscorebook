@@ -44,22 +44,13 @@ export function renderThumbnail(data) {
   const w = innings * CS;
   const h = 9 * CS * 2 + GAP;
 
-  // For 9 innings, fill the container width. For extra innings, keep
-  // the same cell size and let the thumbnail grow wider instead of shrinking.
-  const baseW = 9 * CS;
   const svg = el('svg', {
     viewBox: `0 0 ${w} ${h}`,
+    width: '100%',
+    preserveAspectRatio: 'xMidYMid meet',
     role: 'img',
     'aria-label': 'Scorecard thumbnail',
   });
-  if (innings <= 9) {
-    svg.setAttribute('width', '100%');
-    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-  } else {
-    // Scale width proportionally so cells stay the same size as a 9-inning game
-    svg.style.width = `${(innings / 9) * 100}%`;
-    svg.setAttribute('preserveAspectRatio', 'xMinYMid meet');
-  }
   svg.style.display = 'block';
 
   renderTeam(svg, data, 'away', 0, 0, innings);

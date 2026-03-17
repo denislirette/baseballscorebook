@@ -200,6 +200,11 @@ async function loadThumbnails(cards) {
         if (container) {
           container.innerHTML = '';
           container.appendChild(renderThumbnail(data));
+          // Widen the card for extra-inning games so cells stay full size
+          const innings = data.liveData.linescore.innings?.length || 9;
+          if (innings > 9) {
+            card.style.minWidth = `${Math.round(280 * innings / 9)}px`;
+          }
         }
       } catch {
         // Keep empty grid placeholder on failure
