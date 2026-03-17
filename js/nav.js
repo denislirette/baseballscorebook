@@ -6,7 +6,7 @@ const VERSION = '0.4.0';
 const IS_LOCAL = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
 const NAV_ITEMS = [
-  { href: '/', label: 'Today\'s Games' },
+  { href: '/', label: 'Games' },
   { href: '/standings.html', label: 'Standings' },
   { href: '/reference.html', label: 'Guide' },
   ...(IS_LOCAL ? [{ href: '/design-system.html', label: 'Design System', dev: true }] : []),
