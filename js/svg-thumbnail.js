@@ -242,26 +242,41 @@ export function drawCell(svg, cellX, cellY, ab) {
 
   // ── Diamond / base paths ──
   if (hasSegs) {
-    // Draw base path line segments for all runners
+    // Draw base paths as polylines for clean corners
     for (const runner of runners) {
-      for (const seg of runner.segments || []) {
+      const segs = runner.segments || [];
+      const points = [];
+      for (const seg of segs) {
         const from = dPt(cx, dcy, DR, seg.from);
         const to = dPt(cx, dcy, DR, seg.to);
         if (seg.isOutSegment) {
+          // Out segment: draw separately, truncated to midpoint
           const mx = (from.x + to.x) / 2;
           const my = (from.y + to.y) / 2;
+          if (points.length > 1) {
+            svg.appendChild(el('polyline', {
+              class: 'th-s', points: points.join(' '),
+              'stroke-width': PSW, fill: 'none',
+              'stroke-linejoin': 'miter', 'stroke-linecap': 'square',
+            }));
+          }
           svg.appendChild(el('line', {
             class: 'th-s',
             x1: from.x, y1: from.y, x2: mx, y2: my,
-            'stroke-width': PSW,
+            'stroke-width': PSW, 'stroke-linecap': 'square',
           }));
+          points.length = 0;
         } else {
-          svg.appendChild(el('line', {
-            class: 'th-s',
-            x1: from.x, y1: from.y, x2: to.x, y2: to.y,
-            'stroke-width': PSW,
-          }));
+          if (points.length === 0) points.push(`${from.x},${from.y}`);
+          points.push(`${to.x},${to.y}`);
         }
+      }
+      if (points.length > 1) {
+        svg.appendChild(el('polyline', {
+          class: 'th-s', points: points.join(' '),
+          'stroke-width': PSW, fill: 'none',
+          'stroke-linejoin': 'miter', 'stroke-linecap': 'square',
+        }));
       }
     }
 

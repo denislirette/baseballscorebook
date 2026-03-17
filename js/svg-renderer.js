@@ -1095,8 +1095,7 @@ function drawDiamond(g, CLR, cx, cy, ab, isHR = false) {
     }));
   }
 
-  // Base path lines from runner journeys (extended past corners to overlap)
-  const EXT = L.BASE_PATH_SW * 0.6; // overlap amount
+  // Base path lines from runner journeys, drawn as polylines for clean corners
   const cumRunners = ab.cumulativeRunners;
   if (cumRunners && cumRunners.length > 0) {
     for (const runner of cumRunners) {
@@ -1109,23 +1108,37 @@ function drawDiamond(g, CLR, cx, cy, ab, isHR = false) {
         outMx = (oFrom.x + oTo.x) / 2;
         outMy = (oFrom.y + oTo.y) / 2;
       }
+
+      // Build connected point list for non-out segments
+      const points = [];
+      const outPoints = [];
       for (const seg of runner.segments) {
         const from = diamondPt(cx, cy, R, seg.from);
         const to = diamondPt(cx, cy, R, seg.to);
         if (seg.isOutSegment && outSeg) {
-          // Truncate: draw from start to midpoint only (no extension)
-          g.appendChild(svgEl('line', {
-            x1: from.x, y1: from.y, x2: outMx, y2: outMy,
-            stroke: CLR.text, 'stroke-width': L.BASE_PATH_SW,
-          }));
+          // Out segment drawn separately (truncated to midpoint)
+          outPoints.push(`${from.x},${from.y}`, `${outMx},${outMy}`);
         } else {
-          const ln = extendedLine(from, to, EXT);
-          g.appendChild(svgEl('line', {
-            ...ln,
-            stroke: CLR.text, 'stroke-width': L.BASE_PATH_SW,
-          }));
+          if (points.length === 0) points.push(`${from.x},${from.y}`);
+          points.push(`${to.x},${to.y}`);
         }
       }
+
+      if (points.length > 1) {
+        g.appendChild(svgEl('polyline', {
+          points: points.join(' '),
+          stroke: CLR.text, 'stroke-width': L.BASE_PATH_SW,
+          fill: 'none', 'stroke-linejoin': 'miter', 'stroke-linecap': 'square',
+        }));
+      }
+      if (outPoints.length > 0) {
+        g.appendChild(svgEl('polyline', {
+          points: outPoints.join(' '),
+          stroke: CLR.text, 'stroke-width': L.BASE_PATH_SW,
+          fill: 'none', 'stroke-linecap': 'square',
+        }));
+      }
+
       if (runner.isOut) {
         const outR = Math.round(L.SUB_CIRCLE_R * 1.45);
         if (outSeg) {
@@ -1137,14 +1150,20 @@ function drawDiamond(g, CLR, cx, cy, ab, isHR = false) {
       }
     }
   } else {
+    // Fallback: build polyline from per-AB runners
     const segments = computeBasePathSegments(ab, CLR);
-    for (const seg of segments) {
-      const from = diamondPt(cx, cy, R, seg.from);
-      const to = diamondPt(cx, cy, R, seg.to);
-      const ln = extendedLine(from, to, EXT);
-      g.appendChild(svgEl('line', {
-        ...ln,
+    if (segments.length > 0) {
+      const points = [];
+      for (const seg of segments) {
+        const from = diamondPt(cx, cy, R, seg.from);
+        const to = diamondPt(cx, cy, R, seg.to);
+        if (points.length === 0) points.push(`${from.x},${from.y}`);
+        points.push(`${to.x},${to.y}`);
+      }
+      g.appendChild(svgEl('polyline', {
+        points: points.join(' '),
         stroke: CLR.text, 'stroke-width': L.BASE_PATH_SW,
+        fill: 'none', 'stroke-linejoin': 'miter', 'stroke-linecap': 'square',
       }));
     }
   }
