@@ -598,6 +598,7 @@ strong, b { font-weight: 600; }
 
 .thumbnail-container {
   margin-top: 12px;
+  overflow-x: auto;
 }
 
 /* Thumbnail SVG color classes (theme-reactive via CSS vars) */
