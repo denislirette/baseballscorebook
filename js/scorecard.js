@@ -126,6 +126,15 @@ function renderTeamSection(data, side) {
   header.innerHTML = `<h2>${team.name} (${label})</h2>`;
   section.appendChild(header);
 
+  // Coaching staff (collapsed accordion, right under team name)
+  const coachesHTML = renderCoachingStaffHTML(data, side, team.teamName);
+  if (coachesHTML) {
+    const coachesDiv = document.createElement('div');
+    coachesDiv.className = 'pitcher-stats-section';
+    coachesDiv.innerHTML = coachesHTML;
+    section.appendChild(coachesDiv);
+  }
+
   // Scorecard grid (this team's batting)
   const scroll = document.createElement('div');
   scroll.className = 'scorecard-scroll';
@@ -154,15 +163,6 @@ function renderTeamSection(data, side) {
     benchDiv.className = 'pitcher-stats-section';
     benchDiv.innerHTML = benchHTML;
     section.appendChild(benchDiv);
-  }
-
-  // This team's coaching staff
-  const coachesHTML = renderCoachingStaffHTML(data, side, team.teamName);
-  if (coachesHTML) {
-    const coachesDiv = document.createElement('div');
-    coachesDiv.className = 'pitcher-stats-section';
-    coachesDiv.innerHTML = coachesHTML;
-    section.appendChild(coachesDiv);
   }
 
   return section;
