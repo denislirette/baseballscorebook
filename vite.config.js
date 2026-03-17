@@ -107,6 +107,7 @@ export default defineConfig({
         standings: 'standings.html',
         contact: 'contact.html',
         contactSuccess: 'contact-success.html',
+        about: 'about.html',
         accessibility: 'accessibility.html',
         analytics: 'analytics.html',
       },

@@ -13,6 +13,7 @@ const NAV_ITEMS = [
 ];
 
 const FOOTER_LINKS = [
+  { href: '/about.html', label: 'About' },
   { href: '/contact.html', label: 'Contact' },
   { href: '/accessibility.html', label: 'Accessibility' },
   { href: '/analytics.html', label: 'Analytics' },
