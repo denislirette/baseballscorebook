@@ -325,20 +325,27 @@ export function drawCell(svg, cellX, cellY, ab) {
     } else {
       const display = notation.length > 7 ? notation.substring(0, 7) : notation;
       const isBackwardsK = notation === '\u{A4D8}';
-      const fontSize = showDiamond ? FS_SM : (isBackwardsK ? FS + 4 : FS);
+      const fontSize = showDiamond ? FS_SM : FS;
       const textY = showDiamond ? cellY + CS - PAD : cy + Math.round(fontSize / 3);
-      const attrs = {
-        class: 'th-t',
-        'font-size': String(fontSize), 'font-weight': isBackwardsK ? '900' : '700',
-        'text-anchor': 'middle',
-        'font-family': 'sans-serif',
-      };
       if (isBackwardsK) {
-        attrs['stroke'] = 'currentColor';
-        attrs['stroke-width'] = '0.5';
-        attrs['paint-order'] = 'stroke';
+        // Draw a real K and mirror it horizontally for a perfect match
+        const t = tx('K', cx, textY, {
+          class: 'th-t',
+          'font-size': String(fontSize), 'font-weight': '700',
+          'text-anchor': 'middle',
+          'font-family': 'sans-serif',
+          transform: `scale(-1,1)`,
+          'transform-origin': `${cx} ${textY}`,
+        });
+        svg.appendChild(t);
+      } else {
+        svg.appendChild(tx(display, cx, textY, {
+          class: 'th-t',
+          'font-size': String(fontSize), 'font-weight': '700',
+          'text-anchor': 'middle',
+          'font-family': 'sans-serif',
+        }));
       }
-      svg.appendChild(tx(display, cx, textY, attrs));
     }
   }
 }
