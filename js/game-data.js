@@ -689,7 +689,10 @@ function extractAllPositions(str) {
   const seen = new Set();
   for (const f of found) {
     if (!seen.has(f.idx)) {
-      positions.push(f.num);
+      // Skip consecutive duplicate position numbers (e.g., shortstop mentioned twice)
+      if (positions.length === 0 || f.num !== positions[positions.length - 1]) {
+        positions.push(f.num);
+      }
       seen.add(f.idx);
     }
   }
