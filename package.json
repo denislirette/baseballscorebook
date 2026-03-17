@@ -1,5 +1,5 @@
 {
-  "name": "baseball-scorebook",
+  "name": "baseballscorecard",
   "version": "0.5.0",
   "private": true,
   "type": "module",
@@ -7,7 +7,7 @@
   "description": "Web app that renders live MLB game data as traditional SVG scorecards",
   "repository": {
     "type": "git",
-    "url": "https://github.com/denislirette/baseballscorebook.git"
+    "url": "https://github.com/denislirette/baseballscorecard.git"
   },
   "scripts": {
     "dev": "vite",

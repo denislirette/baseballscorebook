@@ -6,13 +6,13 @@ Thanks for wanting to help out. This project started as a personal thing and I'm
 
 ### 1. Fork the repository
 
-Click the "Fork" button on the [GitHub repo page](https://github.com/denislirette/baseballscorebook). This creates your own copy under your GitHub account.
+Click the "Fork" button on the [GitHub repo page](https://github.com/denislirette/baseballscorecard). This creates your own copy under your GitHub account.
 
 ### 2. Clone your fork locally
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/baseballscorebook.git
-cd baseballscorebook
+git clone https://github.com/YOUR_USERNAME/baseballscorecard.git
+cd baseballscorecard
 npm install
 ```
 
@@ -73,7 +73,7 @@ Screenshots are really helpful, especially for rendering issues. Game-specific b
 
 ### Want to fix something?
 
-1. Check the [issues](https://github.com/denislirette/baseballscorebook/issues) to see if someone's already on it
+1. Check the [issues](https://github.com/denislirette/baseballscorecard/issues) to see if someone's already on it
 2. If there's no issue yet, open one first so we can discuss the approach
 3. Follow the setup steps above, make your fix, and open a PR
 
@@ -118,7 +118,7 @@ The [TECHNICAL-REFERENCE.md](TECHNICAL-REFERENCE.md) has detailed docs on the da
 
 ## Questions
 
-Open an issue tagged `question` or start a [discussion](https://github.com/denislirette/baseballscorebook/discussions). No contribution is too small, and asking before building saves everyone time.
+Open an issue tagged `question` or start a [discussion](https://github.com/denislirette/baseballscorecard/discussions). No contribution is too small, and asking before building saves everyone time.
 
 ## Be decent
 

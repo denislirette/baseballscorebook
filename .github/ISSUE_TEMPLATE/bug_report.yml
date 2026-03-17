@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for reporting a bug! Please search [existing issues](https://github.com/denislirette/baseballscorebook/issues) first to avoid duplicates. If your issue already exists, add a comment or reaction instead.
+        Thanks for reporting a bug! Please search [existing issues](https://github.com/denislirette/baseballscorecard/issues) first to avoid duplicates. If your issue already exists, add a comment or reaction instead.
 
   - type: textarea
     id: what-happened
