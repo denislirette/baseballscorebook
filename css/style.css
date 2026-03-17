@@ -312,9 +312,7 @@ strong, b { font-weight: 600; }
 }
 
 .header-tagline {
-  font-size: 0.75em;
   font-weight: 400;
-  color: var(--text-secondary);
 }
 
 .header-top h1 {
@@ -1098,6 +1096,10 @@ strong, b { font-weight: 600; }
   gap: 20px;
 }
 
+.footer-disclaimer {
+  color: var(--text-secondary);
+}
+
 
 
 
@@ -1322,9 +1324,8 @@ tr.target-highlight td {
   .standings-container { grid-template-columns: repeat(2, 1fr); }
   .game-header-grid    { flex-direction: column; }
 
-  /* Mobile header: tagline wraps below site name */
-  .header-brand { gap: 0; }
-  .header-tagline { flex-basis: 100%; font-size: 0.7em; }
+  /* Mobile header: tagline on its own line */
+  .header-tagline { display: block; }
 
   /* Mobile header: less padding */
   .header-top { padding: 16px var(--container-pad) 16px; }

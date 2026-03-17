@@ -69,15 +69,10 @@ function initNav() {
   const h1 = document.createElement('h1');
   const homeLink = document.createElement('a');
   homeLink.href = '/';
-  homeLink.textContent = 'BaseballScorecard.org';
+  homeLink.innerHTML = 'BaseballScorecard.org <span class="header-tagline">Every game tells a story.</span>';
   homeLink.setAttribute('aria-label', 'BaseballScorecard.org — go to home page');
   h1.appendChild(homeLink);
   brand.appendChild(h1);
-
-  const tagline = document.createElement('span');
-  tagline.className = 'header-tagline';
-  tagline.textContent = 'Every game tells a story.';
-  brand.appendChild(tagline);
 
   top.appendChild(brand);
 
@@ -159,8 +154,8 @@ function initFooter() {
   footer.innerHTML = `
     <div class="footer-content">
       <div class="footer-brand-block">
-        <span class="footer-brand">BaseballScorecard.org</span>
-        <a href="${releasesURL}" target="_blank" rel="noopener" class="footer-version" id="footer-version">v${VERSION}</a>
+        <span class="footer-brand">BaseballScorecard.org <a href="${releasesURL}" target="_blank" rel="noopener" class="footer-version" id="footer-version">v${VERSION}</a></span>
+        <span class="footer-disclaimer">This site is a work in progress. Baseball can be weird and scoring systems aren't perfect. Always double check stats before committing pen to paper. Have some white out handy.</span>
       </div>
       <nav class="footer-links">${links}</nav>
     </div>`;
