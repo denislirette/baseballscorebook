@@ -313,6 +313,9 @@ strong, b { font-weight: 600; }
 
 .header-tagline {
   font-weight: 400;
+  font-size: 0.7em;
+  margin-left: 0.5em;
+  color: var(--text-secondary);
 }
 
 .header-top h1 {
