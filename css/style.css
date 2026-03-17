@@ -1302,7 +1302,7 @@ tr.target-highlight td {
 .anatomy-legend .callout-num-cell { width: 32px; text-align: center; }
 .anatomy-legend a { color: var(--link); text-decoration: underline; }
 .anatomy-legend a:visited { color: var(--visited); }
-.diagram-row { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-end; }
+.diagram-row { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-end; margin-top: 1.5em; }
 .diagram-row .diagram-figure { flex: 1 1 180px; max-width: 25%; }
 .diagram-row .diagram-figure svg { max-width: 100%; }
 .diagram-caption {
