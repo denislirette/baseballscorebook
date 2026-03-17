@@ -236,8 +236,8 @@ h4 { font-size: 1.15em; line-height: 1.5; font-weight: 600; margin-top: 1.5em; m
 strong, b { font-weight: 600; }
 
 :focus-visible {
-  outline: 3px solid var(--sc-sub);
-  outline-offset: 2px;
+  outline: 2px solid var(--text);
+  outline-offset: 3px;
 }
 
 
