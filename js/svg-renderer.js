@@ -216,7 +216,7 @@ export function renderTeamScorecard(data, side) {
   drawHeader(svg, CLR, colMap, statsWidth);
   drawStatHeaders(svg, CLR, colMap);
   drawLineup(svg, CLR, lineup, rowOffsets, boxscore, gameData, side, subMap);
-  drawAtBats(svg, CLR, lineup, grid, rowOffsets, colMap, subMap, subNumberMap);
+  drawAtBats(svg, CLR, lineup, grid, rowOffsets, colMap, subMap, subNumberMap, activeCellKey, lastPlayedInning);
   drawBatterStats(svg, CLR, lineup, rowOffsets, batterStats, colMap, gridHeight);
   // Compute per-inning pitch counts from grid data
   const inningPitchCounts = [];
@@ -285,7 +285,7 @@ function buildColMap(grid, lineup, innings) {
 
 // ─── Per-cell substitution indicators ────────────────────────────
 
-function drawSubIndicator(g, CLR, x, y, subType, subNum, pStats) {
+function drawSubIndicator(g, CLR, x, y, subType, subNum, pStats, cellBgColor) {
   const circleR = L.SUB_CIRCLE_R + 2; // slightly larger for alignment with notation
   const circleFontSize = String(Math.round(circleR * 1.2));
   const lineW = L.SUB_LINE_W;
@@ -304,7 +304,7 @@ function drawSubIndicator(g, CLR, x, y, subType, subNum, pStats) {
     const pColor = CLR.pitcherLine;
     g.appendChild(svgEl('rect', {
       x: x, y: y - 4, width: L.COL_WIDTH, height: 8,
-      fill: CLR.cellBg, stroke: 'none',
+      fill: cellBgColor || CLR.cellBg, stroke: 'none',
     }));
     // Draw square blocks on either side of the label (or across full width if no stats)
     const sqSize = 7; // perfect squares
@@ -570,7 +570,7 @@ function drawLineup(svg, CLR, lineup, rowOffsets, boxscore, gameData, side, subM
 
 // ─── At-bat cells ────────────────────────────────────────────────
 
-function drawAtBats(svg, CLR, lineup, grid, rowOffsets, colMap, subMap, subNumberMap) {
+function drawAtBats(svg, CLR, lineup, grid, rowOffsets, colMap, subMap, subNumberMap, activeCellKey, lastPlayedInning) {
   const g = svgEl('g', { class: 'at-bats' });
   const { innings } = colMap;
 
@@ -630,12 +630,17 @@ function drawAtBats(svg, CLR, lineup, grid, rowOffsets, colMap, subMap, subNumbe
       const subs = subMap.get(key);
       if (subs) {
         const sorted = [...subs].sort((a, b) => (a.type === 'pitcher' ? 1 : 0) - (b.type === 'pitcher' ? 1 : 0));
+        // Determine the cell background for the cover rect
+        const hasData = cellAbs && cellAbs.length > 0;
+        const isActive = key === activeCellKey;
+        const isFuture = lastPlayedInning > 0 && inn > lastPlayedInning;
+        const cellBgColor = isActive ? CLR.activeCell : (hasData ? CLR.cellBg : (isFuture ? CLR.cellBgFuture : CLR.cellBgEmpty));
         for (const sub of sorted) {
           if (isBatAround && (sub.type === 'PH' || sub.type === 'PR')) continue;
           const subX = colMap.colX(inn);
           const subNum = subNumberMap.get(sub.playerId) || 0;
           const pStats = sub.type === 'pitcher' ? pitcherSubStats.get(key) : null;
-          drawSubIndicator(g, CLR, subX, y, sub.type, subNum, pStats);
+          drawSubIndicator(g, CLR, subX, y, sub.type, subNum, pStats, cellBgColor);
         }
       }
     }
