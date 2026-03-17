@@ -289,11 +289,12 @@ strong, b { font-weight: 600; }
 }
 
 .header-logo {
-  height: 28px;
-  width: 28px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--text);
 }
-[data-theme="dark"] .header-logo {
-  filter: invert(1);
+.header-logo svg {
+  display: block;
 }
 
 .header-tagline {
@@ -1115,11 +1116,11 @@ strong, b { font-weight: 600; }
 }
 
 .footer-logo {
-  height: 18px;
-  width: 18px;
+  display: inline-flex;
+  align-items: center;
 }
-[data-theme="dark"] .footer-logo {
-  filter: brightness(0) invert(1);
+.footer-logo svg {
+  display: block;
 }
 
 .footer-links {
