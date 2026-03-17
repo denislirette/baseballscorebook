@@ -916,16 +916,16 @@ function drawScrollablePitchSequence(g, CLR, pitches, pitchX, topY, colW, cellY)
 
     // Challenge badge
     const hasBadge = !!pitch.challenged;
-    const sqSize = fs - 4;
+    const badgeSize = fs;
     if (hasBadge) {
       const label = pitch.overturned ? 'W' : 'L';
       const typeW = typeLabel.length * fs * 0.55;
-      const sqX = midX + 3 + typeW + 2;
-      const sqY = textY - sqSize + 1;
-      rowSvg.appendChild(svgEl('rect', { x: sqX, y: sqY, width: sqSize, height: sqSize, fill: CLR.challenge }));
-      rowSvg.appendChild(svgText(label, sqX + sqSize / 2, sqY + sqSize / 2, {
+      const sqX = midX + 3 + typeW + 4;
+      const sqY = textY - badgeSize + 2;
+      rowSvg.appendChild(svgEl('rect', { x: sqX, y: sqY, width: badgeSize, height: badgeSize, fill: CLR.challenge }));
+      rowSvg.appendChild(svgText(label, sqX + badgeSize / 2, sqY + badgeSize / 2, {
         'text-anchor': 'middle', 'dominant-baseline': 'central',
-        'font-size': String(sqSize - 2), 'font-weight': '700', 'font-family': L.MONO, fill: CLR.bg,
+        'font-size': String(badgeSize - 2), 'font-weight': '700', 'font-family': L.MONO, fill: CLR.bg,
       }));
     }
 
@@ -1007,19 +1007,20 @@ function drawSinglePitch(g, CLR, pitch, colBaseX, startY, row, step, colW, fs) {
     }));
   }
 
-  // Badge tucked right after type
+  // Badge after type, aligned to the right edge of the pitch column
   if (hasBadge) {
     const label = pitch.overturned ? 'W' : 'L';
+    const badgeSize = fsi;
     const typeW = typeLabel.length * fsi * 0.55;
-    const sqX = midX + 3 + typeW + 2;
-    const sqY = textY - sqSize + 1;
+    const sqX = midX + 3 + typeW + 4;
+    const sqY = textY - badgeSize + 2;
     g.appendChild(svgEl('rect', {
-      x: sqX, y: sqY, width: sqSize, height: sqSize,
+      x: sqX, y: sqY, width: badgeSize, height: badgeSize,
       fill: CLR.challenge,
     }));
-    g.appendChild(svgText(label, sqX + sqSize / 2, sqY + sqSize / 2, {
+    g.appendChild(svgText(label, sqX + badgeSize / 2, sqY + badgeSize / 2, {
       'text-anchor': 'middle', 'dominant-baseline': 'central',
-      'font-size': String(sqSize - 2), 'font-weight': '700', 'font-family': L.MONO, fill: '#ffffff',
+      'font-size': String(badgeSize - 2), 'font-weight': '700', 'font-family': L.MONO, fill: '#ffffff',
     }));
   }
 }

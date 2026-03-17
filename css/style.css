@@ -230,7 +230,7 @@ a[target="_blank"]::after {
 }
 
 /* Global heading styles */
-h1 { font-size: 2.2em; line-height: 1.25; font-weight: 800; }
+h1 { font-size: 2.2em; line-height: 1.25; font-weight: 800; margin-bottom: 0.5em; }
 h2 { font-size: 1.65em; line-height: 1.25; font-weight: 700; margin-top: 1.5em; margin-bottom: 0.5em; }
 h3 { font-size: 1.35em; line-height: 1.5; font-weight: 600; margin-top: 1.5em; margin-bottom: 0.5em; }
 h4 { font-size: 1.15em; line-height: 1.5; font-weight: 600; margin-top: 1.5em; margin-bottom: 0.5em; }
