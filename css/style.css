@@ -527,7 +527,7 @@ strong, b { font-weight: 600; }
 }
 
 .dp-grid td:hover:not(.dp-outside) { background: var(--surface); }
-.dp-grid td:focus { outline: none; border-color: var(--link); }
+.dp-grid td:focus { outline: 2px dotted var(--text); outline-offset: -2px; border-color: transparent; }
 .dp-grid td.dp-outside { cursor: default; }
 .dp-grid td.dp-today-cell { font-weight: 700; }
 .dp-grid td.dp-selected { background: var(--text); color: var(--bg); }
