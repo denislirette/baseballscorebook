@@ -324,15 +324,21 @@ export function drawCell(svg, cellX, cellY, ab) {
       }));
     } else {
       const display = notation.length > 7 ? notation.substring(0, 7) : notation;
-      const fontSize = showDiamond ? FS_SM : FS;
+      const isBackwardsK = notation === '\u{A4D8}';
+      const fontSize = showDiamond ? FS_SM : (isBackwardsK ? FS + 4 : FS);
       const textY = showDiamond ? cellY + CS - PAD : cy + Math.round(fontSize / 3);
-      const fw = notation === '\u{A4D8}' ? '900' : '700';
-      svg.appendChild(tx(display, cx, textY, {
+      const attrs = {
         class: 'th-t',
-        'font-size': String(fontSize), 'font-weight': fw,
+        'font-size': String(fontSize), 'font-weight': isBackwardsK ? '900' : '700',
         'text-anchor': 'middle',
         'font-family': 'sans-serif',
-      }));
+      };
+      if (isBackwardsK) {
+        attrs['stroke'] = 'currentColor';
+        attrs['stroke-width'] = '0.5';
+        attrs['paint-order'] = 'stroke';
+      }
+      svg.appendChild(tx(display, cx, textY, attrs));
     }
   }
 }
