@@ -908,8 +908,8 @@ function drawScrollablePitchSequence(g, CLR, pitches, pitchX, topY, colW, cellY)
     const sqSize = fs - 4;
     if (hasBadge) {
       const label = pitch.overturned ? 'W' : 'L';
-      const speedW = speed.length * fs * 0.55;
-      const sqX = midX + 3 + speedW + 2;
+      const typeW = typeLabel.length * fs * 0.55;
+      const sqX = midX + 3 + typeW + 2;
       const sqY = textY - sqSize + 1;
       rowSvg.appendChild(svgEl('rect', { x: sqX, y: sqY, width: sqSize, height: sqSize, fill: CLR.challenge }));
       rowSvg.appendChild(svgText(label, sqX + sqSize / 2, sqY + sqSize / 2, {
@@ -918,13 +918,13 @@ function drawScrollablePitchSequence(g, CLR, pitches, pitchX, topY, colW, cellY)
       }));
     }
 
-    if (typeLabel) {
-      rowSvg.appendChild(svgText(typeLabel, midX - 3, textY, {
+    if (speed) {
+      rowSvg.appendChild(svgText(speed, midX - 3, textY, {
         'font-size': String(fs), 'font-weight': fw, 'font-family': L.MONO, fill: color, 'text-anchor': 'end',
       }));
     }
-    if (speed) {
-      rowSvg.appendChild(svgText(speed, midX + 3, textY, {
+    if (typeLabel) {
+      rowSvg.appendChild(svgText(typeLabel, midX + 3, textY, {
         'font-size': String(fs), 'font-weight': fw, 'font-family': L.MONO, fill: color,
       }));
     }
@@ -979,28 +979,28 @@ function drawSinglePitch(g, CLR, pitch, colBaseX, startY, row, step, colW, fs) {
   const hasBadge = !!pitch.challenged;
   const badgeW = hasBadge ? sqSize + 3 : 0;
 
-  // Pitch type (FF / SL / CU / CH) - right of center, right-aligned
-  const typeLabel = pitch.typeCode || '';
-  if (typeLabel) {
-    g.appendChild(svgText(typeLabel, midX - 3, textY, {
+  // Speed (94, 87, etc.) - left of center, right-aligned
+  const speed = pitch.speed ? String(Math.round(pitch.speed)) : '';
+  if (speed) {
+    g.appendChild(svgText(speed, midX - 3, textY, {
       'font-size': fs, 'font-weight': fw, 'font-family': L.MONO, fill: color,
       'text-anchor': 'end',
     }));
   }
 
-  // Speed (mph) - left of center, left-aligned (tight to type)
-  const speed = pitch.speed ? String(Math.round(pitch.speed)) : '';
-  if (speed) {
-    g.appendChild(svgText(speed, midX + 3, textY, {
+  // Pitch type (FF / SL / CU / CH) - right of center, left-aligned
+  const typeLabel = pitch.typeCode || '';
+  if (typeLabel) {
+    g.appendChild(svgText(typeLabel, midX + 3, textY, {
       'font-size': fs, 'font-weight': fw, 'font-family': L.MONO, fill: color,
     }));
   }
 
-  // Badge tucked right after speed
+  // Badge tucked right after type
   if (hasBadge) {
     const label = pitch.overturned ? 'W' : 'L';
-    const speedW = speed.length * fsi * 0.55;
-    const sqX = midX + 3 + speedW + 2;
+    const typeW = typeLabel.length * fsi * 0.55;
+    const sqX = midX + 3 + typeW + 2;
     const sqY = textY - sqSize + 1;
     g.appendChild(svgEl('rect', {
       x: sqX, y: sqY, width: sqSize, height: sqSize,
