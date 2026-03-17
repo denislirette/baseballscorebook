@@ -210,16 +210,16 @@ export function drawCell(svg, cellX, cellY, ab) {
   // Only shift diamond up when notation text will appear below it
   const dcy = (showDiamond && !isBaseHit && !isHR) ? cy - 4 : cy;
 
-  // ── Out dots (top-left) ──
+  // ── Out dots (top-left, stacked vertically) ──
   const outs = (ab.runners || []).filter(r => r.isOut).length;
   if (outs > 0) {
-    const dotY = cellY + PAD + DOTR;
-    const dotSpacing = 6;
-    const startX = cellX + PAD + DOTR;
+    const dotX = cellX + PAD + DOTR;
+    const dotSpacing = DOTR * 2 + 2;
+    const startY = cellY + PAD + DOTR;
     for (let i = 0; i < Math.min(outs, 3); i++) {
       svg.appendChild(el('circle', {
         class: 'th-out',
-        cx: startX + i * dotSpacing, cy: dotY, r: DOTR,
+        cx: dotX, cy: startY + i * dotSpacing, r: DOTR,
       }));
     }
   }
