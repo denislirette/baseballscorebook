@@ -144,7 +144,10 @@ function initFooter() {
 
   footer.innerHTML = `
     <div class="footer-content">
-      <span class="footer-brand">BaseballScorecard.org <span class="footer-tagline">Every game tells a story.</span></span>
+      <div class="footer-brand-block">
+        <span class="footer-brand">BaseballScorecard.org <span class="footer-tagline">Every game tells a story.</span></span>
+        <a href="/releases.html" class="footer-version">Version ${VERSION}</a>
+      </div>
       <nav class="footer-links">${links}</nav>
     </div>`;
 
