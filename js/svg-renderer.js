@@ -695,7 +695,7 @@ function drawAtBatCell(g, CLR, ab, x, y, hasPitcherSubBelow) {
   const pitchCount = ab.pitchSequence.length;
   const pitchAreaW = L.PITCH_COL_W;
   const PITCH_GAP = 14; // breathing room between main area and pitches
-  const PITCH_PAD_R = 4; // right padding for pitch column (tighter than left PAD)
+  const PITCH_PAD_R = 12; // right padding for pitch column
   const pitchX = x + L.COL_WIDTH - PITCH_PAD_R - pitchAreaW;
 
   // Main area: left side (for diamond, notation, out badge, RBI)
