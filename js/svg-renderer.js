@@ -1433,7 +1433,7 @@ export function renderPitcherStatsHTML(data, side, teamAbbrev) {
     const yr = new Date().getFullYear();
     const seasonRow = `${spacer}
       <tr class="pitcher-season-row">
-        <td class="pitcher-season-label" colspan="2">${yr} Stats</td>
+        <td class="pitcher-season-label" colspan="2">Season</td>
         <td>${v(ss.inningsPitched)}</td>
         <td>${v(ss.hits)}</td>
         <td>${v(ss.runs)}</td>

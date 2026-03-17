@@ -860,7 +860,6 @@ strong, b { font-weight: 600; }
 }
 .pitcher-stats-table td.pitcher-season-label {
   text-align: right;
-  font-style: italic;
 }
 
 .pitcher-stats-table tbody tr:hover td,
