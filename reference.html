@@ -57,6 +57,7 @@
           <li class="subnav-indent"><a href="#batter-stats">Batter Stats</a></li>
           <li class="subnav-indent"><a href="#summary-rows">Summary Rows</a></li>
           <li class="subnav-indent"><a href="#abs-challenge">ABS Challenge</a></li>
+          <li class="subnav-indent"><a href="#keyboard-shortcuts">Keyboard Shortcuts</a></li>
         </ul>
         <p class="subnav-group">Batting Formulas</p>
         <ul>
@@ -114,6 +115,7 @@
           <tr><td class="callout-num-cell"><span class="callout-num">10</span></td><td><strong><a href="#cell-indicators">Pitching change</a></strong></td><td>Square-block line between rows with S/P/K stats</td></tr>
           <tr><td class="callout-num-cell"><span class="callout-num">11</span></td><td><strong><a href="#play-notation">Centered notation</a></strong></td><td>When no diamond is shown (outs, K, BB), the scoring shorthand is centered — e.g. G63 = groundout, shortstop (6) to first baseman (3)</td></tr>
           <tr><td class="callout-num-cell"><span class="callout-num">12</span></td><td><strong>Active cell</strong></td><td>Highlighted background on the current batter's cell during live games</td></tr>
+          <tr><td class="callout-num-cell"><span class="callout-num">13</span></td><td><strong>Batter &amp; pitcher stance</strong></td><td>Pill shapes near the strike zone. The larger, lower pill is the batter (R or L side of plate). The smaller, higher pill is the pitcher (throwing hand). Handles switch hitters per at-bat.</td></tr>
         </table>
       </div>
 
@@ -199,7 +201,7 @@
             mkP('B','CU',-0.8,1.2,78),
             mkP('X','CH',-0.2,2,87),
           ],
-          notation: '1B', result: { eventType: 'single' }, rbi: 1, outNumber: 2,
+          notation: '1B', result: { eventType: 'single' }, rbi: 1, outNumber: 2, batSide: 'R', pitchHand: 'L',
           runners: [{ playerId:1, start:'HP', end:'1B' }, { playerId:2, start:'2B', end:'score' }],
           cumulativeRunners: [
             { playerId:1, segments:[{from:'HP',to:'1B'}], isOut:false, outNumber:null, outBase:null },
@@ -243,6 +245,9 @@
         addCallout(svg1, CLR, 8, W+M-11, (badgeY + dotY)/2, [[badgeX, badgeY], [dotX, dotY]], absColor);
 
         addCallout(svg1, CLR, 9, -M+11, H*0.65,     [-3, H*0.65]);                  // Sub line
+
+        // Callout #13: batter/pitcher stance silhouettes (below diagram)
+        addCallout(svg1, CLR, 13, pX + pcW + M - 5, H + M - 11, [pX + pcW - 8, H - 6]);
 
         document.getElementById('anatomyCell').innerHTML = '';
         document.getElementById('anatomyCell').appendChild(svg1);
@@ -619,6 +624,16 @@
           <table class="legend-table">
             <tr><td><span style="display:inline-block;background:#7B2D8E;color:#fff;font-weight:700;width:1.4em;height:1.4em;line-height:1.4em;text-align:center;font-size:0.85em;">W</span></td><td>Challenge won (call overturned)</td></tr>
             <tr><td><span style="display:inline-block;background:#7B2D8E;color:#fff;font-weight:700;width:1.4em;height:1.4em;line-height:1.4em;text-align:center;font-size:0.85em;">L</span></td><td>Challenge lost (call upheld)</td></tr>
+          </table>
+        </div>
+
+        <div class="legend-section" id="keyboard-shortcuts">
+          <h3>Keyboard Shortcuts</h3>
+          <table class="legend-table">
+            <tr><td><strong>D</strong></td><td>Switch to dark mode</td></tr>
+            <tr><td><strong>L</strong></td><td>Switch to light mode</td></tr>
+            <tr><td><strong>&larr;</strong></td><td>Previous day (game picker)</td></tr>
+            <tr><td><strong>&rarr;</strong></td><td>Next day (game picker)</td></tr>
           </table>
         </div>
 

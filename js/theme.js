@@ -36,4 +36,23 @@ const DARK_ICON = '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox
   });
 
   updateToggle();
+
+  // Keyboard shortcuts: D for dark mode, L for light mode
+  document.addEventListener('keydown', (e) => {
+    // Skip if user is typing in an input or textarea
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+    if (e.key === 'd' || e.key === 'D') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme', 'dark');
+      updateToggle();
+      const refreshBtn = document.getElementById('refresh-btn');
+      if (refreshBtn) refreshBtn.click();
+    } else if (e.key === 'l' || e.key === 'L') {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.removeItem('theme');
+      updateToggle();
+      const refreshBtn = document.getElementById('refresh-btn');
+      if (refreshBtn) refreshBtn.click();
+    }
+  });
 })();

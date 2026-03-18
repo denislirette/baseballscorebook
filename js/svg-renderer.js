@@ -740,7 +740,7 @@ function drawAtBatCell(g, CLR, ab, x, y, hasPitcherSubBelow) {
     drawScrollablePitchSequence(g, CLR, ab.pitchSequence, pitchX, topY, pitchAreaW, y);
   } else {
     drawPitchSequence(g, CLR, ab.pitchSequence, pitchX, topY, false);
-    drawMiniStrikeZone(g, CLR, ab.pitchSequence, pitchX, y, pitchAreaW, ab.batSide);
+    drawMiniStrikeZone(g, CLR, ab.pitchSequence, pitchX, y, pitchAreaW, ab.batSide, ab.pitchHand);
   }
 
   // ── Diamond logic ──
@@ -1046,7 +1046,7 @@ function drawSinglePitch(g, CLR, pitch, colBaseX, startY, row, step, colW, fs) {
 
 // ─── Mini strike zone (bottom 1/3 of pitch column) ──────────────
 
-function drawMiniStrikeZone(g, CLR, pitches, pitchX, cellY, pitchColW, batSide) {
+function drawMiniStrikeZone(g, CLR, pitches, pitchX, cellY, pitchColW, batSide, pitchHand) {
   if (pitches.length === 0 || pitches.length > PITCH_OVERFLOW) return;
 
   const regionH = L.ROW_HEIGHT * 0.28;
@@ -1076,19 +1076,39 @@ function drawMiniStrikeZone(g, CLR, pitches, pitchX, cellY, pitchColW, batSide) 
   const szTopY = mapY(avgTop);
   const szBotY = mapY(avgBot);
 
-  // Batter silhouette oval (behind zone and pitches)
+  // Batter silhouette pill (behind zone and pitches)
   if (batSide === 'R' || batSide === 'L') {
-    const ovalW = (szRight - szLeft) * 0.45;
-    const ovalH = (szBotY - szTopY) * 0.85;
-    const ovalCY = szTopY + (szBotY - szTopY) / 2;
+    const zoneW = szRight - szLeft;
+    const zoneH = szBotY - szTopY;
+    const pillW = zoneW * 0.55;
+    const pillH = zoneH * 1.3;
+    const pillY = szTopY + zoneH / 2 - pillH / 2;
+    const gap = pillW;
     // From catcher's view: R batter stands to catcher's left, L to catcher's right
-    const ovalCX = batSide === 'R'
-      ? szLeft - ovalW * 0.5
-      : szRight + ovalW * 0.5;
-    g.appendChild(svgEl('ellipse', {
-      cx: ovalCX, cy: ovalCY, rx: ovalW / 2, ry: ovalH / 2,
-      fill: CLR.grid, opacity: 0.3,
+    const pillX = batSide === 'R'
+      ? szLeft - gap - pillW
+      : szRight + gap;
+    g.appendChild(svgEl('rect', {
+      x: pillX, y: pillY, width: pillW, height: pillH,
+      rx: pillW / 2, ry: pillW / 2,
+      fill: '#878278', opacity: 0.35,
     }));
+
+    // Pitcher silhouette pill (sits on the zone edge, sticks out above)
+    if (pitchHand === 'R' || pitchHand === 'L') {
+      const pPillW = zoneW * 0.35;
+      const pPillH = zoneH * 0.9;
+      const pPillCY = szTopY - pPillH * 0.35;
+      // Centered on the zone's left or right edge line
+      const pPillX = pitchHand === 'R'
+        ? szRight - pPillW / 2
+        : szLeft - pPillW / 2;
+      g.appendChild(svgEl('rect', {
+        x: pPillX, y: pPillCY, width: pPillW, height: pPillH,
+        rx: pPillW / 2, ry: pPillW / 2,
+        fill: '#878278', opacity: 0.35,
+      }));
+    }
   }
 
   g.appendChild(svgEl('rect', {
