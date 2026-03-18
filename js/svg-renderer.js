@@ -1091,13 +1091,13 @@ function drawMiniStrikeZone(g, CLR, pitches, pitchX, cellY, pitchColW, batSide, 
     g.appendChild(svgEl('rect', {
       x: pillX, y: pillY, width: pillW, height: pillH,
       rx: pillW / 2, ry: pillW / 2,
-      fill: '#878278', opacity: 0.35,
+      fill: '#878278', opacity: 0.45,
     }));
 
     // Pitcher silhouette pill (sits on the zone edge, sticks out above)
     if (pitchHand === 'R' || pitchHand === 'L') {
-      const pPillW = zoneW * 0.35;
-      const pPillH = zoneH * 0.9;
+      const pPillW = zoneW * 0.25;
+      const pPillH = zoneH * 0.7;
       const pPillCY = szTopY - pPillH * 0.35;
       // Centered on the zone's left or right edge line
       const pPillX = pitchHand === 'R'
@@ -1106,7 +1106,7 @@ function drawMiniStrikeZone(g, CLR, pitches, pitchX, cellY, pitchColW, batSide, 
       g.appendChild(svgEl('rect', {
         x: pPillX, y: pPillCY, width: pPillW, height: pPillH,
         rx: pPillW / 2, ry: pPillW / 2,
-        fill: '#878278', opacity: 0.35,
+        fill: '#878278', opacity: 0.45,
       }));
     }
   }
@@ -1531,10 +1531,12 @@ export function renderPitcherStatsHTML(data, side, teamAbbrev) {
   }).join('');
 
   return `
+    <div class="table-scroll-wrapper">
     <table class="pitcher-stats-table">
       <thead><tr><th>${label}</th><th>PITCH TYPES (USAGE/MPH)</th><th>IP</th><th>H</th><th>R</th><th>ER</th><th>BB</th><th>K</th><th>S</th><th>P</th><th>ERA</th><th>WHIP</th></tr></thead>
       <tbody>${rows}</tbody>
-    </table>`;
+    </table>
+    </div>`;
 }
 
 export function renderStartingPitcherHTML(data, side, teamAbbrev) {
@@ -1607,10 +1609,12 @@ export function renderBenchHTML(data, side, teamAbbrev) {
   return `
     <details class="collapsible-section" data-section="bench-${side}">
       <summary role="button" aria-expanded="false">${label} <span class="section-count">(${players.length})</span></summary>
+      <div class="table-scroll-wrapper">
       <table class="pitcher-stats-table">
         <thead><tr><th>Player</th><th>POS</th><th>AVG</th><th>OBP</th><th>SLG</th><th>OPS</th><th>wOBA</th><th>HR</th><th>RBI</th><th>SB</th><th>PA</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
+      </div>
     </details>`;
 }
 
@@ -1644,10 +1648,12 @@ export function renderBullpenHTML(data, side, teamAbbrev) {
   return `
     <details class="collapsible-section" data-section="bullpen-${side}">
       <summary role="button" aria-expanded="false">${label} <span class="section-count">(${players.length})</span></summary>
+      <div class="table-scroll-wrapper">
       <table class="pitcher-stats-table">
         <thead><tr><th>Player</th><th>PITCH TYPES (USAGE/MPH)</th><th>IP</th><th>H</th><th>R</th><th>ER</th><th>BB</th><th>K</th><th>S</th><th>P</th><th>ERA</th><th>WHIP</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
+      </div>
     </details>`;
 }
 

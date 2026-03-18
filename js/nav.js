@@ -1,7 +1,7 @@
 // Global navigation + footer - injected dynamically on every page
 // Same header on every page: site title + nav links, classic HTML link style
 
-const VERSION = '0.5.0';
+const VERSION = '0.6.0';
 
 const IS_LOCAL = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
@@ -15,7 +15,7 @@ const NAV_ITEMS = [
 const FOOTER_LINKS = [
   { href: '/about.html', label: 'About' },
   { href: '/contact.html', label: 'Contact' },
-  { href: '/accessibility.html', label: 'Accessibility' },
+  { href: 'https://github.com/denislirette/baseballscorecard/blob/master/docs/ACCESSIBILITY.md', label: 'Accessibility' },
   { href: '/analytics.html', label: 'Analytics' },
 ];
 
@@ -154,7 +154,7 @@ function initFooter() {
   footer.innerHTML = `
     <div class="footer-content">
       <div class="footer-top">
-        <span class="footer-brand">BaseballScorecard.org <a href="${releasesURL}" target="_blank" rel="noopener" class="footer-version" id="footer-version">v${VERSION}</a></span>
+        <span class="footer-brand">BaseballScorecard.org &nbsp;&nbsp; <a href="${releasesURL}" target="_blank" rel="noopener" class="footer-version" id="footer-version">Version ${VERSION}</a></span>
         <nav class="footer-links">${links}</nav>
       </div>
       <div class="footer-disclaimer">This system isn't perfect and has bugs. Double check stats before committing pen to paper and have some white-out nearby.</div>
@@ -168,7 +168,7 @@ function initFooter() {
       const tag = data.tag_name.replace(/^v/, '');
       const link = document.getElementById('footer-version');
       if (link) {
-        link.textContent = `v${tag}`;
+        link.textContent = `Version ${tag}`;
         link.href = data.html_url;
       }
     })
