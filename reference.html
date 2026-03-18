@@ -281,7 +281,7 @@
             mkP('F','FF',0.5,2.8,96), mkP('B','CU',-0.8,1.2,78),
             mkP('B','CH',1.2,1,86), mkP('H','SI',0.8,1.5,92),
           ],
-          notation: 'HBP', result: { eventType: 'hit_by_pitch' }, rbi: 0, outNumber: null,
+          notation: 'HBP', result: { eventType: 'hit_by_pitch' }, rbi: 0, outNumber: null, batSide: 'L', pitchHand: 'R',
           runners: [{ playerId:1, start:'HP', end:'1B' }],
           cumulativeRunners: [
             { playerId:1, segments:[{from:'HP',to:'1B'}], isOut:false, outNumber:null, outBase:null },
@@ -315,7 +315,7 @@
             mkP('C','FF',0.2,2.5,95),
             mkP('X','SI',0,1.6,93),
           ],
-          notation: 'G63', result: { eventType: 'field_out' }, rbi: 0, outNumber: 1,
+          notation: 'G63', result: { eventType: 'field_out' }, rbi: 0, outNumber: 1, batSide: 'R', pitchHand: 'R',
           runners: [], cumulativeRunners: [],
         };
 
@@ -326,7 +326,7 @@
         // Callout #11: centered notation
         const diamondCx = PAD + (pX - 14 - PAD) / 2;
         const midCy = (PAD + 22 + H - PAD - 28) / 2 - 10;
-        addCallout(svg3, CLR, 11, W+M-11, midCy, [diamondCx + 30, midCy]);
+        addCallout(svg3, CLR, 11, W+M-11, midCy, [pX - 4, midCy]);
 
         // Callout #12: active cell highlight
         addCallout(svg3, CLR, 12, -M+11, H+M-11, [0, H]);
@@ -401,7 +401,7 @@
         {
           label: 'Pinch Hitter (PH)',
           ab: { batterId:1, pitchSequence:[mkP('B','FF',-1,3,95), mkP('C','SL',0.3,2.2,84), mkP('X','CH',-0.2,2,87)],
-            notation:'1B', result:{eventType:'single'}, rbi:0, outNumber:null,
+            notation:'1B', result:{eventType:'single'}, rbi:0, outNumber:null, batSide:'L', pitchHand:'R',
             runners:[{playerId:1,start:'HP',end:'1B'}],
             cumulativeRunners:[{playerId:1,segments:[{from:'HP',to:'1B'}],isOut:false,outNumber:null,outBase:null}] },
           subType: 'PH',
@@ -409,7 +409,7 @@
         {
           label: 'Pinch Runner (PR)',
           ab: { batterId:1, pitchSequence:[mkP('B','FF',-1,3,95), mkP('F','SL',0.3,2.2,84), mkP('X','FF',0.1,2.5,94)],
-            notation:'2B', result:{eventType:'double'}, rbi:0, outNumber:null,
+            notation:'2B', result:{eventType:'double'}, rbi:0, outNumber:null, batSide:'R', pitchHand:'L',
             runners:[{playerId:1,start:'HP',end:'2B'}],
             cumulativeRunners:[{playerId:1,segments:[{from:'HP',to:'1B'},{from:'1B',to:'2B'}],isOut:false,outNumber:null,outBase:null}] },
           subType: 'PR',
@@ -417,7 +417,7 @@
         {
           label: 'Pitching Change',
           ab: { batterId:1, pitchSequence:[mkP('C','FF',0.2,2.5,95), mkP('F','SL',-0.5,1.8,84), mkP('S','CH',0.1,1.5,87)],
-            notation:'\u{A4D8}', result:{eventType:'strikeout'}, rbi:0, outNumber:3,
+            notation:'\u{A4D8}', result:{eventType:'strikeout'}, rbi:0, outNumber:3, batSide:'R', pitchHand:'R',
             runners:[], cumulativeRunners:[] },
           subType: 'pitcher',
           pitcherBelow: true,
@@ -636,19 +636,19 @@
         <div class="legend-section" id="keyboard-shortcuts">
           <h3>Keyboard Shortcuts</h3>
           <table class="legend-table">
-            <tr><td><strong>D</strong></td><td>Switch to dark mode</td></tr>
-            <tr><td><strong>L</strong></td><td>Switch to light mode</td></tr>
-            <tr><td><strong>&larr;</strong></td><td>Previous day (game picker)</td></tr>
-            <tr><td><strong>&rarr;</strong></td><td>Next day (game picker)</td></tr>
+            <tr><td><kbd>D</kbd></td><td>Switch to dark mode</td></tr>
+            <tr><td><kbd>L</kbd></td><td>Switch to light mode</td></tr>
+            <tr><td><kbd>&larr;</kbd></td><td>Previous day (game picker)</td></tr>
+            <tr><td><kbd>&rarr;</kbd></td><td>Next day (game picker)</td></tr>
           </table>
         </div>
 
         <div class="legend-section" id="diamond">
           <h3>Diamond &amp; Base Paths</h3>
           <table class="legend-table">
-            <tr><td><svg width="28" height="32" viewBox="0 0 28 32"><line x1="14" y1="2" x2="14" y2="30" stroke="var(--sc-text)" stroke-width="2.5"/><line x1="8" y1="16" x2="20" y2="16" stroke="var(--sc-text)" stroke-width="2" transform="rotate(-45 14 16)"/></svg></td><td><a href="#diamond-single">Single</a> (1 hash mark on HP&rarr;1B)</td></tr>
-            <tr><td><svg width="28" height="32" viewBox="0 0 28 32"><line x1="14" y1="2" x2="14" y2="30" stroke="var(--sc-text)" stroke-width="2.5"/><line x1="8" y1="13" x2="20" y2="13" stroke="var(--sc-text)" stroke-width="2" transform="rotate(-45 14 13)"/><line x1="8" y1="19" x2="20" y2="19" stroke="var(--sc-text)" stroke-width="2" transform="rotate(-45 14 19)"/></svg></td><td><a href="#diamond-double">Double</a> (2 hash marks on HP&rarr;1B)</td></tr>
-            <tr><td><svg width="28" height="32" viewBox="0 0 28 32"><line x1="14" y1="2" x2="14" y2="30" stroke="var(--sc-text)" stroke-width="2.5"/><line x1="8" y1="10" x2="20" y2="10" stroke="var(--sc-text)" stroke-width="2" transform="rotate(-45 14 10)"/><line x1="8" y1="16" x2="20" y2="16" stroke="var(--sc-text)" stroke-width="2" transform="rotate(-45 14 16)"/><line x1="8" y1="22" x2="20" y2="22" stroke="var(--sc-text)" stroke-width="2" transform="rotate(-45 14 22)"/></svg></td><td><a href="#diamond-triple">Triple</a> (3 hash marks on HP&rarr;1B)</td></tr>
+            <tr><td><svg width="36" height="36" viewBox="0 0 36 36"><!-- Diamond: HP=18,34 1B=34,18 2B=18,2 3B=2,18 --><!-- HP to 1B path --><line x1="18" y1="34" x2="34" y2="18" stroke="var(--sc-text)" stroke-width="2.5" stroke-linejoin="miter"/><!-- 1 hash mark --><line x1="22" y1="22" x2="30" y2="30" stroke="var(--sc-text)" stroke-width="2"/></svg></td><td><a href="#diamond-single">Single</a> (1 hash mark on HP&rarr;1B)</td></tr>
+            <tr><td><svg width="36" height="36" viewBox="0 0 36 36"><!-- HP to 1B to 2B path --><polyline points="18,34 34,18 18,2" fill="none" stroke="var(--sc-text)" stroke-width="2.5" stroke-linejoin="miter"/><!-- 2 hash marks on HP-1B --><line x1="20" y1="24" x2="28" y2="32" stroke="var(--sc-text)" stroke-width="2"/><line x1="24" y1="20" x2="32" y2="28" stroke="var(--sc-text)" stroke-width="2"/></svg></td><td><a href="#diamond-double">Double</a> (2 hash marks on HP&rarr;1B)</td></tr>
+            <tr><td><svg width="36" height="36" viewBox="0 0 36 36"><!-- HP to 1B to 2B to 3B path --><polyline points="18,34 34,18 18,2 2,18" fill="none" stroke="var(--sc-text)" stroke-width="2.5" stroke-linejoin="miter"/><!-- 3 hash marks on HP-1B --><line x1="19" y1="25.5" x2="25.5" y2="32" stroke="var(--sc-text)" stroke-width="2"/><line x1="22" y1="22" x2="30" y2="30" stroke="var(--sc-text)" stroke-width="2"/><line x1="25.5" y1="19" x2="32" y2="25.5" stroke="var(--sc-text)" stroke-width="2"/></svg></td><td><a href="#diamond-triple">Triple</a> (3 hash marks on HP&rarr;1B)</td></tr>
             <tr><td><svg width="28" height="28" viewBox="0 0 28 28"><polygon points="14,2 26,14 14,26 2,14" fill="var(--sc-text)"/><text x="14" y="15" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700" fill="var(--sc-cell-bg)">HR</text></svg></td><td><a href="#diamond-home-run">Home run</a> (filled diamond with white HR text)</td></tr>
             <tr><td><svg width="28" height="12" viewBox="0 0 28 12"><line x1="2" y1="6" x2="26" y2="6" stroke="var(--sc-text)" stroke-width="3"/></svg></td><td>Thick line = runner advanced along base path</td></tr>
             <tr><td><svg width="28" height="28" viewBox="0 0 28 28"><polygon points="14,4 24,14 14,24 4,14" fill="var(--sc-text)"/></svg></td><td>RBI diamond (one per run batted in)</td></tr>
@@ -659,10 +659,10 @@
         <div class="legend-section" id="cell-indicators">
           <h3>Cell Indicators</h3>
           <table class="legend-table">
-            <tr><td style="color:var(--sc-sub)">&#9632; &#9632;</td><td>Pitching change (square blocks on cell boundary)</td></tr>
+            <tr><td><svg width="32" height="32" viewBox="0 0 32 32"><rect x="1" y="1" width="30" height="30" fill="none" stroke="var(--sc-grid)" stroke-width="1"/><rect x="3" y="0" width="7" height="7" fill="var(--sc-sub)"/><rect x="12" y="0" width="7" height="7" fill="var(--sc-sub)"/><rect x="21" y="0" width="7" height="7" fill="var(--sc-sub)"/><line x1="1" y1="3.5" x2="31" y2="3.5" stroke="var(--sc-pitcher-line)" stroke-width="1.5" stroke-dasharray="4,2"/></svg></td><td>Pitching change (square blocks with dashed line on cell boundary). Includes the outgoing pitcher's strikes, pitches, and strikeouts.</td></tr>
             <tr><td><svg width="32" height="32" viewBox="0 0 32 32"><rect x="1" y="1" width="30" height="30" fill="none" stroke="var(--sc-grid)" stroke-width="1"/><line x1="1" y1="1" x2="1" y2="31" stroke="var(--sc-sub)" stroke-width="3"/></svg></td><td>Pinch hitter (solid left line)</td></tr>
             <tr><td><svg width="32" height="32" viewBox="0 0 32 32"><rect x="1" y="1" width="30" height="30" fill="none" stroke="var(--sc-grid)" stroke-width="1"/><line x1="31" y1="1" x2="31" y2="31" stroke="var(--sc-sub)" stroke-width="3"/></svg></td><td>Pinch runner (solid right line)</td></tr>
-            <tr><td style="padding:2px 6px;"><svg width="24" height="24" viewBox="0 0 24 24"><rect x="1" y="1" width="22" height="22" fill="var(--sc-active-cell)" stroke="var(--sc-active-border, #377049)" stroke-width="2.5"/></svg></td><td>Active batter cell (live games)</td></tr>
+            <tr><td><svg width="32" height="32" viewBox="0 0 32 32"><rect x="1" y="1" width="30" height="30" fill="var(--sc-active-cell)" stroke="var(--sc-active-border, #377049)" stroke-width="2.5"/></svg></td><td>Active batter cell (live games)</td></tr>
           </table>
         </div>
 

@@ -1096,7 +1096,7 @@ function drawMiniStrikeZone(g, CLR, pitches, pitchX, cellY, pitchColW, batSide, 
 
     // Pitcher silhouette pill (sits on the zone edge, sticks out above)
     if (pitchHand === 'R' || pitchHand === 'L') {
-      const pPillW = zoneW * 0.25;
+      const pPillW = zoneW * 0.35;
       const pPillH = zoneH * 0.7;
       const pPillCY = szTopY - pPillH * 0.35;
       // Centered on the zone's left or right edge line

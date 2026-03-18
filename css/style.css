@@ -1243,6 +1243,22 @@ tr.target-highlight td {
 .scorebook-note { margin-top: 0.75em; }
 .note { font-size: 0.85em; color: var(--text-secondary); }
 
+kbd {
+  display: inline-block;
+  padding: 3px 8px;
+  font-family: inherit;
+  font-size: 0.85em;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--grid-line);
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  min-width: 1.6em;
+  text-align: center;
+  line-height: 1.4;
+}
+
 /* About page */
 .about-lede {
   font-size: 1.3em;
@@ -1259,7 +1275,8 @@ tr.target-highlight td {
   align-items: start;
   margin: 1.5em 0;
 }
-.about-split-text p:first-child { margin-top: 0; }
+.about-split-text p:first-child { margin-top: -0.35em; padding-top: 0; }
+.about-split-image img { margin-top: 0; }
 .about-split-image img {
   width: 100%;
   height: auto;
