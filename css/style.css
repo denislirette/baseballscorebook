@@ -70,7 +70,7 @@
   --sc-out:           #a04a49;
   --sc-out-badge:     #292524;
   --sc-hit:           #377049;
-  --sc-sub:           #2a6d8d;
+  --sc-sub:           #8B6914;
   --sc-pitcher-line:  #2a6d8d;
   --sc-bg:            #faf9f6;
   --sc-cell-bg:       #faf9f6;
@@ -124,7 +124,7 @@
   --sc-out:           #e08887;
   --sc-out-badge:     #e0ddd5;
   --sc-hit:           #7bbf91;
-  --sc-sub:           #6cb4d9;
+  --sc-sub:           #C9A04E;
   --sc-pitcher-line:  #6cb4d9;
   --sc-bg:            #1c1918;
   --sc-cell-bg:       #292524;
@@ -869,6 +869,41 @@ strong, b { font-weight: 600; }
 .pitcher-stats-table td:first-child { position: sticky; left: 0; z-index: 1; }
 .pitcher-stats-table thead th:first-child { z-index: 3; }
 .pitcher-stats-table .pitcher-name { text-align: left; font-weight: 600; padding-right: 8px; white-space: nowrap; width: 1%; }
+
+/* Player links to MLB.com: standard link style with external icon */
+.player-link {
+  color: var(--link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.player-link:visited { color: var(--visited); }
+.player-link:hover {
+  color: var(--link-hover);
+  text-decoration-thickness: 2px;
+}
+
+/* SVG lineup player names (HTML via foreignObject, matches pitcher table exactly) */
+.lineup-name-html {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow: hidden;
+  line-height: 1.3;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+}
+.lineup-line1 {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lineup-line2 {
+  font-size: 0.8em;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  margin-top: 1px;
+}
 .pitcher-stats-table thead th:first-child { text-align: left; }
 .pitcher-stats-table .pitcher-note { font-weight: 400; color: var(--text-secondary); }
 .pitcher-stats-table .pitcher-pitches { text-align: left; font-size: 0.9em; color: var(--text-secondary); }

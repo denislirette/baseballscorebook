@@ -45,7 +45,6 @@
           <li class="subnav-indent"><a href="#pitch-call-codes">Call Codes</a></li>
           <li class="subnav-indent"><a href="#pitch-types">Pitch Types</a></li>
           <li class="subnav-indent"><a href="#pitch-colors">Pitch Colors</a></li>
-          <li class="subnav-indent"><a href="#count-strike-zone">Count &amp; Strike Zone</a></li>
         </ul>
         <p class="subnav-group">Scorecard</p>
         <ul>
@@ -100,7 +99,7 @@
         </div>
         <table class="anatomy-legend" style="border-collapse:collapse; font-size:0.85em; width:100%; margin-top:16px;">
           <tr><td class="callout-num-cell"><span class="callout-num">1</span></td><td><strong>Out number</strong></td><td>Which out of the inning (1, 2, 3)</td></tr>
-          <tr><td class="callout-num-cell"><span class="callout-num">2</span></td><td><strong>Count</strong></td><td>Ball-strike count at end of AB</td></tr>
+          <tr><td class="callout-num-cell"><span class="callout-num">2</span></td><td><strong>Count</strong></td><td>Ball-strike count at end of at bat</td></tr>
           <tr>
             <td class="callout-num-cell"><span class="callout-num">3</span></td>
             <td><strong><a href="#pitch-types">Pitch log</a></strong></td>
@@ -164,8 +163,7 @@
         span.className = 'callout-num';
         span.textContent = num;
         if (lineColor) {
-          span.style.borderColor = lineColor;
-          span.style.color = lineColor;
+          // Only color the lines, keep the circle consistent with others
         }
         // Center the span inside the foreignObject
         const wrapper = document.createElement('div');
@@ -663,13 +661,6 @@
             <tr><td><svg width="32" height="32" viewBox="0 0 32 32"><rect x="1" y="1" width="30" height="30" fill="none" stroke="var(--sc-grid)" stroke-width="1"/><line x1="1" y1="1" x2="1" y2="31" stroke="var(--sc-sub)" stroke-width="3"/></svg></td><td>Pinch hitter (solid left line)</td></tr>
             <tr><td><svg width="32" height="32" viewBox="0 0 32 32"><rect x="1" y="1" width="30" height="30" fill="none" stroke="var(--sc-grid)" stroke-width="1"/><line x1="31" y1="1" x2="31" y2="31" stroke="var(--sc-sub)" stroke-width="3"/></svg></td><td>Pinch runner (solid right line)</td></tr>
             <tr><td><svg width="32" height="32" viewBox="0 0 32 32"><rect x="1" y="1" width="30" height="30" fill="var(--sc-active-cell)" stroke="var(--sc-active-border, #377049)" stroke-width="2.5"/></svg></td><td>Active batter cell (live games)</td></tr>
-          </table>
-        </div>
-
-        <div class="legend-section" id="count-strike-zone">
-          <h3>Count &amp; Strike Zone</h3>
-          <table class="legend-table">
-            <tr><td>1-2</td><td>Count: 1 ball, 2 strikes</td></tr>
           </table>
         </div>
 

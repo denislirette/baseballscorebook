@@ -22,6 +22,12 @@ import { getConfig } from './layout-config.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
+// Player link helper: generates an MLB.com player link
+function playerLink(name, id) {
+  if (!id) return name;
+  return `<a href="https://www.mlb.com/player/${id}" target="_blank" rel="noopener noreferrer" class="player-link">${name}<span class="sr-only"> (opens in new tab)</span></a>`;
+}
+
 // Stats
 const STAT_HEADERS = ['AB', 'R', 'H', 'BI'];
 const SUMMARY_LABELS = ['R', 'H', 'E', 'LOB', 'S / P'];
@@ -102,6 +108,7 @@ function getColors() {
     activeBorder: v('--sc-active-border') || '#377049',
     challenge:    v('--sc-challenge')    || '#7B2D8E',
     pitcherLine:  v('--sc-pitcher-line') || '#7a9a7e',
+    link:         v('--link')          || '#294991',
   };
 }
 
@@ -428,9 +435,10 @@ function drawGrid(svg, CLR, lineup, colMap, totalRows, rowOffsets, width, gridHe
     g.appendChild(svgEl('line', { x1: x, y1: 0, x2: x, y2: lineBottom, stroke: CLR.grid, 'stroke-width': sw }));
   }
   const statsX = colMap.statsX();
-  g.appendChild(svgEl('line', { x1: statsX, y1: 0, x2: statsX, y2: gridHeight, stroke: CLR.gridBold, 'stroke-width': 2.5 }));
+  const statsBottom = gridHeight + summaryRows * L.SUMMARY_ROW_HEIGHT;
+  g.appendChild(svgEl('line', { x1: statsX, y1: 0, x2: statsX, y2: statsBottom, stroke: CLR.gridBold, 'stroke-width': 2.5 }));
   for (let i = 1; i <= STAT_HEADERS.length; i++) {
-    g.appendChild(svgEl('line', { x1: statsX + i * L.STATS_COL_WIDTH, y1: 0, x2: statsX + i * L.STATS_COL_WIDTH, y2: gridHeight, stroke: CLR.grid, 'stroke-width': 1 }));
+    g.appendChild(svgEl('line', { x1: statsX + i * L.STATS_COL_WIDTH, y1: 0, x2: statsX + i * L.STATS_COL_WIDTH, y2: statsBottom, stroke: CLR.grid, 'stroke-width': 1 }));
   }
 
   g.appendChild(svgEl('rect', { x: 0, y: 0, width, height: gridHeight + summaryRows * L.SUMMARY_ROW_HEIGHT, fill: 'none', stroke: CLR.gridBold, 'stroke-width': 2.5 }));
@@ -536,32 +544,47 @@ function drawLineup(svg, CLR, lineup, rowOffsets, boxscore, gameData, side, subM
       const posStr = posNum !== undefined ? String(posNum) : '';
       const batSide = getPlayerBatSide(gameData, player.id);
 
-      // Line 1: "8 Joey Wiemer, R #21"
-      const nameParts = [];
-      if (posStr) nameParts.push(posStr);
-      nameParts.push(player.name);
-      let nameLine = nameParts.join(' ');
-      if (batSide) nameLine += `, ${batSide}`;
-      if (jerseyNum) nameLine += ` #${jerseyNum}`;
-
-      // Line 2: ".111 AVG / .448 OPS"
       const ops = seasonBatting?.ops || '';
-      const statParts = [];
-      if (avg) statParts.push(`${avg} AVG`);
-      if (ops) statParts.push(`${ops} OPS`);
-      const statLine = statParts.join(' / ');
 
-      // Two-line layout
-      const nameY = bandMidY - 14;
-      const statY = bandMidY + 14;
-      g.appendChild(svgText(nameLine, textX, nameY, {
-        'font-size': nameFontSize, 'font-weight': nameWeight, 'font-family': L.MONO, fill: nameColor,
-        'dominant-baseline': 'central',
-      }));
-      g.appendChild(svgText(statLine, textX, statY, {
-        'font-size': statFontSize, 'font-family': L.MONO, fill: CLR.text,
-        'dominant-baseline': 'central', opacity: '0.65',
-      }));
+      // Use foreignObject to embed HTML — exact same rendering as pitcher tables
+      const fo = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+      fo.setAttribute('x', textX);
+      fo.setAttribute('y', bandY + 4);
+      fo.setAttribute('width', L.MARGIN_LEFT - textX - 4);
+      fo.setAttribute('height', bandHeight - 8);
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lineup-name-html';
+      // Match pitcher table font size exactly: body font * 0.85
+      wrapper.style.fontSize = 'min(calc(clamp(0.95rem, 0.5vw + 0.85rem, 1.1rem) * 1.275), clamp(0.95rem, 0.5vw + 0.85rem, 1.1rem))';
+
+      // Shorten name if needed: "F. Lastname"
+      let displayName = player.name;
+      const maxChars = 18;
+      if (displayName.length > maxChars && displayName.includes(' ')) {
+        const parts = displayName.split(' ');
+        const last = parts[parts.length - 1];
+        displayName = parts[0][0] + '. ' + last;
+      }
+
+      // Line 1: position + name link + bat side
+      const line1 = document.createElement('div');
+      line1.className = 'lineup-line1';
+      line1.innerHTML = `${posStr ? posStr + ' ' : ''}${playerLink(displayName, player.id)}${batSide ? `<span class="hand-indicator">, ${batSide}</span>` : ''}`;
+      wrapper.appendChild(line1);
+
+      // Line 2: jersey + stats
+      const line2 = document.createElement('div');
+      line2.className = 'lineup-line2';
+      const line2Parts = [];
+      if (jerseyNum) line2Parts.push(`#${jerseyNum}`);
+      if (avg) line2Parts.push(`${avg} AVG`);
+      if (ops) line2Parts.push(`${ops} OPS`);
+      line2.textContent = line2Parts.join('  ');
+      wrapper.appendChild(line2);
+
+      fo.appendChild(wrapper);
+      g.appendChild(fo);
     }
   }
 
@@ -1394,15 +1417,18 @@ function drawBatterStats(svg, CLR, lineup, rowOffsets, batterStats, colMap, grid
     }
   }
 
-  const totalsY = gridHeight - 2;
+  // Grand totals aligned with the bottom summary row
+  const summaryBottom = gridHeight + SUMMARY_LABELS.length * L.SUMMARY_ROW_HEIGHT;
+  const totalsY = summaryBottom - L.SUMMARY_ROW_HEIGHT / 2;
   g.appendChild(svgEl('line', {
-    x1: baseX, y1: gridHeight - L.SUMMARY_ROW_HEIGHT,
-    x2: baseX + STAT_HEADERS.length * L.STATS_COL_WIDTH, y2: gridHeight - L.SUMMARY_ROW_HEIGHT,
+    x1: baseX, y1: summaryBottom - L.SUMMARY_ROW_HEIGHT,
+    x2: baseX + STAT_HEADERS.length * L.STATS_COL_WIDTH, y2: summaryBottom - L.SUMMARY_ROW_HEIGHT,
     stroke: CLR.gridBold, 'stroke-width': 1.5,
   }));
   for (let i = 0; i < totals.length; i++) {
-    g.appendChild(svgText(String(totals[i]), baseX + i * L.STATS_COL_WIDTH + L.STATS_COL_WIDTH / 2, totalsY - 6, {
-      'text-anchor': 'middle', 'font-size': '16', 'font-weight': '900', 'font-family': L.FONT, fill: CLR.text,
+    g.appendChild(svgText(String(totals[i]), baseX + i * L.STATS_COL_WIDTH + L.STATS_COL_WIDTH / 2, totalsY, {
+      'text-anchor': 'middle', 'dominant-baseline': 'central',
+      'font-size': '18', 'font-weight': '900', 'font-family': L.FONT, fill: CLR.text,
     }));
   }
 
@@ -1514,7 +1540,7 @@ export function renderPitcherStatsHTML(data, side, teamAbbrev) {
     // Game stats row
     const gameRow = `
       <tr>
-        <td class="pitcher-name">${p.name}<span class="hand-indicator">, ${hand || '?'}</span>${p.note ? ` <span class="pitcher-note">${p.note}</span>` : ''}</td>
+        <td class="pitcher-name">${playerLink(p.name, p.id)}<span class="hand-indicator">, ${hand || '?'}</span>${p.note ? ` <span class="pitcher-note">${p.note}</span>` : ''}</td>
         <td class="pitcher-pitches">${pitchCodes}</td>
         <td>${v(s.inningsPitched)}</td>
         <td>${v(s.hits)}</td>
@@ -1551,7 +1577,7 @@ export function renderStartingPitcherHTML(data, side, teamAbbrev) {
 
   return `
     <div class="starting-pitcher-info">
-      <strong>${info.name}</strong><span class="hand-indicator">, ${info.hand || '?'}</span>
+      <strong>${playerLink(info.name, info.id)}</strong><span class="hand-indicator">, ${info.hand || '?'}</span>
       <span class="sp-record">${s.w}-${s.l}, ${s.era} ERA, ${s.whip} WHIP</span>
       <br>
       <span class="sp-season">${new Date().getFullYear()}: ${s.ip} IP, ${s.h} H, ${s.r} R, ${s.er} ER, ${s.bb} BB, ${s.k} K</span>
@@ -1592,7 +1618,7 @@ export function renderBenchHTML(data, side, teamAbbrev) {
     const woba = calcWOBA(ss);
     return `
     <tr>
-      <td class="pitcher-name">${p.name}<span class="hand-indicator">, ${bat || '?'}</span></td>
+      <td class="pitcher-name">${playerLink(p.name, p.id)}<span class="hand-indicator">, ${bat || '?'}</span></td>
       <td>${p.position}</td>
       <td>${v(ss.avg)}</td>
       <td>${v(ss.obp)}</td>
@@ -1630,7 +1656,7 @@ export function renderBullpenHTML(data, side, teamAbbrev) {
     const ss = p.seasonStats;
     return `
     <tr>
-      <td class="pitcher-name">${p.name}<span class="hand-indicator">, ${hand || '?'}</span></td>
+      <td class="pitcher-name">${playerLink(p.name, p.id)}<span class="hand-indicator">, ${hand || '?'}</span></td>
       <td class="pitcher-pitches">-</td>
       <td>${v(ss.inningsPitched)}</td>
       <td>${v(ss.hits)}</td>
@@ -1848,9 +1874,9 @@ export function renderGameHeaderHTML(data) {
   const umps = extractUmpires(data);
 
   const decisionLines = [
-    decisions.winner ? `<div class="decision-line"><strong>WP:</strong> ${decisions.winner.fullName}</div>` : '',
-    decisions.loser ? `<div class="decision-line"><strong>LP:</strong> ${decisions.loser.fullName}</div>` : '',
-    decisions.save ? `<div class="decision-line"><strong>SV:</strong> ${decisions.save.fullName}</div>` : '',
+    decisions.winner ? `<div class="decision-line"><strong>WP:</strong> ${playerLink(decisions.winner.fullName, decisions.winner.id)}</div>` : '',
+    decisions.loser ? `<div class="decision-line"><strong>LP:</strong> ${playerLink(decisions.loser.fullName, decisions.loser.id)}</div>` : '',
+    decisions.save ? `<div class="decision-line"><strong>SV:</strong> ${playerLink(decisions.save.fullName, decisions.save.id)}</div>` : '',
   ].filter(Boolean).join('');
 
   const firstPitchStr = info.firstPitch
