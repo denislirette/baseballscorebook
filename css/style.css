@@ -1105,7 +1105,7 @@ strong, b { font-weight: 600; }
   color: var(--text-secondary);
   margin-top: 8px;
   font-size: 14px;
-  max-width: 65ch;
+  max-width: 42ch;
 }
 
 
