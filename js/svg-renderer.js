@@ -23,9 +23,12 @@ import { getConfig } from './layout-config.js';
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
 // Player link helper: generates an MLB.com player link
-function playerLink(name, id) {
+// When inSVG is true, omit target="_blank" to prevent the CSS ::after
+// external-link icon from escaping foreignObject bounds on iOS/WebKit.
+function playerLink(name, id, { inSVG = false } = {}) {
   if (!id) return name;
-  return `<a href="https://www.mlb.com/player/${id}" target="_blank" rel="noopener noreferrer" class="player-link">${name}<span class="sr-only"> (opens in new tab)</span></a>`;
+  const target = inSVG ? '' : ' target="_blank"';
+  return `<a href="https://www.mlb.com/player/${id}"${target} rel="noopener noreferrer" class="player-link">${name}${inSVG ? '' : '<span class="sr-only"> (opens in new tab)</span>'}</a>`;
 }
 
 // Stats
@@ -568,7 +571,7 @@ function drawLineup(svg, CLR, lineup, rowOffsets, boxscore, gameData, side, subM
       // Line 1: position + name link + bat side
       const line1 = document.createElement('div');
       line1.className = 'lineup-line1';
-      line1.innerHTML = `${posStr ? posStr + ' ' : ''}${playerLink(displayName, player.id)}${batSide ? `<span class="hand-indicator">, ${batSide}</span>` : ''}`;
+      line1.innerHTML = `${posStr ? posStr + ' ' : ''}${playerLink(displayName, player.id, { inSVG: true })}${batSide ? `<span class="hand-indicator">, ${batSide}</span>` : ''}`;
       wrapper.appendChild(line1);
 
       // Line 2: jersey + stats
