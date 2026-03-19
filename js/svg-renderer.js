@@ -22,14 +22,19 @@ import { getConfig } from './layout-config.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
-// Player link helper: generates an MLB.com player link
-// When inSVG is true, use a <span> instead of <a> to avoid iOS/WebKit
-// rendering link artifacts (::after icons) that escape foreignObject bounds.
-// The span gets a click handler via event delegation (see setupSVGPlayerLinks).
+// Inline SVG icon for "opens in new tab" — used inside foreignObject where
+// CSS ::after pseudo-elements mis-render on iOS/WebKit (they position relative
+// to the SVG viewport instead of the HTML flow, causing ghost icons in the grid).
+// By embedding the icon as real DOM content, it flows correctly everywhere.
+const EXTERNAL_ICON_SVG = `<svg class="external-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>`;
+
+// Player link helper: generates an MLB.com player link.
+// When inSVG is true, uses a real <a> tag but with an inline SVG icon instead
+// of relying on the ::after pseudo-element (which breaks in foreignObject on iOS).
 function playerLink(name, id, { inSVG = false } = {}) {
   if (!id) return name;
   if (inSVG) {
-    return `<span class="player-link svg-player-link" data-player-id="${id}" role="link" tabindex="0">${name}</span>`;
+    return `<a href="https://www.mlb.com/player/${id}" target="_blank" rel="noopener noreferrer" class="player-link svg-player-link">${name}${EXTERNAL_ICON_SVG}<span class="sr-only"> (opens in new tab)</span></a>`;
   }
   return `<a href="https://www.mlb.com/player/${id}" target="_blank" rel="noopener noreferrer" class="player-link">${name}<span class="sr-only"> (opens in new tab)</span></a>`;
 }
@@ -252,12 +257,6 @@ export function renderTeamScorecard(data, side) {
   }
   drawSummaryRows(svg, CLR, linescore, side, colMap, gridHeight, width, statsWidth, inningPitchCounts);
 
-  // Event delegation for player links inside SVG foreignObject.
-  // We use <span> instead of <a> to avoid iOS/WebKit rendering link artifacts.
-  svg.addEventListener('click', (e) => {
-    const link = e.target.closest('.svg-player-link[data-player-id]');
-    if (link) window.open(`https://www.mlb.com/player/${link.dataset.playerId}`, '_blank');
-  });
 
   return svg;
 }
