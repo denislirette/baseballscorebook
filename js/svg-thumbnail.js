@@ -7,9 +7,9 @@ import { getThumbnailConfig } from './layout-config.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
-// Notations that split across two lines: prefix on top, positions below
-// Only split DP and TP across two lines; everything else stays on one line
+// Notations that split across two lines: prefix on top, second part below
 const SPLIT_RE = /^(DP|TP|KDP|K\+)([\d-]+)$/;
+const PAREN_RE = /^([A-Za-z\d]+)\(([A-Z]+)\)$/;
 
 function el(tag, attrs = {}) {
   const e = document.createElementNS(SVG_NS, tag);
@@ -222,25 +222,22 @@ export function drawCell(svg, cellX, cellY, ab) {
   const runners = ab.cumulativeRunners || [];
   const hasSegs = runners.some(r => r.segments?.length > 0);
   const batterRunner = runners.find(r => r.playerId === ab.batterId);
-  const batterScored = batterRunner?.scored || false;
+  const batterScored = (batterRunner?.scored && !batterRunner?.isOut) || false;
   const showDiamond = isHR || batterScored || hasSegs;
 
   const isBaseHit = /^[1-3]B$/.test(notation);
   // Only shift diamond up when notation text will appear below it
   const dcy = (showDiamond && !isBaseHit && !isHR) ? cy - 4 : cy;
 
-  // ── Out dots (top-left, stacked vertically) ──
-  const outs = (ab.runners || []).filter(r => r.isOut).length;
-  if (outs > 0) {
+  // ── Out dot (top-left) — only if the batter themselves was out ──
+  const batterOut = (ab.runners || []).some(r => r.playerId === ab.batterId && r.isOut);
+  if (batterOut) {
     const dotX = cellX + PAD + DOTR;
-    const dotSpacing = DOTR * 2 + 2;
     const startY = cellY + PAD + DOTR;
-    for (let i = 0; i < Math.min(outs, 3); i++) {
-      svg.appendChild(el('circle', {
-        class: 'th-out',
-        cx: dotX, cy: startY + i * dotSpacing, r: DOTR,
-      }));
-    }
+    svg.appendChild(el('circle', {
+      class: 'th-out',
+      cx: dotX, cy: startY, r: DOTR,
+    }));
   }
 
   // ── Home run: solid diamond (centered in cell) ──
@@ -284,6 +281,11 @@ export function drawCell(svg, cellX, cellY, ab) {
             x1: from.x, y1: from.y, x2: mx, y2: my,
             'stroke-width': PSW, 'stroke-linecap': 'square',
           }));
+          // Out dot at the midpoint of the out segment
+          svg.appendChild(el('circle', {
+            class: 'th-out',
+            cx: mx, cy: my, r: DOTR,
+          }));
           points.length = 0;
         } else {
           if (points.length === 0) points.push(`${from.x},${from.y}`);
@@ -325,12 +327,14 @@ export function drawCell(svg, cellX, cellY, ab) {
         }));
       }
     }
-  } else if (batterScored) {
-    // Batter scored but no segment data — show filled diamond centered, same size as HR
-    const scoredDR = Math.round(DR * 1.5);
+  }
+
+  // 50% fill when batter scored (not HR) — works with or without base path segments
+  if (batterScored) {
     svg.appendChild(el('polygon', {
       class: 'th-t',
-      points: dPts(cx, cy, scoredDR),
+      points: dPts(cx, hasSegs ? dcy : cy, DR),
+      opacity: '0.5',
     }));
   }
 
@@ -338,12 +342,15 @@ export function drawCell(svg, cellX, cellY, ab) {
   // Skip notation only for base hits (1B/2B/3B) — paths + hash marks represent those
   if (notation && !isBaseHit) {
     const splitMatch = notation.match(SPLIT_RE);
-    if (splitMatch) {
-      // Two-line notation: prefix (DP, FC, etc.) on top, positions below
-      const prefix = splitMatch[1];
-      const positions = splitMatch[2];
+    const parenMatch = !splitMatch && notation.match(PAREN_RE);
+    if (splitMatch || parenMatch) {
+      // Two-line notation: prefix on top, second part below
+      const match = splitMatch || parenMatch;
+      const prefix = match[1];
+      const positions = match[2];
       const fontSize = showDiamond ? FS_SM - 1 : FS_SM + 1;
       const baseY = showDiamond ? cellY + CS - PAD : cy;
+      const secondFontSize = parenMatch ? Math.round(fontSize * 0.75) : fontSize;
       svg.appendChild(tx(prefix, cx, baseY - 3, {
         class: 'th-t',
         'font-size': String(fontSize), 'font-weight': '700',
@@ -352,14 +359,17 @@ export function drawCell(svg, cellX, cellY, ab) {
       }));
       svg.appendChild(tx(positions, cx, baseY + fontSize - 2, {
         class: 'th-t',
-        'font-size': String(fontSize), 'font-weight': '700',
+        'font-size': String(secondFontSize), 'font-weight': '700',
         'text-anchor': 'middle',
         'font-family': 'sans-serif',
       }));
     } else {
       const display = notation.length > 7 ? notation.substring(0, 7) : notation;
       const isBackwardsK = notation === '\u{A4D8}';
-      const fontSize = showDiamond ? FS_SM : FS;
+      // Scale down font for longer notations so they fit in the cell
+      const baseFS = showDiamond ? FS_SM : FS;
+      const fontSize = display.length >= 5 ? Math.round(baseFS * 0.65) :
+                        display.length === 4 ? Math.round(baseFS * 0.8) : baseFS;
       const textY = showDiamond ? cellY + CS - PAD : cy + Math.round(fontSize / 3);
       if (isBackwardsK) {
         // Draw a real K and mirror it horizontally for a perfect match

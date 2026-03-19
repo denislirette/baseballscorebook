@@ -11,6 +11,8 @@
   <meta property="og:url" content="https://baseballscorecard.org/reference.html">
   <link rel="canonical" href="https://baseballscorecard.org/reference.html">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/favicon.svg">
+  <link rel="manifest" href="/site.webmanifest">
   <link rel="stylesheet" href="/css/style.css">
   <script>
     if (localStorage.getItem('theme') === 'dark') {
@@ -49,6 +51,7 @@
         <p class="subnav-group">Scorecard</p>
         <ul>
           <li class="subnav-indent"><a href="#play-notation">Play Notation</a></li>
+          <li class="subnav-indent"><a href="#annotations">Annotations</a></li>
           <li class="subnav-indent"><a href="#runner-events">Runner Events</a></li>
           <li class="subnav-indent"><a href="#diamond">Diamond &amp; Base Paths</a></li>
           <li class="subnav-indent"><a href="#cell-indicators">Cell Indicators</a></li>
@@ -557,6 +560,16 @@
             <tr><td>SFDP</td><td>Sac fly double play</td></tr>
             <tr><td>SHDP</td><td>Sac bunt double play</td></tr>
             <tr><td>CSDP</td><td>Caught stealing double play</td></tr>
+          </table>
+        </div>
+
+        <div class="legend-section" id="annotations">
+          <h3>Annotations</h3>
+          <p>These appear in parentheses below the play notation when the situation applies.</p>
+          <table class="legend-table">
+            <tr><td>(IFF)</td><td>Infield fly rule. Called on catchable pop-ups with runners on 1st and 2nd (or bases loaded) and fewer than 2 outs. Batter is automatically out whether or not the ball is caught.</td></tr>
+            <tr><td>(TP)</td><td>Triple play. Three outs recorded on a single play.</td></tr>
+            <tr><td>GDP</td><td>Grounded into double play (same as DP but specifically on a ground ball).</td></tr>
           </table>
         </div>
 

@@ -555,8 +555,6 @@ function drawLineup(svg, CLR, lineup, rowOffsets, boxscore, gameData, side, subM
 
       const wrapper = document.createElement('div');
       wrapper.className = 'lineup-name-html';
-      // Match pitcher table font size exactly: body font * 0.85
-      wrapper.style.fontSize = 'min(calc(clamp(0.95rem, 0.5vw + 0.85rem, 1.1rem) * 1.275), clamp(0.95rem, 0.5vw + 0.85rem, 1.1rem))';
 
       // Shorten name if needed: "F. Lastname"
       let displayName = player.name;
@@ -786,12 +784,12 @@ function drawAtBatCell(g, CLR, ab, x, y, hasPitcherSubBelow) {
   const diamondCx = Math.max(mainCx, minCx);
   const diamondCy = midCy;
 
-  // Did the batter score (go all the way around)?
+  // Did the batter score (go all the way around)? Out overrides scored.
   const batterRunner = (ab.cumulativeRunners || []).find(r => r.playerId === ab.batterId);
-  const batterScored = batterRunner?.scored || false;
+  const batterScored = (batterRunner?.scored && !batterRunner?.isOut) || false;
 
   if (hasRunners || alwaysDiamond) {
-    drawDiamond(g, CLR, diamondCx, diamondCy, ab, isHR || batterScored);
+    drawDiamond(g, CLR, diamondCx, diamondCy, ab, isHR, batterScored && !isHR);
   }
 
   // ── Notation ──
@@ -805,16 +803,6 @@ function drawAtBatCell(g, CLR, ab, x, y, hasPitcherSubBelow) {
       'font-size': '28', 'font-weight': '900', 'text-anchor': 'middle', 'dominant-baseline': 'central',
       'font-family': L.MONO, fill: CLR.bg,
     }));
-  } else if (batterScored && !isHit) {
-    // Batter scored via non-hit (BB, HBP, etc.) — show notation below filled diamond
-    if (notation) {
-      const notY = diamondCy + diamondR + 18;
-      const fitSize = String(Math.min(18, maxFitSize(notation.length)));
-      g.appendChild(svgText(notation, diamondCx, notY, {
-        'font-size': fitSize, 'font-weight': '700', 'text-anchor': 'middle',
-        'font-family': L.MONO, fill: CLR.text,
-      }));
-    }
   } else if (notation && !isHit) {
     const notationColor = CLR.text;
     const isK = notation === 'K' || notation === '\u{A4D8}';
@@ -822,27 +810,26 @@ function drawAtBatCell(g, CLR, ab, x, y, hasPitcherSubBelow) {
     const dpSplitMatch = notation.match(/^(DP|TP|KDP)([\d][\d-]*)$/);
 
     if (hasRunners || alwaysDiamond) {
-      // Notation in the bottom row, left-aligned after RBI
-      const notY = botY + BOT_ROW_H / 2;
-      const rbiCount = ab.rbi || 0;
-      const rbiOffset = rbiCount > 0 ? rbiCount * (L.SUB_CIRCLE_R * 2 + 4) + 8 : 0;
-      const notX = mainLeft + rbiOffset;
+      // Notation centered below the diamond
+      const notY = diamondCy + diamondR + 18;
 
       if (dpSplitMatch) {
         const prefix = dpSplitMatch[1];
         const positions = dpSplitMatch[2];
         const fitSize = Math.min(18, maxFitSize(Math.max(prefix.length, positions.length)));
-        g.appendChild(svgText(prefix, notX, notY - fitSize * 0.4, {
+        g.appendChild(svgText(prefix, diamondCx, notY - fitSize * 0.3, {
           'font-size': String(fitSize), 'font-weight': '700', 'font-family': L.MONO, fill: notationColor,
+          'text-anchor': 'middle',
         }));
-        g.appendChild(svgText(positions, notX, notY + fitSize * 0.5, {
+        g.appendChild(svgText(positions, diamondCx, notY + fitSize * 0.6, {
           'font-size': String(fitSize), 'font-weight': '700', 'font-family': L.MONO, fill: notationColor,
+          'text-anchor': 'middle',
         }));
       } else {
         const fitSize = String(Math.min(20, maxFitSize(notation.length)));
-        g.appendChild(svgText(notation, notX, notY, {
+        g.appendChild(svgText(notation, diamondCx, notY, {
           'font-size': fitSize, 'font-weight': '700', 'font-family': L.MONO, fill: notationColor,
-          'dominant-baseline': 'central',
+          'text-anchor': 'middle', 'dominant-baseline': 'central',
         }));
       }
     } else {
@@ -853,19 +840,22 @@ function drawAtBatCell(g, CLR, ab, x, y, hasPitcherSubBelow) {
       const ideal = Math.round(largeSize * scale);
       notFontSize = String(Math.min(ideal, maxFitSize(notation.length)));
 
-      const splitMatch = dpSplitMatch || (notation.length > 4 && notation.match(/^([A-Za-z\u{A4D8}]{2,})([\d][\d]*)$/u));
+      const parenMatch = notation.match(/^([A-Za-z\d]+)\(([A-Z]+)\)$/);
+      const splitMatch = dpSplitMatch || parenMatch || (notation.length > 4 && notation.match(/^([A-Za-z\u{A4D8}]{2,})([\d][\d]*)$/u));
       if (splitMatch) {
         const prefix = splitMatch[1];
         const nums = splitMatch[2];
         const maxLen = Math.max(prefix.length, nums.length);
         const fitSize = Math.min(parseInt(notFontSize) * 1.4, maxFitSize(maxLen));
         const lineGap = fitSize * 0.55;
-        g.appendChild(svgText(prefix, diamondCx, diamondCy - lineGap, {
+        // Shift down to avoid colliding with out badge in top-left
+        const splitCy = diamondCy + fitSize * 0.3;
+        g.appendChild(svgText(prefix, diamondCx, splitCy - lineGap, {
           'text-anchor': 'middle', 'dominant-baseline': 'central',
           'font-size': String(Math.round(fitSize)), 'font-weight': notFontWeight,
           'font-family': L.MONO, fill: notationColor,
         }));
-        g.appendChild(svgText(nums, diamondCx, diamondCy + lineGap, {
+        g.appendChild(svgText(nums, diamondCx, splitCy + lineGap, {
           'text-anchor': 'middle', 'dominant-baseline': 'central',
           'font-size': String(Math.round(fitSize)), 'font-weight': notFontWeight,
           'font-family': L.MONO, fill: notationColor,
@@ -1169,18 +1159,25 @@ function averageZoneEdge(pitches, field, fallback) {
 const FIGMA_R = 67; // Figma diamond half-size
 // These are now read from L.BASE_PATH_SW, L.HASH_SW, L.DIAMOND_SW via layout-config
 
-function drawDiamond(g, CLR, cx, cy, ab, isHR = false) {
+function drawDiamond(g, CLR, cx, cy, ab, isHR = false, scoredNotHR = false) {
   const R = L.DIAMOND_R;
   const hp = { x: cx, y: cy + R };       // bottom
   const b1 = { x: cx + R, y: cy };       // right
   const b2 = { x: cx, y: cy - R };       // top
   const b3 = { x: cx - R, y: cy };       // left
+  const pts = `${hp.x},${hp.y} ${b1.x},${b1.y} ${b2.x},${b2.y} ${b3.x},${b3.y}`;
 
-  // Diamond outline: only show for HR (filled), otherwise hidden
   if (isHR) {
+    // HR: fully filled black diamond
     g.appendChild(svgEl('polygon', {
-      points: `${hp.x},${hp.y} ${b1.x},${b1.y} ${b2.x},${b2.y} ${b3.x},${b3.y}`,
+      points: pts,
       fill: CLR.text, stroke: CLR.text, 'stroke-width': L.DIAMOND_SW,
+    }));
+  } else if (scoredNotHR) {
+    // Runner scored (not HR): 50% opacity fill
+    g.appendChild(svgEl('polygon', {
+      points: pts,
+      fill: CLR.text, stroke: 'none', opacity: '0.5',
     }));
   }
 
