@@ -1,7 +1,7 @@
 // Global navigation + footer - injected dynamically on every page
 // Same header on every page: site title + nav links, classic HTML link style
 
-const VERSION = '0.6.3';
+const VERSION = '0.6.4';
 
 const IS_LOCAL = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
@@ -15,8 +15,8 @@ const NAV_ITEMS = [
 const FOOTER_LINKS = [
   { href: '/about.html', label: 'About' },
   { href: '/contact.html', label: 'Contact' },
+  { href: '/disclaimer.html', label: 'Disclaimer' },
   { href: 'https://github.com/denislirette/baseballscorecard/blob/master/docs/ACCESSIBILITY.md', label: 'Accessibility' },
-  { href: '/analytics.html', label: 'Analytics' },
   { href: 'https://www.buymeacoffee.com/baseballscorecard.org', label: 'Buy Me a Coffee' },
 ];
 
@@ -101,11 +101,49 @@ function initNav() {
   top.appendChild(nav);
 
   // Theme toggle (always visible, before hamburger)
+  const LIGHT_ICON = '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M440-800v-120h80v120h-80Zm0 760v-120h80v120h-80Zm360-400v-80h120v80H800Zm-760 0v-80h120v80H40Zm708-252-56-56 70-72 58 58-72 70ZM198-140l-58-58 72-70 56 56-70 72Zm564 0-70-72 56-56 72 70-58 58ZM212-692l-72-70 58-58 70 72-56 56Zm98 382q-70-70-70-170t70-170q70-70 170-70t170 70q70 70 70 170t-70 170q-70 70-170 70t-170-70Zm283.5-56.5Q640-413 640-480t-46.5-113.5Q547-640 480-640t-113.5 46.5Q320-547 320-480t46.5 113.5Q413-320 480-320t113.5-46.5ZM480-480Z"/></svg>';
+  const DARK_ICON = '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M484-80q-84 0-157.5-32t-128-86.5Q144-253 112-326.5T80-484q0-146 93-257.5T410-880q-18 99 11 193.5T521-521q71 71 165.5 100T880-410q-26 144-138 237T484-80Zm0-80q88 0 163-44t118-121q-86-8-163-43.5T464-465q-61-61-97-138t-43-163q-77 43-120.5 118.5T160-484q0 135 94.5 229.5T484-160Zm-20-305Z"/></svg>';
   const themeBtn = document.createElement('button');
   themeBtn.id = 'theme-toggle';
   themeBtn.className = 'nav-theme-btn';
-  themeBtn.setAttribute('aria-label', 'Toggle dark mode');
+
+  function updateThemeBtn() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    themeBtn.innerHTML = isDark ? LIGHT_ICON : DARK_ICON;
+    themeBtn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+  }
+
+  themeBtn.addEventListener('click', () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.removeItem('theme');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme', 'dark');
+    }
+    updateThemeBtn();
+    // Re-render scorecard if on game page
+    const refreshBtn = document.getElementById('refresh-btn');
+    if (refreshBtn) refreshBtn.click();
+  });
+
+  updateThemeBtn();
   top.appendChild(themeBtn);
+
+  // Keyboard shortcuts: D for dark, L for light
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+    if (e.key === 'd' || e.key === 'D') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme', 'dark');
+      updateThemeBtn();
+    } else if (e.key === 'l' || e.key === 'L') {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.removeItem('theme');
+      updateThemeBtn();
+    }
+  });
 
   // Hamburger button (mobile only)
   const hamburger = document.createElement('button');
@@ -156,7 +194,10 @@ function initFooter() {
     <div class="footer-content">
       <nav class="footer-links">${links}</nav>
       <div class="footer-brand">BaseballScorecard.org <a href="${releasesURL}" target="_blank" rel="noopener" class="footer-version" id="footer-version">Version ${VERSION}</a></div>
-      <p class="footer-disclaimer">Double check stats on this site before committing pen to paper and have some white-out nearby.</p>
+<p class="footer-fine-print">
+  © 2026 BaseballScorecard.org. Data is provided for informational and personal use only. Double-check stats on this site before committing pen to paper. Game data is sourced from the <a href="https://statsapi.mlb.com" target="_blank" rel="noopener">MLB Stats API</a>. 
+This site is not affiliated with Major League Baseball or FanGraphs. All trademarks belong to their respective owners.
+</p>
     </div>`;
 
   // Keep the version link up to date with the latest GitHub release

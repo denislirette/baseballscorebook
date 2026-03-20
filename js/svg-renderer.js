@@ -188,10 +188,11 @@ export function renderTeamScorecard(data, side) {
   // (bat-around innings get extra columns so each at-bat has a full-size cell)
   const colMap = buildColMap(grid, lineup, innings);
 
-  // Determine active batter cell for highlighting (live games)
+  // Determine active batter cell for highlighting (live games only, not pre-game)
   const currentPlay = data.liveData.plays.currentPlay;
+  const gameState = data.gameData.status?.abstractGameState;
   let activeCellKey = null;
-  if (currentPlay && !currentPlay.about.isComplete && currentPlay.about.halfInning === halfInning) {
+  if (gameState === 'Live' && currentPlay && !currentPlay.about.isComplete && currentPlay.about.halfInning === halfInning) {
     const batterId = currentPlay.matchup?.batter?.id;
     if (batterId) {
       const playerSlot = lineup.find(s => s.players.some(p => p.id === batterId));
@@ -230,11 +231,12 @@ export function renderTeamScorecard(data, side) {
     if (linescoreInnings[i]?.[halfKey]) lastPlayedInning = i + 1;
   }
 
-  drawGrid(svg, CLR, lineup, colMap, totalRows, rowOffsets, width, gridHeight, statsWidth, summaryRows, activeCellKey, subMap, grid, lastPlayedInning);
+  const isFinalGame = data.gameData.status?.abstractGameState === 'Final';
+  drawGrid(svg, CLR, lineup, colMap, totalRows, rowOffsets, width, gridHeight, statsWidth, summaryRows, activeCellKey, subMap, grid, lastPlayedInning, isFinalGame);
   drawHeader(svg, CLR, colMap, statsWidth);
   drawStatHeaders(svg, CLR, colMap);
   drawLineup(svg, CLR, lineup, rowOffsets, boxscore, gameData, side, subMap);
-  drawAtBats(svg, CLR, lineup, grid, rowOffsets, colMap, subMap, subNumberMap, activeCellKey, lastPlayedInning);
+  drawAtBats(svg, CLR, lineup, grid, rowOffsets, colMap, subMap, subNumberMap, activeCellKey, lastPlayedInning, isFinalGame);
   drawBatterStats(svg, CLR, lineup, rowOffsets, batterStats, colMap, gridHeight);
   // Compute per-inning pitch counts from grid data
   const inningPitchCounts = [];
@@ -382,7 +384,7 @@ function drawSubIndicator(g, CLR, x, y, subType, subNum, pStats, cellBgColor) {
 
 // ─── Grid ────────────────────────────────────────────────────────
 
-function drawGrid(svg, CLR, lineup, colMap, totalRows, rowOffsets, width, gridHeight, statsWidth, summaryRows, activeCellKey, subMap, grid, lastPlayedInning) {
+function drawGrid(svg, CLR, lineup, colMap, totalRows, rowOffsets, width, gridHeight, statsWidth, summaryRows, activeCellKey, subMap, grid, lastPlayedInning, isFinalGame) {
   const g = svgEl('g', { class: 'grid-lines' });
   const { innings } = colMap;
 
@@ -603,7 +605,7 @@ function drawLineup(svg, CLR, lineup, rowOffsets, boxscore, gameData, side, subM
 
 // ─── At-bat cells ────────────────────────────────────────────────
 
-function drawAtBats(svg, CLR, lineup, grid, rowOffsets, colMap, subMap, subNumberMap, activeCellKey, lastPlayedInning) {
+function drawAtBats(svg, CLR, lineup, grid, rowOffsets, colMap, subMap, subNumberMap, activeCellKey, lastPlayedInning, isFinalGame) {
   const g = svgEl('g', { class: 'at-bats' });
   const { innings } = colMap;
 
@@ -727,8 +729,10 @@ function drawAtBats(svg, CLR, lineup, grid, rowOffsets, colMap, subMap, subNumbe
     }));
   }
 
-  // Last pitcher stats: draw at the bottom of the final at-bat cell of the game
-  if (lastPitcherId && pitcherTotals.has(lastPitcherId)) {
+  // Last pitcher stats: only draw at the bottom of the final at-bat cell
+  // when the game is Final. During live games this would create a phantom
+  // sub line suggesting the current pitcher has been replaced.
+  if (isFinalGame && lastPitcherId && pitcherTotals.has(lastPitcherId)) {
     // Find the last cell that has at-bat data (scan innings in reverse, then slots in reverse)
     let lastCellX = -1;
     let lastCellY = -1;
@@ -1621,8 +1625,8 @@ export function renderStartingPitcherHTML(data, side, teamAbbrev) {
     </div>`;
 }
 
-// 2024 MLB linear weights for wOBA (updated annually by FanGraphs)
-const WOBA_WEIGHTS = { bb: 0.696, hbp: 0.726, s1b: 0.883, s2b: 1.244, s3b: 1.569, hr: 2.004 };
+// 2025 MLB linear weights for wOBA (source: FanGraphs Guts)
+const WOBA_WEIGHTS = { bb: 0.691, hbp: 0.722, s1b: 0.882, s2b: 1.252, s3b: 1.584, hr: 2.037 };
 
 function calcWOBA(ss) {
   const bb = (ss.baseOnBalls ?? 0) - (ss.intentionalWalks ?? 0);
