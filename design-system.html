@@ -199,7 +199,87 @@
   </div>
 </div>
 
+<h2>MLB Team Colors</h2>
+<p>Official primary and secondary colors for all 30 MLB teams. Text color (white or black) is chosen to meet WCAG AA contrast ratio (4.5:1 minimum).</p>
+<table class="team-colors-table" style="width:100%;border-collapse:collapse;font-size:0.85em;">
+<thead>
+<tr><th style="text-align:left;padding:8px;border-bottom:2px solid var(--grid-line);">Team</th><th style="text-align:left;padding:8px;border-bottom:2px solid var(--grid-line);">Primary</th><th style="text-align:left;padding:8px;border-bottom:2px solid var(--grid-line);">Secondary</th><th style="text-align:left;padding:8px;border-bottom:2px solid var(--grid-line);">Primary HEX</th><th style="text-align:left;padding:8px;border-bottom:2px solid var(--grid-line);">Secondary HEX</th></tr>
+</thead>
+<tbody id="team-colors-body"></tbody>
+</table>
+
   </div><!-- /.ds-page -->
+
+<script>
+// MLB team colors (official brand colors)
+const MLB_TEAMS = [
+  { name: 'Arizona Diamondbacks', abbr: 'ARI', primary: '#A71930', secondary: '#E3D4AD' },
+  { name: 'Atlanta Braves', abbr: 'ATL', primary: '#CE1141', secondary: '#13274F' },
+  { name: 'Baltimore Orioles', abbr: 'BAL', primary: '#DF4601', secondary: '#000000' },
+  { name: 'Boston Red Sox', abbr: 'BOS', primary: '#BD3039', secondary: '#0C2340' },
+  { name: 'Chicago Cubs', abbr: 'CHC', primary: '#0E3386', secondary: '#CC3433' },
+  { name: 'Chicago White Sox', abbr: 'CWS', primary: '#27251F', secondary: '#C4CED4' },
+  { name: 'Cincinnati Reds', abbr: 'CIN', primary: '#C6011F', secondary: '#000000' },
+  { name: 'Cleveland Guardians', abbr: 'CLE', primary: '#00385D', secondary: '#E50022' },
+  { name: 'Colorado Rockies', abbr: 'COL', primary: '#33006F', secondary: '#C4CED4' },
+  { name: 'Detroit Tigers', abbr: 'DET', primary: '#0C2340', secondary: '#FA4616' },
+  { name: 'Houston Astros', abbr: 'HOU', primary: '#002D62', secondary: '#EB6E1F' },
+  { name: 'Kansas City Royals', abbr: 'KC', primary: '#004687', secondary: '#BD9B60' },
+  { name: 'Los Angeles Angels', abbr: 'LAA', primary: '#BA0021', secondary: '#003263' },
+  { name: 'Los Angeles Dodgers', abbr: 'LAD', primary: '#005A9C', secondary: '#EF3E42' },
+  { name: 'Miami Marlins', abbr: 'MIA', primary: '#00A3E0', secondary: '#EF3340' },
+  { name: 'Milwaukee Brewers', abbr: 'MIL', primary: '#FFC52F', secondary: '#12284B' },
+  { name: 'Minnesota Twins', abbr: 'MIN', primary: '#002B5C', secondary: '#D31145' },
+  { name: 'New York Mets', abbr: 'NYM', primary: '#002D72', secondary: '#FF5910' },
+  { name: 'New York Yankees', abbr: 'NYY', primary: '#003087', secondary: '#C4CED4' },
+  { name: 'Athletics', abbr: 'OAK', primary: '#003831', secondary: '#EFB21E' },
+  { name: 'Philadelphia Phillies', abbr: 'PHI', primary: '#E81828', secondary: '#002D72' },
+  { name: 'Pittsburgh Pirates', abbr: 'PIT', primary: '#27251F', secondary: '#FDB827' },
+  { name: 'San Diego Padres', abbr: 'SD', primary: '#2F241D', secondary: '#FFC425' },
+  { name: 'San Francisco Giants', abbr: 'SF', primary: '#FD5A1E', secondary: '#27251F' },
+  { name: 'Seattle Mariners', abbr: 'SEA', primary: '#0C2C56', secondary: '#005C5C' },
+  { name: 'St. Louis Cardinals', abbr: 'STL', primary: '#C41E3A', secondary: '#0C2340' },
+  { name: 'Tampa Bay Rays', abbr: 'TB', primary: '#092C5C', secondary: '#8FBCE6' },
+  { name: 'Texas Rangers', abbr: 'TEX', primary: '#003278', secondary: '#C0111F' },
+  { name: 'Toronto Blue Jays', abbr: 'TOR', primary: '#134A8E', secondary: '#1D2D5C' },
+  { name: 'Washington Nationals', abbr: 'WSH', primary: '#AB0003', secondary: '#14225A' },
+];
+
+function luminance(hex) {
+  const r = parseInt(hex.slice(1,3),16)/255;
+  const g = parseInt(hex.slice(3,5),16)/255;
+  const b = parseInt(hex.slice(5,7),16)/255;
+  const lin = c => c <= 0.04045 ? c/12.92 : Math.pow((c+0.055)/1.055, 2.4);
+  return 0.2126*lin(r) + 0.7152*lin(g) + 0.0722*lin(b);
+}
+function contrastText(hex) {
+  const wRatio = contrastRatio(hex, '#FFFFFF');
+  const bRatio = contrastRatio(hex, '#000000');
+  return parseFloat(wRatio) >= parseFloat(bRatio) ? '#FFFFFF' : '#000000';
+}
+function contrastRatio(c1, c2) {
+  let l1 = luminance(c1), l2 = luminance(c2);
+  if (l1 < l2) [l1, l2] = [l2, l1];
+  return ((l1 + 0.05) / (l2 + 0.05)).toFixed(1);
+}
+
+const tbody = document.getElementById('team-colors-body');
+MLB_TEAMS.forEach(t => {
+  const pText = contrastText(t.primary);
+  const sText = contrastText(t.secondary);
+  const pRatio = contrastRatio(t.primary, pText);
+  const sRatio = contrastRatio(t.secondary, sText);
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td style="padding:8px;border-bottom:1px solid var(--grid-line);font-weight:600;">${t.abbr} ${t.name}</td>
+    <td style="padding:8px 16px;border-bottom:1px solid var(--grid-line);background:${t.primary};color:${pText};font-weight:700;font-family:'SF Mono',monospace;font-size:0.9em;">${t.primary} (${pRatio}:1)</td>
+    <td style="padding:8px 16px;border-bottom:1px solid var(--grid-line);background:${t.secondary};color:${sText};font-weight:700;font-family:'SF Mono',monospace;font-size:0.9em;">${t.secondary} (${sRatio}:1)</td>
+    <td style="padding:8px;border-bottom:1px solid var(--grid-line);font-family:'SF Mono',monospace;font-size:0.85em;">${t.primary}</td>
+    <td style="padding:8px;border-bottom:1px solid var(--grid-line);font-family:'SF Mono',monospace;font-size:0.85em;">${t.secondary}</td>
+  `;
+  tbody.appendChild(tr);
+});
+</script>
 
 <script type="module">
 import { svgEl, svgText, refreshLayout, getColors, drawAtBatCell, drawSubIndicator } from './js/svg-renderer.js';
@@ -957,7 +1037,6 @@ async function save() {
 
 // ─── Theme toggle ────────────────────────────────────────────────
 
-// Theme toggle is handled by the global nav (js/theme.js) + MutationObserver above
 
 // ─── Init ────────────────────────────────────────────────────────
 
@@ -1022,6 +1101,5 @@ observer.observe(document.documentElement, { attributes: true, attributeFilter: 
 
 </script>
 <script type="module" src="/js/nav.js"></script>
-<script type="module" src="/js/theme.js"></script>
 </body>
 </html>

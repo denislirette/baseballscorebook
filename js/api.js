@@ -112,6 +112,38 @@ export async function fetchStandings(season) {
 }
 
 /**
+ * Fetch season batting and pitching stats for a team.
+ * @param {number} teamId - MLB team ID
+ * @param {number} season - e.g. 2025
+ * @returns {Promise<Object>} { batting: {...}, pitching: {...} }
+ */
+export async function fetchTeamSeasonStats(teamId, season) {
+  async function tryFetch(yr) {
+    const [batResp, pitResp, fldResp] = await Promise.all([
+      fetch(`${MLB_API_BASE}/teams/${teamId}/stats?stats=season&season=${yr}&group=hitting`),
+      fetch(`${MLB_API_BASE}/teams/${teamId}/stats?stats=season&season=${yr}&group=pitching`),
+      fetch(`${MLB_API_BASE}/teams/${teamId}/stats?stats=season&season=${yr}&group=fielding`),
+    ]);
+    const bat = batResp.ok ? await batResp.json() : null;
+    const pit = pitResp.ok ? await pitResp.json() : null;
+    const fld = fldResp.ok ? await fldResp.json() : null;
+    const batting = bat?.stats?.[0]?.splits?.[0]?.stat || null;
+    const pitching = pit?.stats?.[0]?.splits?.[0]?.stat || null;
+    const fielding = fld?.stats?.[0]?.splits?.[0]?.stat || null;
+    return { batting, pitching, fielding, season: yr };
+  }
+  try {
+    const result = await tryFetch(season);
+    if (result.batting) return result;
+    // Fallback to previous season if current has no data (Spring Training)
+    const fallback = await tryFetch(season - 1);
+    return fallback;
+  } catch {
+    return { batting: null, pitching: null, fielding: null, season };
+  }
+}
+
+/**
  * Get the games array from a schedule response.
  * @param {Object} scheduleData - Raw schedule API response
  * @returns {Array} Array of game objects
@@ -135,17 +167,31 @@ export async function fetchAllTeamStats(season) {
   }
 
   const teamIds = [108,109,110,111,112,113,114,115,116,117,118,119,120,121,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,158];
+  const safeFetch = (url, id, type) =>
+    fetch(url).then(r => r.json())
+      .then(d => ({ id, type, stat: d?.stats?.[0]?.splits?.[0]?.stat || null }))
+      .catch(() => ({ id, type, stat: null }));
+
   const fetches = teamIds.flatMap(id => [
-    fetch(`${MLB_API_BASE}/teams/${id}/stats?stats=season&season=${season}&group=pitching`).then(r => r.json()).then(d => ({ id, type: 'pitching', stat: d.stats[0].splits[0].stat })),
-    fetch(`${MLB_API_BASE}/teams/${id}/stats?stats=season&season=${season}&group=fielding`).then(r => r.json()).then(d => ({ id, type: 'fielding', stat: d.stats[0].splits[0].stat })),
+    safeFetch(`${MLB_API_BASE}/teams/${id}/stats?stats=season&season=${season}&group=hitting`, id, 'hitting'),
+    safeFetch(`${MLB_API_BASE}/teams/${id}/stats?stats=season&season=${season}&group=pitching`, id, 'pitching'),
+    safeFetch(`${MLB_API_BASE}/teams/${id}/stats?stats=season&season=${season}&group=fielding`, id, 'fielding'),
   ]);
 
   const results = await Promise.all(fetches);
   const map = {};
   for (const r of results) {
+    if (!r.stat) continue;
     if (!map[r.id]) map[r.id] = {};
-    if (r.type === 'pitching') {
+    if (r.type === 'hitting') {
+      map[r.id].avg = r.stat.avg || '.000';
+      map[r.id].ops = r.stat.ops || '.000';
+      map[r.id].runs = r.stat.runs || 0;
+      map[r.id].homeRuns = r.stat.homeRuns || 0;
+      map[r.id].stolenBases = r.stat.stolenBases || 0;
+    } else if (r.type === 'pitching') {
       map[r.id].era = r.stat.era || '-.--';
+      map[r.id].runsAllowed = r.stat.runs || 0;
     } else {
       map[r.id].errors = r.stat.errors || 0;
       map[r.id].doublePlays = r.stat.doublePlays || 0;

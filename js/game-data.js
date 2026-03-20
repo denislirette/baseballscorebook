@@ -246,6 +246,33 @@ export function buildScorecardGrid(allPlays, halfInning, lineup, boxscore, side)
     }
   }
 
+  // ─── Third pass: add pickoff/CS out markers to the at-bat cell where they occurred ───
+  // When a runner is picked off or caught stealing during another batter's at-bat,
+  // the out marker (with out number) needs to appear in THAT batter's cell, not the
+  // runner's original cell. This ensures the out count is visually correct per cell.
+  for (const [, abs] of grid) {
+    for (const ab of abs) {
+      if (!ab.runners) continue;
+      for (const r of ab.runners) {
+        if (r.isOut && r.outBase && r.playerId !== ab.batterId) {
+          if (!ab.cumulativeRunners) ab.cumulativeRunners = [];
+          // Only add if not already present
+          if (!ab.cumulativeRunners.some(cr => cr.playerId === r.playerId && cr.outBase === r.outBase)) {
+            ab.cumulativeRunners.push({
+              playerId: r.playerId,
+              segments: [],
+              currentBase: null,
+              scored: false,
+              isOut: true,
+              outBase: r.outBase,
+              outNumber: r.outNumber || null,
+            });
+          }
+        }
+      }
+    }
+  }
+
   // Merge pinch-runner journeys into the original batter's cell.
   // When a PR replaces a batter, the PR's baserunning continues the
   // original batter's path, so the diamond should show the full journey.
@@ -310,11 +337,9 @@ export function buildSubstitutionMap(allPlays, halfInning, lineup) {
       let slot = null;
 
       if (event === 'Pitching Substitution') {
-        // Pitching subs: use batter's slot (affects the cell being batted)
-        if (play.about.halfInning === halfInning) {
-          slot = playerSlotMap.get(play.matchup.batter.id);
-          subType = 'pitcher';
-        }
+        // Pitcher subs are handled below by detecting actual pitcher ID changes
+        // between completed at-bats. This ensures the line only appears once the
+        // new pitcher has actually thrown a pitch, not just when the sub is announced.
       } else if (event === 'Offensive Substitution') {
         // PH/PR: the substitute player enters the lineup
         slot = playerSlotMap.get(playerId) || playerSlotMap.get(play.matchup.batter.id);
@@ -335,6 +360,34 @@ export function buildSubstitutionMap(allPlays, halfInning, lineup) {
         }
       }
     }
+  }
+
+  // Detect pitcher substitutions by comparing pitcher IDs between consecutive
+  // completed at-bats in the same half-inning. The sub line is placed on the
+  // cell of the FIRST batter to face the new pitcher, which confirms the change
+  // actually happened (the new pitcher has thrown at least one pitch).
+  const relevantPlays = allPlays.filter(p => p.about.halfInning === halfInning && p.about.isComplete);
+  let prevPitcherId = null;
+  let prevBatterId = null;
+  let prevInning = null;
+  for (const play of relevantPlays) {
+    const pitcherId = play.matchup?.pitcher?.id;
+    if (prevPitcherId && pitcherId && pitcherId !== prevPitcherId) {
+      // Pitcher changed — place sub line on the PREVIOUS batter's cell
+      // (the last at-bat by the departing pitcher, not the first by the new one)
+      const slot = playerSlotMap.get(prevBatterId);
+      if (slot && prevInning) {
+        const key = `${slot}-${prevInning}`;
+        if (!subMap.has(key)) subMap.set(key, []);
+        const existing = subMap.get(key);
+        if (!existing.some(s => s.type === 'pitcher')) {
+          existing.push({ type: 'pitcher', playerId: prevPitcherId });
+        }
+      }
+    }
+    prevPitcherId = pitcherId;
+    prevBatterId = play.matchup?.batter?.id;
+    prevInning = play.about.inning;
   }
 
   return subMap;

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Disclaimer - BaseballScorecard.org</title>
+  <meta name="description" content="Where the data comes from, what might be wrong, and how analytics work on BaseballScorecard.org.">
+  <meta property="og:title" content="Disclaimer - BaseballScorecard.org">
+  <meta property="og:description" content="Where the data comes from, what might be wrong, and how analytics work on BaseballScorecard.org.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://baseballscorecard.org/disclaimer.html">
+  <link rel="canonical" href="https://baseballscorecard.org/disclaimer.html">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/favicon.svg">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="stylesheet" href="/css/style.css">
+  <script>
+    if (localStorage.getItem('theme') === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  </script>
+</head>
+<body>
+  <header class="app-header">
+    <a href="/" class="back-link">All Games</a>
+    <h1>Disclaimer</h1>
+    <button class="header-btn" id="theme-toggle" aria-label="Toggle dark mode"></button>
+  </header>
+
+  <div class="page-with-subnav">
+    <aside class="subnav">
+      <nav aria-label="Page sections">
+        <ul>
+          <li class="subnav-indent"><a href="#intro">A quick note</a></li>
+          <li class="subnav-indent"><a href="#data">Where the data comes from</a></li>
+          <li class="subnav-indent"><a href="#affiliation">Not affiliated with MLB</a></li>
+          <li class="subnav-indent"><a href="#accuracy">Accuracy</a></li>
+          <li class="subnav-indent"><a href="#analytics">Analytics</a></li>
+          <li class="subnav-indent"><a href="#open-source">Open source</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="page-content">
+
+      <h2 id="intro">Disclaimer</h2>
+      <p>I'm a designer who has always been curious about data and storytelling. I also love baseball. When I discovered scorekeeping, something clicked. The way a scorecard captures a game on a single sheet of paper, with symbols and numbers to help tell the story with data, felt like the perfect intersection between my love for design and data.</p>
+      <p>Before you go filling in your scorebook based on what you see here, there are a few things you should know.</p>
+
+      <h2 id="data">Where the data comes from</h2>
+      <p>Everything on this site, the lineups, <a href="/guide.html#pitch-types">pitch sequences</a>, <a href="/guide.html#play-notation">play by play</a>, boxscores, <a href="/standings.html">standings</a>, all of it, comes from the <a href="https://statsapi.mlb.com" target="_blank" rel="noopener">MLB Stats API</a>. You might hear it called the GUMBO feed. It's the same data that powers MLB's own apps, and it's free to use.</p>
+      <p>The <a href="/guide.html#formula-woba">wOBA</a> calculations use published linear weights from <a href="https://www.fangraphs.com/tools/guts" target="_blank" rel="noopener">FanGraphs</a>. These weights shift a little each year depending on the run environment across the league. The values currently in the code are from the 2025 season.</p>
+      <p>Weather icons are from Erik Flowers' <a href="https://erikflowers.github.io/weather-icons/" target="_blank" rel="noopener">Weather Icons</a> project, and the <a href="/guide.html#batting-formulas">math formulas</a> on the Guide page use <a href="https://www.mathjax.org/" target="_blank" rel="noopener">MathJax</a> to render properly. Both are loaded from CDNs.</p>
+
+      <h2 id="affiliation">Not affiliated with MLB</h2>
+      <p>BaseballScorecard.org has nothing to do with Major League Baseball, any MLB team, or MLB Advanced Media. Same goes for FanGraphs and every other source mentioned here. This is a fan project, built by one guy with a little help from Claude Code and lots of coffee (<a href="https://buymeacoffee.com/baseballscorecard.org" target="_blank" rel="noopener">Buy me a coffee!</a>). All trademarks belong to their respective owners.</p>
+
+      <h2 id="accuracy">The scorecards might be wrong</h2>
+      <p>The site is still in the early innings. There are 80+ play event types in the MLB API, and new edge cases crawl out of the woodwork every game.</p>
+      <p>The scorecards are generated automatically from raw API data. Sometimes a play gets parsed wrong, or a substitution renders in a way that looks off. It's hilarious how it breaks sometimes. But I'm working on it. <p><strong>Please double check what you see here before committing pen to paper, and keep some white-out nearby.</strong></p>
+      <p>If something looks wrong, <a href="https://github.com/denislirette/baseballscorecard/issues" target="_blank" rel="noopener">open an issue on GitHub</a> or send a message through the <a href="/contact.html">contact page</a>. Those reports are how the site gets better.</p>
+
+      <h2 id="analytics">Analytics</h2>
+      <p>I use <a href="https://www.simpleanalytics.com" target="_blank" rel="noopener">Simple Analytics</a> to see how many people visit and which pages they look at. That's it. Simple Analytics doesn't use cookies, doesn't collect personal data, and doesn't track you across pages. No fingerprinting, nothing sold to anyone. I just want to know which parts of the site people actually use so I can focus my time there.</p>
+
+      <h2 id="open-source">Open source</h2>
+      <p>The whole thing is open source under the MIT License. The code is on <a href="https://github.com/denislirette/baseballscorecard" target="_blank" rel="noopener">GitHub</a>. You can read it, fork it, break it, fix it, or contribute back. If you're a developer who also happens to love scorekeeping, pull requests are always welcome. If you're not a developer but you spot something that looks wrong during a game, that's just as valuable.</p>
+      <div class="callout-amber">
+        <p class="callout-title">Baseball is complicated. Scorekeeping is an art. Software has bugs.</p>
+        <p>The intersection of all three is this project, and any help making it better is appreciated.</p>
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module" src="/js/nav.js"></script>
+</body>
+</html>

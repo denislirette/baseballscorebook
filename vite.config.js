@@ -110,6 +110,7 @@ export default defineConfig({
         about: 'about.html',
         accessibility: 'accessibility.html',
         analytics: 'analytics.html',
+        disclaimer: 'disclaimer.html',
       },
     },
   },

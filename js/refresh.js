@@ -13,8 +13,20 @@ export function renderRefreshControls(refreshFn, getGameState) {
   const intervalInput = document.getElementById('refresh-interval');
   const unitSelect = document.getElementById('refresh-unit');
   const statusEl = document.getElementById('refresh-status');
-
   let running = false;
+
+  // Restore saved preferences
+  const savedInterval = localStorage.getItem('refresh-interval');
+  const savedUnit = localStorage.getItem('refresh-unit');
+  const savedEnabled = localStorage.getItem('refresh-enabled');
+  if (savedInterval) intervalInput.value = savedInterval;
+  if (savedUnit) unitSelect.value = savedUnit;
+
+  function savePrefs() {
+    localStorage.setItem('refresh-interval', intervalInput.value);
+    localStorage.setItem('refresh-unit', unitSelect.value);
+    localStorage.setItem('refresh-enabled', running ? 'true' : 'false');
+  }
 
   function getIntervalMs() {
     const val = parseInt(intervalInput.value, 10) || 10;
@@ -28,12 +40,17 @@ export function renderRefreshControls(refreshFn, getGameState) {
     statusEl.textContent = `Last updated: ${lastRefresh.toLocaleTimeString()}`;
   }
 
+  function updateToggle() {
+    toggleBtn.setAttribute('aria-checked', running ? 'true' : 'false');
+    const bar = toggleBtn.closest('.refresh-controls');
+    if (bar) bar.classList.toggle('refresh-active', running);
+  }
+
   async function doRefresh() {
     await refreshFn();
     lastRefresh = new Date();
     updateStatus();
 
-    // Stop auto-refresh if game is final
     const state = getGameState();
     if (state === 'Final') {
       stop();
@@ -44,8 +61,8 @@ export function renderRefreshControls(refreshFn, getGameState) {
   function start() {
     stop();
     running = true;
-    toggleBtn.textContent = 'Stop';
-    toggleBtn.setAttribute('aria-pressed', 'true');
+    updateToggle();
+    savePrefs();
     refreshTimer = setInterval(doRefresh, getIntervalMs());
   }
 
@@ -55,8 +72,8 @@ export function renderRefreshControls(refreshFn, getGameState) {
       refreshTimer = null;
     }
     running = false;
-    toggleBtn.textContent = 'Start';
-    toggleBtn.setAttribute('aria-pressed', 'false');
+    updateToggle();
+    savePrefs();
   }
 
   toggleBtn.addEventListener('click', () => {
@@ -67,11 +84,17 @@ export function renderRefreshControls(refreshFn, getGameState) {
     }
   });
 
-  // Restart with new interval when user changes the values
   intervalInput.addEventListener('change', () => {
+    savePrefs();
     if (running) start();
   });
   unitSelect.addEventListener('change', () => {
+    savePrefs();
     if (running) start();
   });
+
+  // Auto-start if user previously had it enabled
+  if (savedEnabled === 'true') {
+    start();
+  }
 }

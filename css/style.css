@@ -197,6 +197,15 @@ body {
   -webkit-text-size-adjust: 100%;
 }
 
+::selection {
+  background: #f5e6a3;
+  color: #1c1918;
+}
+html[data-theme="dark"] ::selection {
+  background: #5c4d1a;
+  color: #f5f2e9;
+}
+
 /* Global link styles */
 a {
   color: var(--link);
@@ -671,11 +680,27 @@ strong, b { font-weight: 600; }
 .refresh-controls {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px var(--container-pad);
+  gap: 10px;
+  padding: 6px var(--container-pad);
   border-bottom: 1px solid var(--grid-line);
   flex-wrap: wrap;
   background: var(--surface);
+  font-size: 0.8em;
+  transition: background 0.15s ease;
+}
+.refresh-controls.refresh-active {
+  background: #377049;
+  color: #fff;
+}
+.refresh-controls.refresh-active .refresh-label,
+.refresh-controls.refresh-active #refresh-status {
+  color: #fff;
+}
+.refresh-controls.refresh-active #refresh-interval,
+.refresh-controls.refresh-active #refresh-unit {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  border-color: rgba(255,255,255,0.3);
 }
 
 .refresh-controls label,
@@ -688,9 +713,50 @@ strong, b { font-weight: 600; }
   color: var(--text);
   min-height: 36px;
 }
-#refresh-toggle[aria-pressed="true"] {
-  background: var(--text);
-  color: var(--bg);
+/* Accessible switch (W3C APG pattern) */
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  font-size: inherit;
+  font-family: inherit;
+  color: var(--text);
+}
+.switch-track {
+  display: inline-block;
+  width: 30px;
+  height: 16px;
+  background: #555;
+  border-radius: 8px;
+  position: relative;
+  transition: background 0.15s ease;
+}
+.switch-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border-radius: 50%;
+  transition: left 0.15s ease;
+}
+.switch[aria-checked="true"] .switch-track {
+  background: #275234;
+}
+html[data-theme="dark"] .switch[aria-checked="true"] .switch-track {
+  background: #2d5e3d;
+}
+.switch[aria-checked="true"] .switch-thumb {
+  left: 16px;
+}
+.switch:focus-visible .switch-track {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
 }
 
 #refresh-interval {
@@ -788,13 +854,62 @@ strong, b { font-weight: 600; }
 
 .scorecard-section-header {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
   margin-bottom: 12px;
 }
-
 .scorecard-section-header img { width: 48px; height: 48px; object-fit: contain; }
-.scorecard-section-header h2  { font-size: 1.5em; font-weight: 700; margin: 0; }
+.scorecard-section-header h2  { font-size: 2.25em; font-weight: 700; margin: 0; }
+.team-label { font-size: 0.85em; color: var(--text-secondary); font-weight: 400; }
+
+.team-header-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.team-header-row .scorecard-section-header { margin-bottom: 0; }
+.team-season-stats { margin: 0; }
+.team-season-caption { text-align: left; font-size: 0.8em; color: var(--text-secondary); padding-bottom: 4px; }
+.team-stats-grid {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.team-stats-label {
+  caption-side: top;
+  text-align: left;
+  font-size: 0.75em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  padding-bottom: 3px;
+}
+.team-season-table {
+  font-size: 0.85em;
+  border-collapse: collapse;
+  width: auto;
+}
+.team-season-table th,
+.team-season-table td {
+  padding: 4px 12px;
+  text-align: center;
+  border: 1px solid var(--grid-line);
+}
+.team-season-table th {
+  font-weight: 600;
+  background: var(--surface);
+}
+.team-rank {
+  display: block;
+  font-size: 0.7em;
+  color: var(--text-secondary);
+  line-height: 1;
+  margin-top: 1px;
+}
 
 .scorecard-scroll {
   overflow-x: auto;
@@ -1143,7 +1258,7 @@ foreignObject .svg-player-link::after { display: none; }
    ═══════════════════════════════════════════════════════ */
 
 .site-footer {
-  border-top: 1px solid color-mix(in srgb, var(--text) 20%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--text) 50%, transparent);
   margin-top: 48px;
   padding: 24px var(--container-pad) 48px;
   font-size: 0.85em;
@@ -1160,14 +1275,14 @@ foreignObject .svg-player-link::after { display: none; }
 .footer-brand {
   font-weight: 700;
   color: var(--text);
-  margin-top: 8px;
+  margin-top: 40px;
 }
 
 .footer-version {
   color: var(--text-secondary);
-  font-weight: 400;
-  font-size: 0.75em;
-  margin-left: 0.5em;
+  font-weight: 500;
+  font-size: 0.875em;
+  margin-left: 0.3em;
 }
 
 .footer-links {
@@ -1180,12 +1295,90 @@ foreignObject .svg-player-link::after { display: none; }
   font-weight: 400;
 }
 
-.footer-disclaimer {
+/* ── Callouts ── */
+.callout-amber,
+.callout-info {
+  --callout-color: var(--sc-sub);
+  --callout-icon-gap: 40px;
+  --callout-icon-top: 1.9rem;
+  --callout-icon-left: -0.51rem;
+  --callout-icon-scale: 1.3;
+  --callout-gap-center: 2.62rem;
+  --callout-gap-start: calc(var(--callout-gap-center) - var(--callout-icon-gap) / 2);
+  --callout-gap-end: calc(var(--callout-gap-center) + var(--callout-icon-gap) / 2);
+  border: none;
+  padding: 1.5rem 2.5rem 0.75rem 2.5rem;
+  margin: 2rem 0;
+  position: relative;
+}
+.callout-info { --callout-color: var(--text-secondary); }
+
+.callout-amber::before,
+.callout-info::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  background: linear-gradient(
+    to bottom,
+    var(--callout-color) 0%,
+    var(--callout-color) var(--callout-gap-start),
+    transparent var(--callout-gap-start),
+    transparent var(--callout-gap-end),
+    var(--callout-color) var(--callout-gap-end),
+    var(--callout-color) 100%
+  );
+}
+.callout-amber::after,
+.callout-info::after {
+  content: "";
+  position: absolute;
+  top: var(--callout-icon-top);
+  left: var(--callout-icon-left);
+  width: 1.4rem;
+  height: 1.4rem;
+  transform: scale(var(--callout-icon-scale));
+  z-index: 2;
+  background-color: var(--callout-color);
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+}
+.callout-amber::after {
+  -webkit-mask-image: url("/img/icons/star.svg");
+  mask-image: url("/img/icons/star.svg");
+}
+.callout-info::after {
+  -webkit-mask-image: url("/img/icons/info.svg");
+  mask-image: url("/img/icons/info.svg");
+}
+
+.callout-title {
+  font-weight: 700;
+  font-size: 1.075em;
+  margin: 0 0 0.25rem 0;
+  line-height: 1.3;
+}
+
+@media (max-width: 768px) {
+  .callout-amber,
+  .callout-info {
+    padding-left: 2.25rem;
+    padding-right: 1.5rem;
+  }
+}
+
+.footer-fine-print {
   color: var(--text-secondary);
-  margin-top: 12px;
-  font-size: 0.7em;
+  font-size: 0.85em;
   max-width: none;
-  line-height: 1.4;
+  line-height: 1.5;
+  margin: 0;
 }
 
 
@@ -1249,24 +1442,34 @@ foreignObject .svg-player-link::after { display: none; }
   flex: 1;
   min-width: 0;
 }
+.page-content > h2:first-child,
+.page-content > div:first-child > h2:first-child {
+  margin-top: 0;
+}
+.page-content p { margin-bottom: 1.25em; }
 
 /* ── Target highlight (clicked from subnav) ── */
 .target-highlight {
-  background-color: var(--sc-active-cell);
+  background-color: #f5e6a3;
   color: var(--text);
   padding: 4px 8px;
   scroll-margin-top: 2rem;
 }
 
 tr.target-highlight td {
-  background-color: var(--sc-active-cell);
+  background-color: #f5e6a3;
 }
 
 .subnav a.target-highlight {
-  background-color: var(--sc-active-cell);
+  background-color: #f5e6a3;
   color: var(--text);
   text-decoration: none;
   font-weight: 700;
+}
+html[data-theme="dark"] .target-highlight,
+html[data-theme="dark"] tr.target-highlight td,
+html[data-theme="dark"] .subnav a.target-highlight {
+  background-color: #5c4d1a;
 }
 
 
@@ -1570,8 +1773,14 @@ kbd {
   .diagram-row .diagram-figure { flex: 1 1 calc(50% - 16px); max-width: 50%; }
   .diagram-row .diagram-figure svg { max-width: 100%; }
 
+  /* Team stats stack on mobile */
+  .team-header-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .team-season-table { font-size: 0.8em; }
+  .team-season-table th,
+  .team-season-table td { padding: 4px 8px; }
+
   /* Footer responsive: nav above brand */
-  .footer-links { gap: 10px; }
+  .footer-links { flex-direction: column; gap: 12px; }
 }
 
 /* Mobile (≤ 480px) */
@@ -1583,6 +1792,11 @@ kbd {
   .scorecard-section-header h2  { font-size: 1.25em; }
   .refresh-controls    { padding: 6px var(--container-pad); gap: 8px; }
 
+  /* Team stats: tighter padding for narrow screens */
+  .team-season-table { font-size: 0.75em; }
+  .team-season-table th,
+  .team-season-table td { padding: 3px 5px; }
+
   /* Footer mobile: nav on top, brand below with spacing */
-  .footer-links { gap: 8px; }
+  .footer-links { flex-direction: column; gap: 10px; }
 }

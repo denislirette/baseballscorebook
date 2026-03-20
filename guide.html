@@ -39,7 +39,7 @@
       <nav aria-label="Page sections">
         <ul>
           <li class="subnav-indent"><a href="#anatomy">Play Cell Anatomy</a></li>
-          <li class="subnav-indent"><a href="#diamond-states">Base Hits and the Diamond</a></li>
+          <li class="subnav-indent"><a href="#diamond-states">Hits and the Diamond</a></li>
           <li class="subnav-indent"><a href="#sub-diagrams">Substitutions</a></li>
         </ul>
         <p class="subnav-group">Pitches</p>
@@ -49,16 +49,16 @@
         </ul>
         <p class="subnav-group">Scorecard</p>
         <ul>
-          <li class="subnav-indent"><a href="#play-notation">Play Notation</a></li>
-          <li class="subnav-indent"><a href="#diamond">Diamond &amp; Base Paths</a></li>
-          <li class="subnav-indent"><a href="#cell-indicators">Cell Indicators</a></li>
-          <li class="subnav-indent"><a href="#fielding-positions">Fielding Positions</a></li>
-          <li class="subnav-indent"><a href="#batter-stats">Batter Stats</a></li>
-          <li class="subnav-indent"><a href="#summary-rows">Summary Rows</a></li>
-          <li class="subnav-indent"><a href="#abs-challenge">ABS Challenge</a></li>
-          <li class="subnav-indent"><a href="#keyboard-shortcuts">Keyboard Shortcuts</a></li>
+          <li class="subnav-indent"><a href="#play-notation">Notation</a></li>
+          <li class="subnav-indent"><a href="#diamond">Diamond</a></li>
+          <li class="subnav-indent"><a href="#cell-indicators">Indicators</a></li>
+          <li class="subnav-indent"><a href="#fielding-positions">Positions</a></li>
+          <li class="subnav-indent"><a href="#batter-stats">Stats</a></li>
+          <li class="subnav-indent"><a href="#summary-rows">Totals</a></li>
+          <li class="subnav-indent"><a href="#abs-challenge">ABS</a></li>
+          <li class="subnav-indent"><a href="#keyboard-shortcuts">Shortcuts</a></li>
         </ul>
-        <p class="subnav-group">Batting Formulas</p>
+        <p class="subnav-group">Batting</p>
         <ul>
           <li class="subnav-indent"><a href="#formula-avg">AVG</a></li>
           <li class="subnav-indent"><a href="#formula-obp">OBP</a></li>
@@ -69,7 +69,7 @@
           <li class="subnav-indent"><a href="#formula-babip">BABIP</a></li>
           <li class="subnav-indent"><a href="#formula-pa">PA</a></li>
         </ul>
-        <p class="subnav-group">Pitching Formulas</p>
+        <p class="subnav-group">Pitching</p>
         <ul>
           <li class="subnav-indent"><a href="#formula-era">ERA</a></li>
           <li class="subnav-indent"><a href="#formula-whip">WHIP</a></li>
@@ -79,7 +79,6 @@
           <li class="subnav-indent"><a href="#formula-kbb">K/BB</a></li>
           <li class="subnav-indent"><a href="#formula-fip">FIP</a></li>
         </ul>
-        <p class="subnav-group"><a href="#data-source" style="color:inherit;text-decoration:none;">Data Source</a></p>
       </nav>
     </aside>
 
@@ -487,7 +486,7 @@
 
       <!-- Section 2: Diamond States (live-rendered) -->
       <div class="diagram-section" id="diamond-states">
-        <h2>Base Hits and the Diamond</h2>
+        <h2>Hits and the Diamond</h2>
         <p>The diamond represents the base paths. Thick lines trace runner advancement. Perpendicular <strong>hash marks</strong> on the home-to-first segment indicate the hit type. A <strong>filled diamond</strong> with white text means a home run.</p>
         <div class="diagram-row" id="diamondStatesRow"></div>
       </div>
@@ -521,7 +520,7 @@
         </div>
 
         <div class="legend-section" id="play-notation">
-          <h3>Play Notation</h3>
+          <h3>Notation</h3>
           <table class="legend-table">
             <tr id="play-BB"><td>BB</td><td>Walk (base on balls)</td></tr>
             <tr><td>BI</td><td>Batter interference</td></tr>
@@ -559,7 +558,7 @@
         </div>
 
         <div class="legend-section" id="fielding-positions">
-          <h3>Fielding Positions</h3>
+          <h3>Positions</h3>
           <table class="legend-table">
             <tr id="pos-1"><td>1</td><td>Pitcher (P)</td></tr>
             <tr id="pos-2"><td>2</td><td>Catcher (C)</td></tr>
@@ -575,7 +574,7 @@
         </div>
 
         <div class="legend-section" id="batter-stats">
-          <h3>Batter Stats</h3>
+          <h3>Stats</h3>
           <table class="legend-table">
             <tr id="stat-AB"><td>AB</td><td>At bats - used in <a href="#formula-avg">AVG</a>, <a href="#formula-slg">SLG</a>, <a href="#formula-babip">BABIP</a></td></tr>
             <tr id="stat-R"><td>R</td><td>Runs scored</td></tr>
@@ -585,7 +584,7 @@
         </div>
 
         <div class="legend-section" id="summary-rows">
-          <h3>Summary Rows</h3>
+          <h3>Totals</h3>
           <table class="legend-table">
             <tr><td>R</td><td>Runs</td></tr>
             <tr><td>H</td><td>Hits</td></tr>
@@ -607,7 +606,7 @@
         </div>
 
         <div class="legend-section" id="abs-challenge">
-          <h3>ABS Challenge</h3>
+          <h3>ABS</h3>
           <table class="legend-table">
             <tr><td><span style="display:inline-block;background:#7B2D8E;color:#fff;font-weight:700;width:1.4em;height:1.4em;line-height:1.4em;text-align:center;font-size:0.85em;">W</span></td><td>Challenge won (call overturned)</td></tr>
             <tr><td><span style="display:inline-block;background:#7B2D8E;color:#fff;font-weight:700;width:1.4em;height:1.4em;line-height:1.4em;text-align:center;font-size:0.85em;">L</span></td><td>Challenge lost (call upheld)</td></tr>
@@ -615,7 +614,7 @@
         </div>
 
         <div class="legend-section" id="keyboard-shortcuts">
-          <h3>Keyboard Shortcuts</h3>
+          <h3>Shortcuts</h3>
           <table class="legend-table">
             <tr><td><kbd>D</kbd></td><td>Switch to dark mode</td></tr>
             <tr><td><kbd>L</kbd></td><td>Switch to light mode</td></tr>
@@ -625,7 +624,7 @@
         </div>
 
         <div class="legend-section" id="diamond">
-          <h3>Diamond &amp; Base Paths</h3>
+          <h3>Diamond</h3>
           <table class="legend-table">
             <tr><td><svg width="36" height="36" viewBox="0 0 36 36"><!-- Diamond: HP=18,34 1B=34,18 2B=18,2 3B=2,18 --><!-- HP to 1B path --><line x1="18" y1="34" x2="34" y2="18" stroke="var(--sc-text)" stroke-width="2.5" stroke-linejoin="miter"/><!-- 1 hash mark --><line x1="22" y1="22" x2="30" y2="30" stroke="var(--sc-text)" stroke-width="2"/></svg></td><td><a href="#diamond-single">Single</a> (1 hash mark on HP&rarr;1B)</td></tr>
             <tr><td><svg width="36" height="36" viewBox="0 0 36 36"><!-- HP to 1B to 2B path --><polyline points="18,34 34,18 18,2" fill="none" stroke="var(--sc-text)" stroke-width="2.5" stroke-linejoin="miter"/><!-- 2 hash marks on HP-1B --><line x1="20" y1="24" x2="28" y2="32" stroke="var(--sc-text)" stroke-width="2"/><line x1="24" y1="20" x2="32" y2="28" stroke="var(--sc-text)" stroke-width="2"/></svg></td><td><a href="#diamond-double">Double</a> (2 hash marks on HP&rarr;1B)</td></tr>
@@ -638,9 +637,9 @@
         </div>
 
         <div class="legend-section" id="cell-indicators">
-          <h3>Cell Indicators</h3>
+          <h3>Indicators</h3>
           <table class="legend-table">
-            <tr><td><svg width="32" height="32" viewBox="0 0 32 32"><rect x="1" y="1" width="30" height="30" fill="none" stroke="var(--sc-grid)" stroke-width="1"/><rect x="3" y="0" width="7" height="7" fill="var(--sc-sub)"/><rect x="12" y="0" width="7" height="7" fill="var(--sc-sub)"/><rect x="21" y="0" width="7" height="7" fill="var(--sc-sub)"/></svg></td><td>Pitching change (square blocks on cell boundary). Includes the outgoing pitcher's strikes, pitches, and strikeouts.</td></tr>
+            <tr><td><svg width="32" height="32" viewBox="0 0 32 32"><rect x="1" y="1" width="30" height="30" fill="none" stroke="var(--sc-grid)" stroke-width="1"/><rect x="3" y="0" width="7" height="7" fill="var(--sc-pitcher-line)"/><rect x="12" y="0" width="7" height="7" fill="var(--sc-pitcher-line)"/><rect x="21" y="0" width="7" height="7" fill="var(--sc-pitcher-line)"/></svg></td><td>Pitching change (square blocks on cell boundary). Includes the outgoing pitcher's strikes, pitches, and strikeouts.</td></tr>
             <tr><td><svg width="32" height="32" viewBox="0 0 32 32"><rect x="1" y="1" width="30" height="30" fill="none" stroke="var(--sc-grid)" stroke-width="1"/><line x1="1" y1="1" x2="1" y2="31" stroke="var(--sc-sub)" stroke-width="3"/></svg></td><td>Pinch hitter (solid left line)</td></tr>
             <tr><td><svg width="32" height="32" viewBox="0 0 32 32"><rect x="1" y="1" width="30" height="30" fill="none" stroke="var(--sc-grid)" stroke-width="1"/><line x1="31" y1="1" x2="31" y2="31" stroke="var(--sc-sub)" stroke-width="3"/></svg></td><td>Pinch runner (solid right line)</td></tr>
             <tr><td><svg width="32" height="32" viewBox="0 0 32 32"><rect x="1" y="1" width="30" height="30" fill="var(--sc-active-cell)" stroke="var(--sc-active-border, #377049)" stroke-width="2.5"/></svg></td><td>Active batter cell (live games)</td></tr>
@@ -651,7 +650,7 @@
 
       <!-- ── Formulas ── -->
       <div class="stats-section" id="batting-formulas" style="margin-top:40px;">
-        <h2>Batting Formulas</h2>
+        <h2>Batting</h2>
         <dl class="formula-list">
           <div class="formula-entry" id="formula-avg">
             <dt>AVG</dt>
@@ -697,7 +696,7 @@
       </div>
 
       <div class="stats-section" id="pitching-formulas">
-        <h2>Pitching Formulas</h2>
+        <h2>Pitching</h2>
         <dl class="formula-list">
           <div class="formula-entry" id="formula-era">
             <dt>ERA</dt>
@@ -737,15 +736,10 @@
         </dl>
       </div>
 
-      <div class="stats-section" id="data-source" style="margin-top:48px;">
-        <h2>Data Source</h2>
-        <p style="line-height:1.7; max-width:65ch;">All stats are sourced from the MLB Stats API (statsapi.mlb.com). Advanced metrics like wOBA are calculated client-side from the raw components provided by the API. Season-level stats (AVG, OPS, ERA, WHIP, etc.) come directly from the API's boxscore and player endpoints.</p>
-      </div>
 
     </main>
   </div>
 
   <script type="module" src="/js/nav.js"></script>
-  <script type="module" src="/js/theme.js"></script>
 </body>
 </html>
