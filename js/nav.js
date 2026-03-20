@@ -1,7 +1,7 @@
 // Global navigation + footer - injected dynamically on every page
 // Same header on every page: site title + nav links, classic HTML link style
 
-const VERSION = '0.6.2';
+const VERSION = '0.6.3';
 
 const IS_LOCAL = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
@@ -154,11 +154,9 @@ function initFooter() {
 
   footer.innerHTML = `
     <div class="footer-content">
-      <div class="footer-top">
-        <span class="footer-brand">BaseballScorecard.org &nbsp;&nbsp; <a href="${releasesURL}" target="_blank" rel="noopener" class="footer-version" id="footer-version">Version ${VERSION}</a></span>
-        <nav class="footer-links">${links}</nav>
-      </div>
-      <p class="footer-disclaimer">This system isn't perfect and has bugs. Double check stats before committing pen to paper and have some white-out nearby.</p>
+      <nav class="footer-links">${links}</nav>
+      <div class="footer-brand">BaseballScorecard.org <a href="${releasesURL}" target="_blank" rel="noopener" class="footer-version" id="footer-version">Version ${VERSION}</a></div>
+      <p class="footer-disclaimer">Double check stats on this site before committing pen to paper and have some white-out nearby.</p>
     </div>`;
 
   // Keep the version link up to date with the latest GitHub release

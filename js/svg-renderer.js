@@ -1958,11 +1958,13 @@ export function renderGameHeaderHTML(data) {
     info.venue ? `<tr><td class="pitcher-name">Venue</td><td>${info.venue}${info.attendance || info.venueCapacity ? ` (${info.attendance ? info.attendance.toLocaleString() : '0'} / ${info.venueCapacity ? info.venueCapacity.toLocaleString() : '-'})` : ''}</td></tr>` : '',
   ].filter(Boolean).join('');
 
-  // Weather table rows
-  const weatherRows = [
-    info.weather ? `<tr><td class="pitcher-name"><i class="wi ${weatherIcon(info.weatherCondition)}"></i> Temp</td><td>${info.weather}</td></tr>` : '',
-    info.wind ? `<tr><td class="pitcher-name"><i class="wi wi-strong-wind"></i> Wind</td><td>${formatWind(info.wind)}</td></tr>` : '',
-  ].filter(Boolean).join('');
+  // Weather table rows - always show, with fallback
+  const weatherRows = info.weather || info.wind
+    ? [
+        info.weather ? `<tr><td class="pitcher-name"><i class="wi ${weatherIcon(info.weatherCondition)}"></i> Temp</td><td>${info.weather}</td></tr>` : '',
+        info.wind ? `<tr><td class="pitcher-name"><i class="wi wi-strong-wind"></i> Wind</td><td>${formatWind(info.wind)}</td></tr>` : '',
+      ].filter(Boolean).join('')
+    : `<tr><td colspan="2">Waiting on data from sources</td></tr>`;
 
   return `
     <div class="game-header">
@@ -1988,19 +1990,19 @@ export function renderGameHeaderHTML(data) {
           </table>
         </div>
 
-        ${weatherRows ? `<div>
+        <div>
           <table class="pitcher-stats-table">
             <thead><tr><th colspan="2">Weather</th></tr></thead>
             <tbody>${weatherRows}</tbody>
           </table>
-        </div>` : ''}
+        </div>
 
-        ${hasUmps ? `<div>
+        <div>
           <table class="pitcher-stats-table">
             <thead><tr><th colspan="2">Umpires</th></tr></thead>
-            <tbody>${umpTableRows}</tbody>
+            <tbody>${hasUmps ? umpTableRows : '<tr><td colspan="2">Waiting on data from sources</td></tr>'}</tbody>
           </table>
-        </div>` : ''}
+        </div>
 
       </div>
     </div>`;

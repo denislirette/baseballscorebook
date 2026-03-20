@@ -27,15 +27,15 @@
   </header>
 
   <div class="refresh-controls">
-    <label>
-      <input type="checkbox" id="auto-refresh" checked>
-      Auto-refresh
+    <button class="header-btn" id="refresh-toggle" aria-pressed="false">Start</button>
+    <label class="refresh-label">every
+      <input type="number" id="refresh-interval" value="10" min="1" max="300" step="1" aria-label="Refresh interval">
+      <select id="refresh-unit" aria-label="Refresh time unit">
+        <option value="seconds" selected>seconds</option>
+        <option value="minutes">minutes</option>
+      </select>
     </label>
-    <label>
-      every <input type="number" id="refresh-interval" value="1" min="1" max="300" step="1"> sec
-    </label>
-    <button class="header-btn" id="save-interval-btn">Save</button>
-    <span id="refresh-status"></span>
+    <span id="refresh-status" aria-live="polite"></span>
   </div>
 
   <main id="scorecard-container" class="scorecard-container">

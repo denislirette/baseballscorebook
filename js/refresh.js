@@ -2,7 +2,6 @@
 
 let refreshTimer = null;
 let lastRefresh = null;
-let statusPrefix = '';
 
 /**
  * Set up refresh control listeners and auto-refresh behavior.
@@ -10,78 +9,69 @@ let statusPrefix = '';
  * @param {Function} getGameState - Returns the current abstractGameState
  */
 export function renderRefreshControls(refreshFn, getGameState) {
-  const autoRefreshCheckbox = document.getElementById('auto-refresh');
+  const toggleBtn = document.getElementById('refresh-toggle');
   const intervalInput = document.getElementById('refresh-interval');
-  const saveBtn = document.getElementById('save-interval-btn');
+  const unitSelect = document.getElementById('refresh-unit');
   const statusEl = document.getElementById('refresh-status');
 
-  let activeInterval = (parseInt(intervalInput.value, 10) || 1) * 1000;
+  let running = false;
 
-  function updateStatusFull() {
-    if (!lastRefresh) return;
-    const timeStr = lastRefresh.toLocaleTimeString();
-    statusEl.textContent = `Last updated: ${timeStr}`;
-    // Cache prefix (everything except seconds) for fast updates
-    const lastColon = timeStr.lastIndexOf(':');
-    statusPrefix = `Last updated: ${timeStr.slice(0, lastColon + 1)}`;
+  function getIntervalMs() {
+    const val = parseInt(intervalInput.value, 10) || 10;
+    const unit = unitSelect.value;
+    if (unit === 'minutes') return val * 60 * 1000;
+    return val * 1000;
   }
 
-  function updateStatusSeconds() {
-    if (!lastRefresh || !statusPrefix) return;
-    const now = new Date();
-    const secs = String(now.getSeconds()).padStart(2, '0');
-    const suffix = now.toLocaleTimeString().slice(now.toLocaleTimeString().lastIndexOf(':') + 3);
-    statusEl.textContent = `${statusPrefix}${secs}${suffix}`;
+  function updateStatus() {
+    if (!lastRefresh) return;
+    statusEl.textContent = `Last updated: ${lastRefresh.toLocaleTimeString()}`;
   }
 
   async function doRefresh() {
     await refreshFn();
     lastRefresh = new Date();
-    if (activeInterval < 10000) {
-      updateStatusSeconds();
-    } else {
-      updateStatusFull();
-    }
+    updateStatus();
 
     // Stop auto-refresh if game is final
     const state = getGameState();
     if (state === 'Final') {
-      stopAutoRefresh();
-      autoRefreshCheckbox.checked = false;
-      updateStatusFull();
+      stop();
       statusEl.textContent += ' (Game Final)';
     }
   }
 
-  function startAutoRefresh() {
-    stopAutoRefresh();
-    refreshTimer = setInterval(doRefresh, activeInterval);
+  function start() {
+    stop();
+    running = true;
+    toggleBtn.textContent = 'Stop';
+    toggleBtn.setAttribute('aria-pressed', 'true');
+    refreshTimer = setInterval(doRefresh, getIntervalMs());
   }
 
-  function stopAutoRefresh() {
+  function stop() {
     if (refreshTimer) {
       clearInterval(refreshTimer);
       refreshTimer = null;
     }
+    running = false;
+    toggleBtn.textContent = 'Start';
+    toggleBtn.setAttribute('aria-pressed', 'false');
   }
 
-  saveBtn.addEventListener('click', () => {
-    activeInterval = (parseInt(intervalInput.value, 10) || 1) * 1000;
-    if (autoRefreshCheckbox.checked) {
-      startAutoRefresh();
-    }
-  });
-
-  autoRefreshCheckbox.addEventListener('change', () => {
-    if (autoRefreshCheckbox.checked) {
-      startAutoRefresh();
+  toggleBtn.addEventListener('click', () => {
+    if (running) {
+      stop();
     } else {
-      stopAutoRefresh();
+      start();
     }
   });
 
-  // Start auto-refresh by default for live games
-  if (autoRefreshCheckbox.checked) {
-    startAutoRefresh();
-  }
+  // Restart with new interval when user changes the values
+  intervalInput.addEventListener('change', () => {
+    if (running) start();
+  });
+  unitSelect.addEventListener('change', () => {
+    if (running) start();
+  });
 }
