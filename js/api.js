@@ -83,11 +83,12 @@ export async function fetchCoaches(teamId) {
     const data = await resp.json();
     const roster = data.roster || [];
     const find = (title) => roster.find(c => c.title === title)?.person?.fullName || null;
+    const findStartsWith = (prefix) => roster.find(c => c.title?.startsWith(prefix))?.person?.fullName || null;
     return {
       manager: find('Manager'),
       pitching: find('Pitching Coach'),
-      firstBase: find('First Base Coach'),
-      thirdBase: find('Third Base Coach'),
+      firstBase: findStartsWith('First Base'),
+      thirdBase: findStartsWith('Third Base'),
     };
   } catch {
     return null;

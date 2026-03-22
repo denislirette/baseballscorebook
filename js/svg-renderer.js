@@ -2023,23 +2023,20 @@ export function renderCoachingStaffHTML(data, side, teamName) {
   const coaches = data._coaches?.[side];
   if (!coaches) return '';
 
-  const label = teamName ? `${teamName} COACHING STAFF` : 'COACHING STAFF';
+  const entries = [
+    coaches.manager ? ['Manager', coaches.manager] : null,
+    coaches.pitching ? ['Pitching Coach', coaches.pitching] : null,
+    coaches.firstBase ? ['First Base Coach', coaches.firstBase] : null,
+    coaches.thirdBase ? ['Third Base Coach', coaches.thirdBase] : null,
+  ].filter(Boolean);
 
-  const rows = [
-    coaches.manager ? `<tr><td class="pitcher-name">${coaches.manager}</td><td>Manager</td></tr>` : '',
-    coaches.pitching ? `<tr><td class="pitcher-name">${coaches.pitching}</td><td>Pitching Coach</td></tr>` : '',
-    coaches.firstBase ? `<tr><td class="pitcher-name">${coaches.firstBase}</td><td>1B Coach</td></tr>` : '',
-    coaches.thirdBase ? `<tr><td class="pitcher-name">${coaches.thirdBase}</td><td>3B Coach</td></tr>` : '',
-  ].filter(Boolean).join('');
+  if (!entries.length) return '';
 
-  if (!rows) return '';
+  const headers = entries.map(([role]) => `<th>${role}</th>`).join('');
+  const cells = entries.map(([, name]) => `<td>${name}</td>`).join('');
 
-  return `
-    <details class="collapsible-section" data-section="coaches-${side}">
-      <summary role="button" aria-expanded="false">${label}</summary>
-      <table class="pitcher-stats-table">
-        <thead><tr><th>Name</th><th>Role</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </details>`;
+  return `<table class="coaching-staff-table">
+    <thead><tr>${headers}</tr></thead>
+    <tbody><tr>${cells}</tr></tbody>
+  </table>`;
 }

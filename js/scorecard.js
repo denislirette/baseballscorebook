@@ -43,6 +43,8 @@ const gamePk = params.get('gamePk');
 let gameData = null;
 let standingsData = null;
 let allTeamStatsData = null;
+let cachedCoaches = null;
+let cachedTeamSeasonStats = {};
 
 let isInitialLoad = true;
 
@@ -67,19 +69,22 @@ async function loadGame() {
       // First load: fetch standings, coaches, team stats in parallel
       const awayId = gumbo.gameData?.teams?.away?.id;
       const homeId = gumbo.gameData?.teams?.home?.id;
-      const [standings, allTeamStats, awayCoaches, homeCoaches] = await Promise.all([
+      const [standings, allTeamStats, awayCoaches, homeCoaches, awaySeasonStats, homeSeasonStats] = await Promise.all([
         fetchStandings(season).catch(() => null),
         fetchAllTeamStats(season).catch(() => null),
         awayId ? fetchCoaches(awayId) : null,
         homeId ? fetchCoaches(homeId) : null,
+        awayId ? fetchTeamSeasonStats(awayId, season).catch(() => ({})) : {},
+        homeId ? fetchTeamSeasonStats(homeId, season).catch(() => ({})) : {},
       ]);
       standingsData = standings;
       allTeamStatsData = allTeamStats;
-      gameData._coaches = { away: awayCoaches, home: homeCoaches };
-    } else {
-      // Auto-refresh: reuse cached standings/coaches/team stats
-      gameData._coaches = gameData._coaches || {};
+      cachedCoaches = { away: awayCoaches, home: homeCoaches };
+      if (awayId) cachedTeamSeasonStats[awayId] = awaySeasonStats;
+      if (homeId) cachedTeamSeasonStats[homeId] = homeSeasonStats;
     }
+    // Always apply cached data to fresh gumbo object
+    gameData._coaches = cachedCoaches || {};
 
     // Preserve scroll position during auto-refresh
     const scrollY = isInitialLoad ? 0 : window.scrollY;
@@ -189,81 +194,89 @@ function renderTeamSection(data, side, allTeamStats) {
 
   section.appendChild(headerRow);
   const season = parseInt(data.gameData.game?.season || new Date().getFullYear());
-  fetchTeamSeasonStats(team.id, season).then(stats => {
-    if (stats.batting && stats.pitching) {
-      const b = stats.batting;
-      const p = stats.pitching;
-      const f = stats.fielding;
-      const yr = stats.season || season;
+  // Use cached team season stats (fetched on initial load) for synchronous rendering
+  const stats = cachedTeamSeasonStats[team.id];
+  if (stats?.batting && stats?.pitching) {
+    const b = stats.batting;
+    const p = stats.pitching;
+    const f = stats.fielding;
+    const yr = stats.season || season;
 
-      // wOBA calculation using 2025 FanGraphs linear weights
-      const W = { bb: 0.691, hbp: 0.722, s1b: 0.882, s2b: 1.252, s3b: 1.584, hr: 2.037 };
-      const ubb = (b.baseOnBalls ?? 0) - (b.intentionalWalks ?? 0);
-      const hbp = b.hitByPitch ?? 0;
-      const singles = (b.hits ?? 0) - (b.doubles ?? 0) - (b.triples ?? 0) - (b.homeRuns ?? 0);
-      const wobaDenom = (b.atBats ?? 0) + ubb + (b.intentionalWalks ?? 0) + (b.sacFlies ?? 0) + hbp;
-      const woba = wobaDenom > 0 ? (W.bb * ubb + W.hbp * hbp + W.s1b * singles + W.s2b * (b.doubles ?? 0) + W.s3b * (b.triples ?? 0) + W.hr * (b.homeRuns ?? 0)) / wobaDenom : 0;
+    // wOBA calculation using 2025 FanGraphs linear weights
+    const W = { bb: 0.691, hbp: 0.722, s1b: 0.882, s2b: 1.252, s3b: 1.584, hr: 2.037 };
+    const ubb = (b.baseOnBalls ?? 0) - (b.intentionalWalks ?? 0);
+    const hbp = b.hitByPitch ?? 0;
+    const singles = (b.hits ?? 0) - (b.doubles ?? 0) - (b.triples ?? 0) - (b.homeRuns ?? 0);
+    const wobaDenom = (b.atBats ?? 0) + ubb + (b.intentionalWalks ?? 0) + (b.sacFlies ?? 0) + hbp;
+    const woba = wobaDenom > 0 ? (W.bb * ubb + W.hbp * hbp + W.s1b * singles + W.s2b * (b.doubles ?? 0) + W.s3b * (b.triples ?? 0) + W.hr * (b.homeRuns ?? 0)) / wobaDenom : 0;
 
-      // wRC+ calculation
-      const lgwOBA = 0.313;
-      const wOBAScale = 1.232;
-      const lgRPA = 0.118;
-      const pa = b.plateAppearances ?? 0;
-      const wrcPlus = pa > 0 ? Math.round((((woba - lgwOBA) / wOBAScale + lgRPA) / lgRPA) * 100) : '-';
+    // wRC+ calculation
+    const lgwOBA = 0.313;
+    const wOBAScale = 1.232;
+    const lgRPA = 0.118;
+    const pa = b.plateAppearances ?? 0;
+    const wrcPlus = pa > 0 ? Math.round((((woba - lgwOBA) / wOBAScale + lgRPA) / lgRPA) * 100) : '-';
 
-      const rs = b.runs ?? 0;
-      const ra = p.runs ?? 0;
-      const seasonLabel = yr !== season ? `${yr} Season` : 'Season';
+    const rs = b.runs ?? 0;
+    const ra = p.runs ?? 0;
+    const seasonLabel = yr !== season ? `${yr} Season` : 'Season';
 
-      // Compute rankings if allTeamStats available
-      const ordinal = (n) => {
-        const s = ['th','st','nd','rd'];
-        const v = n % 100;
-        return n + (s[(v - 20) % 10] || s[v] || s[0]);
-      };
-      const rankHtml = (statKey, lowerIsBetter) => {
-        if (!allTeamStats) return '';
-        const r = computeTeamRank(team.id, statKey, allTeamStats, lowerIsBetter);
-        return r ? `<span class="team-rank">${ordinal(r)}</span>` : '';
-      };
+    // Compute rankings if allTeamStats available
+    const ordinal = (n) => {
+      const s = ['th','st','nd','rd'];
+      const v = n % 100;
+      return n + (s[(v - 20) % 10] || s[v] || s[0]);
+    };
+    const rankHtml = (statKey, lowerIsBetter) => {
+      if (!allTeamStats) return '';
+      const r = computeTeamRank(team.id, statKey, allTeamStats, lowerIsBetter);
+      return r ? `<span class="team-rank">${ordinal(r)}</span>` : '';
+    };
 
-      teamStatsPlaceholder.innerHTML = `
-        <div class="team-stats-grid">
-          <table class="team-season-table">
-            <thead><tr><th>AVG</th><th>OPS</th><th>wOBA</th><th>wRC+</th><th>HR</th><th>SB</th><th>RS</th></tr></thead>
-            <tbody><tr>
-              <td>${b.avg ?? '-'}${rankHtml('avg', false)}</td>
-              <td>${b.ops ?? '-'}${rankHtml('ops', false)}</td>
-              <td>${woba.toFixed(3)}</td>
-              <td>${wrcPlus}</td>
-              <td>${b.homeRuns ?? 0}${rankHtml('homeRuns', false)}</td>
-              <td>${b.stolenBases ?? 0}${rankHtml('stolenBases', false)}</td>
-              <td>${rs}${rankHtml('runs', false)}</td>
-            </tr></tbody>
-          </table>
-          <table class="team-season-table">
-            <thead><tr><th>ERA</th><th>RA</th><th>FLD%</th><th>DP</th><th>E</th><th>CS</th></tr></thead>
-            <tbody><tr>
-              <td>${p.era ?? '-'}${rankHtml('era', true)}</td>
-              <td>${ra}${rankHtml('runsAllowed', true)}</td>
-              <td>${f?.fielding ?? '-'}${rankHtml('fielding', false)}</td>
-              <td>${f?.doublePlays ?? '-'}${rankHtml('doublePlays', false)}</td>
-              <td>${f?.errors ?? '-'}${rankHtml('errors', true)}</td>
-              <td>${b.caughtStealing ?? 0}</td>
-            </tr></tbody>
-          </table>
-        </div>
-        <div class="team-season-caption">${seasonLabel} Stats</div>`;
-    }
-  });
+    teamStatsPlaceholder.innerHTML = `
+      <div class="team-stats-grid">
+        <table class="team-season-table">
+          <thead><tr><th>AVG</th><th>OPS</th><th>wOBA</th><th>wRC+</th><th>HR</th><th>SB</th><th>RS</th></tr></thead>
+          <tbody><tr>
+            <td>${b.avg ?? '-'}${rankHtml('avg', false)}</td>
+            <td>${b.ops ?? '-'}${rankHtml('ops', false)}</td>
+            <td>${woba.toFixed(3)}</td>
+            <td>${wrcPlus}</td>
+            <td>${b.homeRuns ?? 0}${rankHtml('homeRuns', false)}</td>
+            <td>${b.stolenBases ?? 0}${rankHtml('stolenBases', false)}</td>
+            <td>${rs}${rankHtml('runs', false)}</td>
+          </tr></tbody>
+        </table>
+        <table class="team-season-table">
+          <thead><tr><th>ERA</th><th>RA</th><th>FLD%</th><th>DP</th><th>E</th><th>CS</th></tr></thead>
+          <tbody><tr>
+            <td>${p.era ?? '-'}${rankHtml('era', true)}</td>
+            <td>${ra}${rankHtml('runsAllowed', true)}</td>
+            <td>${f?.fielding ?? '-'}${rankHtml('fielding', false)}</td>
+            <td>${f?.doublePlays ?? '-'}${rankHtml('doublePlays', false)}</td>
+            <td>${f?.errors ?? '-'}${rankHtml('errors', true)}</td>
+            <td>${b.caughtStealing ?? 0}</td>
+          </tr></tbody>
+        </table>
+      </div>
+      <div class="team-season-caption">${seasonLabel} Stats</div>`;
+  }
 
-  // Coaching staff (collapsed accordion, right under team name)
+  // Coaching staff (inline list under team name)
   const coachesHTML = renderCoachingStaffHTML(data, side, team.teamName);
   if (coachesHTML) {
     const coachesDiv = document.createElement('div');
-    coachesDiv.className = 'pitcher-stats-section';
     coachesDiv.innerHTML = coachesHTML;
     section.appendChild(coachesDiv);
+  }
+
+  // This team's bench (grouped with coaching staff above)
+  const benchHTML = renderBenchHTML(data, side, team.teamName);
+  if (benchHTML) {
+    const benchDiv = document.createElement('div');
+    benchDiv.className = 'pitcher-stats-section';
+    benchDiv.innerHTML = benchHTML;
+    section.appendChild(benchDiv);
   }
 
   // Scorecard grid (this team's batting)
@@ -285,15 +298,6 @@ function renderTeamSection(data, side, allTeamStats) {
     bullpenDiv.className = 'pitcher-stats-section';
     bullpenDiv.innerHTML = bullpenHTML;
     section.appendChild(bullpenDiv);
-  }
-
-  // This team's bench
-  const benchHTML = renderBenchHTML(data, side, team.teamName);
-  if (benchHTML) {
-    const benchDiv = document.createElement('div');
-    benchDiv.className = 'pitcher-stats-section';
-    benchDiv.innerHTML = benchHTML;
-    section.appendChild(benchDiv);
   }
 
   return section;
