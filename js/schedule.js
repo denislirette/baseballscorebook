@@ -2,7 +2,7 @@
 
 import { fetchSchedule, fetchLiveFeed, getGames, isDevMode } from './api.js';
 import { formatDate, parseDate, formatGameTime, gameStatusText } from './utils.js';
-import { renderThumbnail, renderEmptyGrid } from './svg-thumbnail.js';
+import { renderThumbnail } from './svg-thumbnail.js';
 import { DatePicker } from './datepicker.js';
 
 const gamesGrid = document.getElementById('games-grid');
@@ -82,7 +82,8 @@ async function loadGames() {
     const remaining = games.filter(g => !cancelled.includes(g));
     const wbc = remaining.filter(g => g._isWBC);
     const springTraining = remaining.filter(g => !g._isWBC && g.gameType === 'S');
-    const active = remaining.filter(g => !g._isWBC && g.gameType !== 'S');
+    const exhibition = remaining.filter(g => !g._isWBC && g.gameType === 'E');
+    const active = remaining.filter(g => !g._isWBC && g.gameType !== 'S' && g.gameType !== 'E');
 
     // Sort: active/finished games first, then by start time
     const sortGames = (arr) => arr.sort((a, b) => {
@@ -94,6 +95,7 @@ async function loadGames() {
     sortGames(active);
     sortGames(wbc);
     sortGames(springTraining);
+    sortGames(exhibition);
 
     gamesGrid.innerHTML = '';
     const cards = [];
@@ -125,6 +127,12 @@ async function loadGames() {
     if (springTraining.length > 0) {
       addHeading('Spring Training');
       addCards(springTraining);
+    }
+
+    // Exhibition
+    if (exhibition.length > 0) {
+      addHeading('Exhibition');
+      addCards(exhibition);
     }
 
     // WBC
@@ -192,15 +200,8 @@ function renderGameCard(game, dateStr) {
         </div>
       </div>
     </div>
-    ${showScore ? '<div class="thumbnail-container"></div>' : ''}
     ${!showScore ? renderPitchers(away, home) : ''}
   `;
-
-  // Render empty grid placeholder for live/final games only
-  if (showScore) {
-    const container = a.querySelector('.thumbnail-container');
-    container.appendChild(renderEmptyGrid());
-  }
 
   return a;
 }
@@ -231,15 +232,19 @@ async function loadThumbnails(cards) {
     await Promise.allSettled(batch.map(async ({ game, card }) => {
       try {
         const data = await fetchLiveFeed(game.gamePk);
-        const container = card.querySelector('.thumbnail-container');
-        if (container) {
-          container.innerHTML = '';
-          container.appendChild(renderThumbnail(data));
-          // Widen the card for extra-inning games so cells stay full size
-          const innings = data.liveData.linescore.innings?.length || 9;
-          if (innings > 9) {
-            card.style.minWidth = `${Math.round(280 * innings / 9)}px`;
-          }
+        // Only show thumbnail if at least one at-bat has happened
+        const plays = data.liveData?.plays?.allPlays || [];
+        if (plays.length === 0) return;
+
+        const container = document.createElement('div');
+        container.className = 'thumbnail-container';
+        container.appendChild(renderThumbnail(data));
+        card.appendChild(container);
+
+        // Widen the card for extra-inning games so cells stay full size
+        const innings = data.liveData.linescore.innings?.length || 9;
+        if (innings > 9) {
+          card.style.minWidth = `${Math.round(280 * innings / 9)}px`;
         }
       } catch (e) {
         console.error('Thumbnail load error for gamePk', game.gamePk, e);

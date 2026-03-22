@@ -569,9 +569,8 @@ strong, b { font-weight: 600; }
    ═══════════════════════════════════════════════════════ */
 
 .games-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--grid-gap);
+  columns: 280px;
+  column-gap: var(--grid-gap);
   padding: var(--grid-gap) var(--container-pad);
   width: 100%;
 }
@@ -587,6 +586,8 @@ strong, b { font-weight: 600; }
   display: flex;
   flex-direction: column;
   font-size: 14px;
+  break-inside: avoid;
+  margin-bottom: var(--grid-gap);
 }
 
 .game-card:hover,
@@ -649,7 +650,7 @@ strong, b { font-weight: 600; }
 }
 
 .cancelled-section {
-  grid-column: 1 / -1;
+  column-span: all;
   margin-top: 8px;
 }
 .cancelled-section > .games-grid {
