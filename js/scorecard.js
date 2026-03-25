@@ -158,8 +158,6 @@ function renderGame(data, standings, allTeamStats) {
   // Restore and persist <details> open/closed state
   restoreDetailsState();
 
-  // Pitcher hover: highlight play cells belonging to hovered pitcher
-  setupPitcherHighlight();
 }
 
 function renderTeamSection(data, side, allTeamStats) {
@@ -299,34 +297,6 @@ function renderTeamSection(data, side, allTeamStats) {
   }
 
   return section;
-}
-
-// Pitcher hover highlight: when hovering a pitcher row, tint their play cells
-function setupPitcherHighlight() {
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  const HIGHLIGHT = isDark ? 'rgba(96, 165, 250, 0.20)' : 'rgba(37, 99, 235, 0.12)';
-  const BORDER = isDark ? '#ffffff' : '#1e3a5f';
-  const BORDER_W = 2;
-  for (const row of document.querySelectorAll('tr.pitcher-game-row[data-pitcher-id]')) {
-    const pid = row.dataset.pitcherId;
-    row.addEventListener('mouseenter', () => {
-      for (const rect of document.querySelectorAll(`rect.cell-bg[data-pitcher-id="${pid}"]`)) {
-        rect.dataset.origFill = rect.getAttribute('fill');
-        rect.setAttribute('fill', HIGHLIGHT);
-        rect.dataset.origStroke = rect.getAttribute('stroke') || 'none';
-        rect.dataset.origStrokeW = rect.getAttribute('stroke-width') || '0';
-        rect.setAttribute('stroke', BORDER);
-        rect.setAttribute('stroke-width', BORDER_W);
-      }
-    });
-    row.addEventListener('mouseleave', () => {
-      for (const rect of document.querySelectorAll(`rect.cell-bg[data-pitcher-id="${pid}"]`)) {
-        rect.setAttribute('fill', rect.dataset.origFill || '');
-        rect.setAttribute('stroke', rect.dataset.origStroke || 'none');
-        rect.setAttribute('stroke-width', rect.dataset.origStrokeW || '0');
-      }
-    });
-  }
 }
 
 // Setup refresh controls
