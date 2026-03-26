@@ -257,7 +257,8 @@ function renderTeamSection(data, side, allTeamStats) {
           </tr></tbody>
         </table>
       </div>
-      <div class="team-season-caption">${seasonLabel} Stats</div>`;
+      </div>`;
+
   }
 
   // Coaching staff — append into the stats grid if it exists, otherwise standalone
