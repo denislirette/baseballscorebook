@@ -1102,6 +1102,8 @@ foreignObject .svg-player-link::after { display: none; }
 }
 
 .section-count { font-weight: 400; color: var(--text-secondary); }
+.open-section .scorecard-section-header { padding: 10px 12px; font-size: 0.95em; font-family: var(--font-mono); background: var(--surface); margin-bottom: 0; }
+.open-section .table-scroll-wrapper { padding: 0; }
 .collapsible-section summary::-webkit-details-marker { display: none; }
 .collapsible-section summary::before              { content: '\25B6\00a0'; }
 .collapsible-section[open] summary::before        { content: '\25BC\00a0'; }

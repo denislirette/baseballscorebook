@@ -165,6 +165,9 @@ function renderTeamSection(data, side, allTeamStats) {
   const oppSide = side === 'away' ? 'home' : 'away';
   const oppTeam = data.gameData.teams[oppSide];
   const label = side === 'away' ? 'Away' : 'Home';
+  // Spring Training / Exhibition use accordions (large rosters); Regular season shows tables directly
+  const gameType = data.gameData.game?.type || 'R';
+  const useAccordion = gameType === 'S' || gameType === 'E';
 
   const section = document.createElement('div');
   section.className = 'scorecard-section';
@@ -268,7 +271,7 @@ function renderTeamSection(data, side, allTeamStats) {
   }
 
   // This team's bench (grouped with coaching staff above)
-  const benchHTML = renderBenchHTML(data, side, team.teamName);
+  const benchHTML = renderBenchHTML(data, side, team.teamName, { useAccordion });
   if (benchHTML) {
     const benchDiv = document.createElement('div');
     benchDiv.className = 'pitcher-stats-section';
@@ -289,7 +292,7 @@ function renderTeamSection(data, side, allTeamStats) {
   section.appendChild(pitchersDiv);
 
   // Opposing bullpen
-  const bullpenHTML = renderBullpenHTML(data, oppSide, oppTeam.teamName);
+  const bullpenHTML = renderBullpenHTML(data, oppSide, oppTeam.teamName, { useAccordion });
   if (bullpenHTML) {
     const bullpenDiv = document.createElement('div');
     bullpenDiv.className = 'pitcher-stats-section';

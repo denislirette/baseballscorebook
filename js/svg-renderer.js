@@ -1618,7 +1618,7 @@ function calcWOBA(ss) {
   return woba.toFixed(3);
 }
 
-export function renderBenchHTML(data, side, teamAbbrev) {
+export function renderBenchHTML(data, side, teamAbbrev, { useAccordion = true } = {}) {
   const boxscore = data.liveData.boxscore;
   const gameData = data.gameData;
   const players = getBenchPlayers(boxscore, side);
@@ -1645,19 +1645,26 @@ export function renderBenchHTML(data, side, teamAbbrev) {
     </tr>`;
   }).join('');
 
-  return `
-    <details class="collapsible-section" data-section="bench-${side}">
-      <summary role="button" aria-expanded="false">${label} <span class="section-count">(${players.length})</span></summary>
-      <div class="table-scroll-wrapper">
+  const tableHTML = `<div class="table-scroll-wrapper">
       <table class="pitcher-stats-table">
         <thead><tr><th>Player</th><th>POS</th><th>AVG</th><th>OBP</th><th>SLG</th><th>OPS</th><th>wOBA</th><th>HR</th><th>RBI</th><th>SB</th><th>PA</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
-      </div>
+      </div>`;
+
+  if (useAccordion) {
+    return `<details class="collapsible-section" data-section="bench-${side}">
+      <summary role="button" aria-expanded="false">${label} <span class="section-count">(${players.length})</span></summary>
+      ${tableHTML}
     </details>`;
+  }
+  return `<div class="open-section">
+    <h3 class="scorecard-section-header">${label} <span class="section-count">(${players.length})</span></h3>
+    ${tableHTML}
+  </div>`;
 }
 
-export function renderBullpenHTML(data, side, teamAbbrev) {
+export function renderBullpenHTML(data, side, teamAbbrev, { useAccordion = true } = {}) {
   const boxscore = data.liveData.boxscore;
   const gameData = data.gameData;
   const players = getBullpenPitchers(boxscore, side);
@@ -1684,16 +1691,23 @@ export function renderBullpenHTML(data, side, teamAbbrev) {
     </tr>`;
   }).join('');
 
-  return `
-    <details class="collapsible-section" data-section="bullpen-${side}">
-      <summary role="button" aria-expanded="false">${label} <span class="section-count">(${players.length})</span></summary>
-      <div class="table-scroll-wrapper">
+  const tableHTML = `<div class="table-scroll-wrapper">
       <table class="pitcher-stats-table">
         <thead><tr><th>Player</th><th>PITCH TYPES (USAGE/MPH)</th><th>IP</th><th>H</th><th>R</th><th>ER</th><th>BB</th><th>K</th><th>S</th><th>P</th><th>ERA</th><th>WHIP</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
-      </div>
+      </div>`;
+
+  if (useAccordion) {
+    return `<details class="collapsible-section" data-section="bullpen-${side}">
+      <summary role="button" aria-expanded="false">${label} <span class="section-count">(${players.length})</span></summary>
+      ${tableHTML}
     </details>`;
+  }
+  return `<div class="open-section">
+    <h3 class="scorecard-section-header">${label} <span class="section-count">(${players.length})</span></h3>
+    ${tableHTML}
+  </div>`;
 }
 
 function weatherIcon(condition) {
