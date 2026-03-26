@@ -195,6 +195,7 @@ body {
   line-height: 1.4;
   transition: background 0.2s, color 0.2s;
   -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
 }
 
 ::selection {
@@ -205,6 +206,12 @@ html[data-theme="dark"] ::selection {
   background: #5c4d1a;
   color: #f5f2e9;
 }
+
+/* Team logos: swap light/dark variants based on theme */
+.team-logo { display: inline-block; margin: 0 10px 0 0; }
+.team-logo-dark { display: none; }
+[data-theme="dark"] .team-logo-light { display: none; }
+[data-theme="dark"] .team-logo-dark { display: inline-block; }
 
 /* Global link styles */
 a {
@@ -305,13 +312,12 @@ strong, b { font-weight: 600; }
 .site-header {
   position: relative;
   background: var(--bg);
-  border-bottom: 1px solid var(--grid-line);
 }
 
 .header-top {
   display: flex;
   align-items: center;
-  padding: 32px var(--container-pad) 32px var(--container-pad);
+  padding: 32px var(--container-pad) 12px var(--container-pad);
   gap: 12px;
 }
 
@@ -683,82 +689,49 @@ strong, b { font-weight: 600; }
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 6px var(--container-pad);
-  border-bottom: 1px solid var(--grid-line);
+  padding: 8px var(--container-pad);
   flex-wrap: wrap;
   background: var(--surface);
   font-size: 0.8em;
   transition: background 0.15s ease;
+  margin: 0 0 16px;
+  border-top: 1px solid var(--grid-line);
+  border-bottom: 1px solid var(--grid-line);
 }
 .refresh-controls.refresh-active {
   background: #377049;
   color: #fff;
 }
-.refresh-controls.refresh-active .refresh-label,
-.refresh-controls.refresh-active #refresh-status {
-  color: #fff;
-}
+.refresh-controls.refresh-active .refresh-label { color: #fff; }
+.refresh-controls.refresh-active #refresh-status { color: #fff; }
 .refresh-controls.refresh-active #refresh-interval,
 .refresh-controls.refresh-active #refresh-unit {
   background: rgba(255,255,255,0.15);
   color: #fff;
   border-color: rgba(255,255,255,0.3);
 }
+.refresh-controls.refresh-active .refresh-checkbox {
+  border-color: rgba(255,255,255,0.5);
+}
 
-.refresh-controls label,
-.refresh-label { display: flex; align-items: center; gap: 6px; font-weight: 400; }
+.refresh-label { cursor: pointer; font-weight: 400; }
 #refresh-unit {
   padding: 4px 6px;
   border: 1px solid var(--grid-line);
   border-radius: 0;
   background: var(--card-bg);
   color: var(--text);
-  min-height: 36px;
-}
-/* Accessible switch (W3C APG pattern) */
-.switch {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px 0;
   font-size: inherit;
   font-family: inherit;
-  color: var(--text);
 }
-.switch-track {
-  display: inline-block;
-  width: 30px;
-  height: 16px;
-  background: #555;
-  border-radius: 8px;
-  position: relative;
-  transition: background 0.15s ease;
+/* Checkbox for auto-refresh */
+.refresh-checkbox {
+  cursor: pointer;
+  flex-shrink: 0;
+  accent-color: var(--text);
 }
-.switch-thumb {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 12px;
-  height: 12px;
-  background: #fff;
-  border-radius: 50%;
-  transition: left 0.15s ease;
-}
-.switch[aria-checked="true"] .switch-track {
-  background: #275234;
-}
-html[data-theme="dark"] .switch[aria-checked="true"] .switch-track {
-  background: #2d5e3d;
-}
-.switch[aria-checked="true"] .switch-thumb {
-  left: 16px;
-}
-.switch:focus-visible .switch-track {
-  outline: 2px solid var(--text);
-  outline-offset: 2px;
+.refresh-controls.refresh-active .refresh-checkbox {
+  accent-color: #fff;
 }
 
 #refresh-interval {
@@ -768,7 +741,8 @@ html[data-theme="dark"] .switch[aria-checked="true"] .switch-track {
   border-radius: 0;
   background: var(--card-bg);
   color: var(--text);
-  min-height: 36px;
+  font-size: inherit;
+  font-family: inherit;
 }
 
 #refresh-btn {
@@ -803,7 +777,20 @@ html[data-theme="dark"] .switch[aria-checked="true"] .switch-track {
    8b. TEAM COMPARISON TABLE
    ═══════════════════════════════════════════════════════ */
 
-.team-comparison { margin-bottom: 16px; }
+.game-top-row { display: flex; gap: 16px; align-items: stretch; margin-bottom: 16px; }
+.game-top-row > .team-comparison { flex: 1; margin: 0; }
+.game-top-row > .team-comparison .pitcher-stats-table { width: 100%; }
+.game-top-row > .game-header-linescore { flex: 1; }
+.game-top-row > .game-header-linescore .linescore-table { width: 100%; }
+.team-comparison { margin: 0; }
+.team-comparison { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.team-comparison .pitcher-stats-table { width: auto; }
+.team-comparison .pitcher-stats-table td:first-child { white-space: nowrap; }
+@media (max-width: 900px) {
+  .game-top-row { flex-direction: column; }
+  .game-top-row > .team-comparison .pitcher-stats-table { width: 100%; }
+  .game-top-row > .game-header-linescore .linescore-table { width: 100%; }
+}
 
 
 .tc-note {
@@ -842,8 +829,10 @@ html[data-theme="dark"] .switch[aria-checked="true"] .switch-track {
   gap: 16px;
   align-items: start;
   flex-wrap: wrap;
-  margin-top: 12px;
+  margin-bottom: 16px;
 }
+.game-header-grid > div { flex: 1; min-width: 200px; }
+.game-header-grid .pitcher-stats-table { width: 100%; }
 .game-header-grid .wi { margin-right: 4px; font-size: 1.1em; vertical-align: -1px; }
 
 
@@ -851,7 +840,8 @@ html[data-theme="dark"] .switch[aria-checked="true"] .switch-track {
    10. SCORECARD SECTIONS
    ═══════════════════════════════════════════════════════ */
 
-.scorecard-section    { margin: 24px 0; }
+.scorecard-section    { margin: 48px 0; border-top: 1px solid var(--grid-line); padding-top: 48px; }
+.scorecard-section:first-of-type { margin-top: 0; border-top: none; padding-top: 0; }
 .scorecard-section h2 { font-weight: 700; margin-bottom: 8px; }
 
 .scorecard-section-header {
@@ -916,6 +906,7 @@ html[data-theme="dark"] .switch[aria-checked="true"] .switch-track {
 .scorecard-scroll {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  margin-top: 16px;
 }
 
 .scorecard-svg {
@@ -1102,8 +1093,11 @@ foreignObject .svg-player-link::after { display: none; }
 }
 
 .section-count { font-weight: 400; color: var(--text-secondary); }
-.open-section .scorecard-section-header { padding: 10px 12px; font-size: 0.95em; font-family: var(--font-mono); background: var(--surface); margin-bottom: 0; flex-direction: row; align-items: baseline; gap: 6px; }
+.open-section { display: inline-block; }
+.open-section .scorecard-section-header { padding: 6px 6px; font-size: 0.85em; font-family: var(--font-mono); background: var(--surface); margin-bottom: 0; flex-direction: row; align-items: baseline; gap: 6px; border: 1px solid var(--grid-line); border-bottom: none; font-weight: 700; }
 .open-section .table-scroll-wrapper { padding: 0; }
+.open-section .pitcher-stats-table { width: auto; }
+.hand-group-row td { font-size: 0.75em; line-height: 1.3; color: var(--text); background: var(--surface); padding: 2px 6px; opacity: 0.65; text-align: left; }
 .collapsible-section summary::-webkit-details-marker { display: none; }
 .collapsible-section summary::before              { content: '\25B6\00a0'; }
 .collapsible-section[open] summary::before        { content: '\25BC\00a0'; }
@@ -1140,6 +1134,7 @@ foreignObject .svg-player-link::after { display: none; }
 .linescore-table th { background: var(--surface); font-weight: 700; }
 .linescore-table td { background: var(--card-bg); }
 .linescore-table .team-name { text-align: left; font-weight: 700; padding-right: 12px; }
+.linescore-table th:first-child { text-align: left; }
 .linescore-table .rhe       { font-weight: 700; background: var(--surface); }
 .linescore-table td:not(.rhe) + td.rhe,
 .linescore-table th:not(.rhe) + th.rhe { border-left: 2.5px solid var(--text); }
@@ -1188,7 +1183,7 @@ foreignObject .svg-player-link::after { display: none; }
 
 .standings-row {
   display: grid;
-  grid-template-columns: 36px 62px 36px 32px;
+  grid-template-columns: 36px 62px 36px 36px 32px;
   white-space: nowrap;
   gap: 4px;
   padding: 3px 8px;
@@ -1200,6 +1195,7 @@ foreignObject .svg-player-link::after { display: none; }
 .standings-team      { font-weight: 700; }
 .standings-wl        { text-align: right; }
 .standings-gb        { text-align: right; }
+.standings-l10       { text-align: right; }
 .standings-streak    { text-align: right; color: var(--text-secondary); }
 
 
@@ -1277,17 +1273,18 @@ foreignObject .svg-player-link::after { display: none; }
   gap: 8px;
 }
 
-.footer-brand {
-  font-weight: 700;
-  color: var(--text);
-  margin-top: 40px;
+.footer-nav-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
 }
 
 .footer-version {
   color: var(--text-secondary);
-  font-weight: 500;
-  font-size: 0.875em;
-  margin-left: 0.3em;
+  font-weight: 400;
+  white-space: nowrap;
 }
 
 .footer-links {
@@ -1381,10 +1378,12 @@ foreignObject .svg-player-link::after { display: none; }
 .footer-fine-print {
   color: var(--text-secondary);
   font-size: 0.85em;
-  max-width: none;
+  max-width: 50%;
   line-height: 1.5;
-  margin: 0;
+  margin: 24px 0 0;
 }
+@media (max-width: 1024px) { .footer-fine-print { max-width: 75%; } }
+@media (max-width: 768px) { .footer-fine-print { max-width: 100%; } }
 
 
 
@@ -1784,24 +1783,29 @@ kbd {
   .team-season-table th,
   .team-season-table td { padding: 4px 8px; }
 
-  /* Footer responsive: nav above brand */
+  /* Footer responsive: stack links and version */
+  .footer-nav-row { flex-direction: column; gap: 12px; }
   .footer-links { flex-direction: column; gap: 12px; }
+  .footer-version { order: 1; }
 }
 
 /* Mobile (≤ 480px) */
 @media (max-width: 480px) {
   :root { --container-pad: 8px; --grid-gap: 8px; }
   .standings-container { grid-template-columns: 1fr; }
-  .standings-row       { grid-template-columns: 40px 62px 36px 32px; }
+  .standings-row       { grid-template-columns: 40px 62px 36px 36px 32px; }
   .scorecard-section-header img { width: 36px; height: 36px; }
   .scorecard-section-header h2  { font-size: 1.25em; }
   .refresh-controls    { padding: 6px var(--container-pad); gap: 8px; }
 
-  /* Team stats: tighter padding for narrow screens */
-  .team-season-table { font-size: 0.75em; }
+  /* Team stats: full width on mobile */
+  .team-stats-grid { flex-direction: column; }
+  .team-season-table { font-size: 0.75em; width: 100%; }
   .team-season-table th,
   .team-season-table td { padding: 3px 5px; }
 
-  /* Footer mobile: nav on top, brand below with spacing */
+  /* Footer mobile */
+  .footer-nav-row { flex-direction: column; gap: 10px; }
   .footer-links { flex-direction: column; gap: 10px; }
+  .footer-version { order: 1; }
 }

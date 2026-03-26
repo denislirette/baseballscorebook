@@ -1,26 +1,12 @@
 // Scorecard page: main entry point
 
-// MLB team primary colors with accessible text
-const MLB_TEAM_COLORS = {
-  ARI: { bg: '#A71930', text: '#fff' }, ATL: { bg: '#CE1141', text: '#fff' },
-  BAL: { bg: '#DF4601', text: '#000' }, BOS: { bg: '#BD3039', text: '#fff' },
-  CHC: { bg: '#0E3386', text: '#fff' }, CWS: { bg: '#27251F', text: '#fff' },
-  CIN: { bg: '#C6011F', text: '#fff' }, CLE: { bg: '#00385D', text: '#fff' },
-  COL: { bg: '#33006F', text: '#fff' }, DET: { bg: '#0C2340', text: '#fff' },
-  HOU: { bg: '#002D62', text: '#fff' }, KC:  { bg: '#004687', text: '#fff' },
-  LAA: { bg: '#BA0021', text: '#fff' }, LAD: { bg: '#005A9C', text: '#fff' },
-  MIA: { bg: '#00A3E0', text: '#000' }, MIL: { bg: '#FFC52F', text: '#000' },
-  MIN: { bg: '#002B5C', text: '#fff' }, NYM: { bg: '#002D72', text: '#fff' },
-  NYY: { bg: '#003087', text: '#fff' }, OAK: { bg: '#003831', text: '#fff' },
-  PHI: { bg: '#E81828', text: '#fff' }, PIT: { bg: '#27251F', text: '#fff' },
-  SD:  { bg: '#2F241D', text: '#fff' }, SF:  { bg: '#FD5A1E', text: '#000' },
-  SEA: { bg: '#0C2C56', text: '#fff' }, STL: { bg: '#C41E3A', text: '#fff' },
-  TB:  { bg: '#092C5C', text: '#fff' }, TEX: { bg: '#003278', text: '#fff' },
-  TOR: { bg: '#134A8E', text: '#fff' }, WSH: { bg: '#AB0003', text: '#fff' },
-};
+// Team logo helper: returns <img> with light/dark source swap via CSS
+function teamLogoHTML(teamId, teamName, size = '1.2em') {
+  return `<img class="team-logo team-logo-light" src="/img/logos/light/${teamId}.svg" alt="${teamName}" style="height:${size};width:auto;vertical-align:middle;"><img class="team-logo team-logo-dark" src="/img/logos/dark/${teamId}.svg" alt="" style="height:${size};width:auto;vertical-align:middle;">`;
+}
 
 import { updateConfig, resetConfig } from './layout-config.js';
-import { fetchLiveFeed, fetchStandings, fetchAllTeamStats, fetchCoaches, fetchTeamSeasonStats } from './api.js';
+import { fetchLiveFeed, fetchStandings, fetchAllTeamStats, fetchCoaches, fetchTeamSeasonStats, fetchPitchArsenals } from './api.js';
 import { buildTeamLineup, computeLineupTrends, computeTeamRank } from './game-data.js';
 import {
   renderTeamScorecard,
@@ -82,6 +68,22 @@ async function loadGame() {
       if (awayId) cachedTeamSeasonStats[awayId] = awaySeasonStats;
       if (homeId) cachedTeamSeasonStats[homeId] = homeSeasonStats;
     }
+    // Fetch pitch arsenals on first load (non-blocking)
+    if (isInitialLoad) {
+      const boxscore = gumbo.liveData.boxscore;
+      const allPitcherIds = [
+        ...(boxscore.teams.away.pitchers || []),
+        ...(boxscore.teams.away.bullpen || []),
+        ...(boxscore.teams.home.pitchers || []),
+        ...(boxscore.teams.home.bullpen || []),
+      ];
+      const uniqueIds = [...new Set(allPitcherIds)];
+      fetchPitchArsenals(uniqueIds, season).then(arsenals => {
+        gameData._arsenals = arsenals;
+        renderGame(gameData, standingsData, allTeamStatsData);
+      }).catch(() => {});
+    }
+
     // Always apply cached data to fresh gumbo object
     gameData._coaches = cachedCoaches || {};
 
@@ -138,15 +140,17 @@ function renderGame(data, standings, allTeamStats) {
 
   // Pitch legend removed; see Legend overlay for full reference
 
-  // Team comparison table
-  const comparisonSection = document.createElement('div');
-  comparisonSection.innerHTML = renderTeamComparisonHTML(data, standings);
-  _target.appendChild(comparisonSection);
+  // Top row: W-L comparison + linescore side by side on desktop
+  const header = renderGameHeaderHTML(data);
+  const topRow = document.createElement('div');
+  topRow.className = 'game-top-row';
+  topRow.innerHTML = renderTeamComparisonHTML(data, standings) + header.linescore;
+  _target.appendChild(topRow);
 
-  // Game header with linescore, game info, umpires
-  const headerSection = document.createElement('div');
-  headerSection.innerHTML = renderGameHeaderHTML(data);
-  _target.appendChild(headerSection);
+  // Game info row: date, weather, umpires spread across
+  const infoRow = document.createElement('div');
+  infoRow.innerHTML = header.gameInfo;
+  _target.appendChild(infoRow);
 
   // Render both team sections
   _target.appendChild(renderTeamSection(data, 'away', allTeamStats));
@@ -178,13 +182,8 @@ function renderTeamSection(data, side, allTeamStats) {
 
   const header = document.createElement('div');
   header.className = 'scorecard-section-header';
-  const abbr = team.abbreviation || '';
-  const colors = MLB_TEAM_COLORS[abbr];
-  if (colors) {
-    header.innerHTML = `<h2><span class="team-name-color" style="background:${colors.bg};color:${colors.text};padding:4px 12px;">${team.name}</span></h2><span class="team-label">${label}</span>`;
-  } else {
-    header.innerHTML = `<h2>${team.name}</h2><span class="team-label">${label}</span>`;
-  }
+  const logo = teamLogoHTML(team.id, team.name, '2.25em');
+  header.innerHTML = `<h2>${logo} ${team.name}</h2><span class="team-label">${label}</span>`;
   headerRow.appendChild(header);
 
   const teamStatsPlaceholder = document.createElement('div');
@@ -261,13 +260,18 @@ function renderTeamSection(data, side, allTeamStats) {
       <div class="team-season-caption">${seasonLabel} Stats</div>`;
   }
 
-  // Coaching staff — aligned with stat tables
+  // Coaching staff — append into the stats grid if it exists, otherwise standalone
   const coachesHTML = renderCoachingStaffHTML(data, side, team.teamName);
   if (coachesHTML) {
-    const coachesDiv = document.createElement('div');
-    coachesDiv.className = 'team-stats-grid';
-    coachesDiv.innerHTML = coachesHTML;
-    section.appendChild(coachesDiv);
+    const existingGrid = teamStatsPlaceholder.querySelector('.team-stats-grid');
+    if (existingGrid) {
+      existingGrid.insertAdjacentHTML('beforeend', coachesHTML);
+    } else {
+      const coachesDiv = document.createElement('div');
+      coachesDiv.className = 'team-stats-grid';
+      coachesDiv.innerHTML = coachesHTML;
+      section.appendChild(coachesDiv);
+    }
   }
 
   // This team's bench (grouped with coaching staff above)

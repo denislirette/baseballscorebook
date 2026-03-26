@@ -202,4 +202,84 @@ export async function fetchAllTeamStats(season) {
   return map;
 }
 
+/**
+ * Fetch season pitch arsenal for a list of pitcher IDs.
+ * Uses the MLB people endpoint with pitchArsenal hydration.
+ * @param {number[]} pitcherIds
+ * @param {number} season
+ * @returns {Promise<Map<number, Array>>} Map of pitcherId → [{code, pct, avgVelo}]
+ */
+export async function fetchPitchArsenals(pitcherIds, season) {
+  const result = new Map();
+  if (!pitcherIds.length) return result;
+
+  async function fetchSeason(ids, yr) {
+    const resp = await fetch(`${MLB_API_BASE}/people?personIds=${ids}&hydrate=stats(type=pitchArsenal,season=${yr},group=pitching)`);
+    if (!resp.ok) return [];
+    const data = await resp.json();
+    return data.people || [];
+  }
+
+  // Batch in groups of 50 to avoid URL length limits
+  const batches = [];
+  for (let i = 0; i < pitcherIds.length; i += 50) {
+    batches.push(pitcherIds.slice(i, i + 50));
+  }
+  const missingIds = [];
+  for (const batch of batches) {
+    try {
+      const ids = batch.join(',');
+      const people = await fetchSeason(ids, season);
+      for (const p of people) {
+        const splits = p.stats?.[0]?.splits || [];
+        if (splits.length === 0) { missingIds.push(p.id); continue; }
+        const arsenal = splits
+          .map(s => ({
+            code: s.stat.type.code,
+            desc: s.stat.type.description,
+            pct: Math.round(s.stat.percentage * 100),
+            avgVelo: s.stat.averageSpeed ? s.stat.averageSpeed.toFixed(1) : null,
+          }))
+          .filter(a => a.pct > 0)
+          .sort((a, b) => b.pct - a.pct);
+        result.set(p.id, arsenal);
+      }
+      // Track IDs that weren't in the response at all
+      for (const id of batch) {
+        if (!people.some(p => p.id === id)) missingIds.push(id);
+      }
+    } catch { /* skip failed batches */ }
+  }
+
+  // Fallback to previous season for pitchers with no current-season data
+  if (missingIds.length > 0) {
+    const fallbackBatches = [];
+    for (let i = 0; i < missingIds.length; i += 50) {
+      fallbackBatches.push(missingIds.slice(i, i + 50));
+    }
+    for (const batch of fallbackBatches) {
+      try {
+        const ids = batch.join(',');
+        const people = await fetchSeason(ids, season - 1);
+        for (const p of people) {
+          if (result.has(p.id)) continue;
+          const splits = p.stats?.[0]?.splits || [];
+          if (splits.length === 0) continue;
+          const arsenal = splits
+            .map(s => ({
+              code: s.stat.type.code,
+              desc: s.stat.type.description,
+              pct: Math.round(s.stat.percentage * 100),
+              avgVelo: s.stat.averageSpeed ? s.stat.averageSpeed.toFixed(1) : null,
+            }))
+            .filter(a => a.pct > 0)
+            .sort((a, b) => b.pct - a.pct);
+          result.set(p.id, arsenal);
+        }
+      } catch { /* skip */ }
+    }
+  }
+  return result;
+}
+
 

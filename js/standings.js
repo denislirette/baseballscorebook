@@ -51,14 +51,22 @@ function renderDivisionBox(divId, teamRecords, awayTeamId, homeTeamId) {
     const w = tr.leagueRecord.wins;
     const l = tr.leagueRecord.losses;
     const gb = tr.divisionGamesBack;
+    const l10 = formatL10(tr.records?.splitRecords);
     const streak = formatStreak(tr.streak?.streakCode);
     const isPlaying = tr.team.id === awayTeamId || tr.team.id === homeTeamId;
     const highlight = isPlaying ? ' standings-highlight' : '';
 
-    return `<div class="standings-row${highlight}"><span class="standings-team">${abbrev}</span><span class="standings-wl">${w}-${l}</span><span class="standings-gb">${gb}</span><span class="standings-streak">${streak}</span></div>`;
+    return `<div class="standings-row${highlight}"><span class="standings-team">${abbrev}</span><span class="standings-wl">${w}-${l}</span><span class="standings-gb">${gb}</span><span class="standings-l10">${l10}</span><span class="standings-streak">${streak}</span></div>`;
   }).join('');
 
   return `<div class="standings-division"><div class="standings-division-header">${DIVISION_NAMES[divId] || ''}</div>${rows}</div>`;
+}
+
+function formatL10(splitRecords) {
+  if (!splitRecords) return '-';
+  const l10 = splitRecords.find(s => s.type === 'lastTen');
+  if (!l10) return '-';
+  return `${l10.wins}-${l10.losses}`;
 }
 
 function formatStreak(streakCode) {

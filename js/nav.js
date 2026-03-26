@@ -1,7 +1,7 @@
 // Global navigation + footer - injected dynamically on every page
 // Same header on every page: site title + nav links, classic HTML link style
 
-const VERSION = '0.7.4';
+const VERSION = '0.8.0';
 
 const IS_LOCAL = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
@@ -13,10 +13,10 @@ const NAV_ITEMS = [
 ];
 
 const FOOTER_LINKS = [
-  { href: '/about.html', label: 'About' },
+  { href: '/about.html', label: 'About the Project' },
   { href: '/contact.html', label: 'Contact' },
   { href: '/disclaimer.html', label: 'Disclaimer' },
-  { href: 'https://github.com/denislirette/baseballscorecard/blob/master/docs/ACCESSIBILITY.md', label: 'Accessibility' },
+  { href: 'https://github.com/denislirette/baseballscorecard/blob/master/docs/ACCESSIBILITY.md', label: 'Accessibility Statement' },
   { href: 'https://www.buymeacoffee.com/baseballscorecard.org', label: 'Buy Me a Coffee' },
 ];
 
@@ -192,12 +192,13 @@ function initFooter() {
 
   footer.innerHTML = `
     <div class="footer-content">
-      <nav class="footer-links">${links}</nav>
-      <div class="footer-brand">BaseballScorecard.org <a href="${releasesURL}" target="_blank" rel="noopener" class="footer-version" id="footer-version">Version ${VERSION}</a></div>
-<p class="footer-fine-print">
-  © 2026 BaseballScorecard.org. Data is provided for informational and personal use only. Double-check stats on this site before committing pen to paper. Game data is sourced from the <a href="https://statsapi.mlb.com" target="_blank" rel="noopener">MLB Stats API</a>. 
-This site is not affiliated with Major League Baseball or FanGraphs. All trademarks belong to their respective owners.
-</p>
+      <div class="footer-nav-row">
+        <nav class="footer-links">${links}</nav>
+        <a href="${releasesURL}" target="_blank" rel="noopener" class="footer-version" id="footer-version">Version ${VERSION}</a>
+      </div>
+      <p class="footer-fine-print">
+        © 2026 BaseballScorecard.org. Data is provided for informational and personal use only. Double-check stats before committing pen to paper. This site is not affiliated with Major League Baseball or FanGraphs. All logos are the trademark and property of their owners. We present them here for purely educational purposes.
+      </p>
     </div>`;
 
   // Keep the version link up to date with the latest GitHub release

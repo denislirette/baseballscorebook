@@ -1,6 +1,10 @@
 // SVG scorecard rendering: Bob Carpenter layout, high-contrast, dark mode
 // Large cells with full-size diamond, large notation, big batter info
 
+function teamLogo(teamId, size = '1.5em') {
+  return `<img class="team-logo team-logo-light" src="/img/logos/light/${teamId}.svg" alt="" style="height:${size};width:auto;vertical-align:middle;margin-right:2px;"><img class="team-logo team-logo-dark" src="/img/logos/dark/${teamId}.svg" alt="" style="height:${size};width:auto;vertical-align:middle;margin-right:2px;">`;
+}
+
 import {
   buildTeamLineup,
   buildScorecardGrid,
@@ -1006,7 +1010,7 @@ function drawScrollablePitchSequence(g, CLR, pitches, pitchX, topY, colW, cellY)
       rowSvg.appendChild(svgEl('rect', { x: sqX, y: sqY, width: badgeSize, height: badgeSize, fill: CLR.challenge }));
       rowSvg.appendChild(svgText(label, sqX + badgeSize / 2, sqY + badgeSize / 2, {
         'text-anchor': 'middle', 'dominant-baseline': 'central',
-        'font-size': String(badgeSize - 2), 'font-weight': '700', 'font-family': L.MONO, fill: CLR.bg,
+        'font-size': String(badgeSize - 2), 'font-weight': '700', 'font-family': L.MONO, fill: '#ffffff',
       }));
     }
 
@@ -1101,7 +1105,7 @@ function drawSinglePitch(g, CLR, pitch, colBaseX, startY, row, step, colW, fs) {
     }));
     g.appendChild(svgText(label, sqX + badgeSize / 2, sqY + badgeSize / 2, {
       'text-anchor': 'middle', 'dominant-baseline': 'central',
-      'font-size': String(badgeSize - 2), 'font-weight': '700', 'font-family': L.MONO, fill: CLR.bg,
+      'font-size': String(badgeSize - 2), 'font-weight': '700', 'font-family': L.MONO, fill: '#ffffff',
     }));
   }
 }
@@ -1545,6 +1549,7 @@ export function renderPitcherStatsHTML(data, side, teamAbbrev) {
   const boxscore = data.liveData.boxscore;
   const decisions = data.liveData.decisions || {};
   const gameData = data.gameData;
+  const arsenals = data._arsenals || new Map();
   const allPlays = data.liveData.plays.allPlays;
   const pitchers = getPitcherStats(boxscore, side, decisions, allPlays);
   if (pitchers.length === 0) return '';
@@ -1554,7 +1559,9 @@ export function renderPitcherStatsHTML(data, side, teamAbbrev) {
     const s = p.stats;
     const ss = p.seasonStats || {};
     const hand = getPlayerPitchHand(gameData, p.id);
-    const pitchCodes = formatRepertoire(p.repertoire);
+    // Use in-game repertoire if available, fall back to season arsenal
+    const repertoire = p.repertoire?.length ? p.repertoire : (arsenals.get?.(p.id) || []);
+    const pitchCodes = formatRepertoire(repertoire);
     const spacer = i > 0 ? `<tr class="pitcher-spacer"><td colspan="12"></td></tr>` : '';
     // Season stats row (above game row, smaller font)
     const seasonRow = `${spacer}
@@ -1624,31 +1631,43 @@ export function renderBenchHTML(data, side, teamAbbrev, { useAccordion = true } 
   const players = getBenchPlayers(boxscore, side);
   if (players.length === 0) return '';
   const label = teamAbbrev ? `${teamAbbrev} BENCH` : 'BENCH';
+  const colCount = 11;
 
-  const rows = players.map(p => {
-    const bat = getPlayerBatSide(gameData, p.id);
-    const ss = p.seasonStats;
-    const woba = calcWOBA(ss);
-    return `
-    <tr>
-      <td class="pitcher-name">${playerLink(p.name, p.id)}<span class="hand-indicator">, ${bat || '?'}</span></td>
-      <td>${p.position}</td>
-      <td>${v(ss.avg)}</td>
-      <td>${v(ss.obp)}</td>
-      <td>${v(ss.slg)}</td>
-      <td>${v(ss.ops)}</td>
-      <td>${woba}</td>
-      <td>${v(ss.homeRuns)}</td>
-      <td>${v(ss.rbi)}</td>
-      <td>${v(ss.stolenBases)}</td>
-      <td>${v(ss.plateAppearances)}</td>
-    </tr>`;
-  }).join('');
+  // Group by bat side: R, L, S
+  const groups = { R: [], L: [], S: [] };
+  for (const p of players) {
+    const bat = getPlayerBatSide(gameData, p.id) || '?';
+    (groups[bat] || (groups['R'] = groups['R'])).push({ ...p, bat });
+  }
+  const groupLabels = { R: 'Right Handed', L: 'Left Handed', S: 'Switch Hitters' };
+  const rows = [];
+  for (const code of ['R', 'L', 'S']) {
+    if (groups[code].length === 0) continue;
+    rows.push(`<tr class="hand-group-row"><td colspan="${colCount}">${groupLabels[code]}</td></tr>`);
+    for (const p of groups[code]) {
+      const ss = p.seasonStats;
+      const woba = calcWOBA(ss);
+      rows.push(`
+      <tr>
+        <td class="pitcher-name">${playerLink(p.name, p.id)}<span class="hand-indicator">, ${p.bat}</span></td>
+        <td>${p.position}</td>
+        <td>${v(ss.avg)}</td>
+        <td>${v(ss.obp)}</td>
+        <td>${v(ss.slg)}</td>
+        <td>${v(ss.ops)}</td>
+        <td>${woba}</td>
+        <td>${v(ss.homeRuns)}</td>
+        <td>${v(ss.rbi)}</td>
+        <td>${v(ss.stolenBases)}</td>
+        <td>${v(ss.plateAppearances)}</td>
+      </tr>`);
+    }
+  }
 
   const tableHTML = `<div class="table-scroll-wrapper">
       <table class="pitcher-stats-table">
         <thead><tr><th>Player</th><th>POS</th><th>AVG</th><th>OBP</th><th>SLG</th><th>OPS</th><th>wOBA</th><th>HR</th><th>RBI</th><th>SB</th><th>PA</th></tr></thead>
-        <tbody>${rows}</tbody>
+        <tbody>${rows.join('')}</tbody>
       </table>
       </div>`;
 
@@ -1667,34 +1686,49 @@ export function renderBenchHTML(data, side, teamAbbrev, { useAccordion = true } 
 export function renderBullpenHTML(data, side, teamAbbrev, { useAccordion = true } = {}) {
   const boxscore = data.liveData.boxscore;
   const gameData = data.gameData;
+  const arsenals = data._arsenals || new Map();
   const players = getBullpenPitchers(boxscore, side);
   if (players.length === 0) return '';
   const label = teamAbbrev ? `${teamAbbrev} BULLPEN` : 'BULLPEN';
+  const colCount = 12;
 
-  const rows = players.map(p => {
-    const hand = getPlayerPitchHand(gameData, p.id);
-    const ss = p.seasonStats;
-    return `
-    <tr>
-      <td class="pitcher-name">${playerLink(p.name, p.id)}<span class="hand-indicator">, ${hand || '?'}</span></td>
-      <td class="pitcher-pitches">-</td>
-      <td>${v(ss.inningsPitched)}</td>
-      <td>${v(ss.hits)}</td>
-      <td>${v(ss.runs)}</td>
-      <td>${v(ss.earnedRuns)}</td>
-      <td>${v(ss.baseOnBalls)}</td>
-      <td>${v(ss.strikeOuts)}</td>
-      <td>${v(ss.strikes)}</td>
-      <td>${v(ss.numberOfPitches || ss.pitchesThrown)}</td>
-      <td>${v(ss.era)}</td>
-      <td>${v(ss.whip)}</td>
-    </tr>`;
-  }).join('');
+  // Group by pitch hand: R, L
+  const groups = { R: [], L: [] };
+  for (const p of players) {
+    const hand = getPlayerPitchHand(gameData, p.id) || '?';
+    (groups[hand] || groups['R']).push({ ...p, hand });
+  }
+  const groupLabels = { R: 'Right Handed', L: 'Left Handed' };
+  const rows = [];
+  for (const code of ['R', 'L']) {
+    if (groups[code].length === 0) continue;
+    rows.push(`<tr class="hand-group-row"><td colspan="${colCount}">${groupLabels[code]}</td></tr>`);
+    for (const p of groups[code]) {
+      const ss = p.seasonStats;
+      const arsenal = arsenals.get?.(p.id);
+      const pitchCodes = arsenal ? formatRepertoire(arsenal) : '-';
+      rows.push(`
+      <tr>
+        <td class="pitcher-name">${playerLink(p.name, p.id)}<span class="hand-indicator">, ${p.hand}</span></td>
+        <td class="pitcher-pitches">${pitchCodes}</td>
+        <td>${v(ss.inningsPitched)}</td>
+        <td>${v(ss.hits)}</td>
+        <td>${v(ss.runs)}</td>
+        <td>${v(ss.earnedRuns)}</td>
+        <td>${v(ss.baseOnBalls)}</td>
+        <td>${v(ss.strikeOuts)}</td>
+        <td>${v(ss.strikes)}</td>
+        <td>${v(ss.numberOfPitches || ss.pitchesThrown)}</td>
+        <td>${v(ss.era)}</td>
+        <td>${v(ss.whip)}</td>
+      </tr>`);
+    }
+  }
 
   const tableHTML = `<div class="table-scroll-wrapper">
       <table class="pitcher-stats-table">
         <thead><tr><th>Player</th><th>PITCH TYPES (USAGE/MPH)</th><th>IP</th><th>H</th><th>R</th><th>ER</th><th>BB</th><th>K</th><th>S</th><th>P</th><th>ERA</th><th>WHIP</th></tr></thead>
-        <tbody>${rows}</tbody>
+        <tbody>${rows.join('')}</tbody>
       </table>
       </div>`;
 
@@ -1743,8 +1777,8 @@ function formatWind(wind) {
 
 // Division short names for column headers
 const DIV_SHORT = {
-  200: 'West', 201: 'East', 202: 'Central',
-  203: 'West', 204: 'East', 205: 'Central',
+  200: 'W', 201: 'E', 202: 'C',
+  203: 'W', 204: 'E', 205: 'C',
 };
 
 function findTeamStandings(standings, teamId) {
@@ -1787,15 +1821,15 @@ export function renderTeamComparisonHTML(data, standings) {
     return `
     <div class="team-comparison">
       <table class="pitcher-stats-table">
-        <thead><tr><th></th><th>W-L</th><th>PCT</th></tr></thead>
+        <thead><tr><th>Team</th><th>W-L</th><th>PCT</th></tr></thead>
         <tbody>
           <tr>
-            <td class="pitcher-name">${away.abbreviation}</td>
+            <td class="pitcher-name">${teamLogo(away.id)}${away.abbreviation}</td>
             <td>${away.record.wins}-${away.record.losses}</td>
             <td>${away.record.winningPercentage}</td>
           </tr>
           <tr>
-            <td class="pitcher-name">${home.abbreviation}</td>
+            <td class="pitcher-name">${teamLogo(home.id)}${home.abbreviation}</td>
             <td>${home.record.wins}-${home.record.losses}</td>
             <td>${home.record.winningPercentage}</td>
           </tr>
@@ -1837,47 +1871,38 @@ export function renderTeamComparisonHTML(data, standings) {
 
   const awayGB = awaySt?.divisionGamesBack || '-';
   const homeGB = homeSt?.divisionGamesBack || '-';
-  const awayStreak = awaySt?.streak?.streakCode || '-';
-  const homeStreak = homeSt?.streak?.streakCode || '-';
-
   return `
     <div class="team-comparison">
       <table class="pitcher-stats-table">
         <thead>
           <tr>
-            <th></th>
+            <th>Team</th>
             <th>W-L</th>
             <th>GB</th>
-            <th>Home</th>
-            <th>Road</th>
+            <th>H</th>
+            <th>R</th>
             ${divHeaders}
             <th>IL</th>
-            <th>L10</th>
-            <th>STRK</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td class="pitcher-name">${away.abbreviation}</td>
+            <td class="pitcher-name">${teamLogo(away.id)}${away.abbreviation}</td>
             <td>${awaySt?.leagueRecord?.wins ?? away.record.wins}-${awaySt?.leagueRecord?.losses ?? away.record.losses}</td>
             <td>${awayGB}</td>
             <td>${splitRecord(awaySplits, 'home')}</td>
             <td>${splitRecord(awaySplits, 'away')}</td>
             ${awayDivCells}
             <td>${interleagueRecord(awayLeagueRecs, awayLeagueId)}</td>
-            <td>${splitRecord(awaySplits, 'lastTen')}</td>
-            <td>${awayStreak}</td>
           </tr>
           <tr>
-            <td class="pitcher-name">${home.abbreviation}</td>
+            <td class="pitcher-name">${teamLogo(home.id)}${home.abbreviation}</td>
             <td>${homeSt?.leagueRecord?.wins ?? home.record.wins}-${homeSt?.leagueRecord?.losses ?? home.record.losses}</td>
             <td>${homeGB}</td>
             <td>${splitRecord(homeSplits, 'home')}</td>
             <td>${splitRecord(homeSplits, 'away')}</td>
             ${homeDivCells}
             <td>${interleagueRecord(homeLeagueRecs, homeLeagueId)}</td>
-            <td>${splitRecord(homeSplits, 'lastTen')}</td>
-            <td>${homeStreak}</td>
           </tr>
         </tbody>
       </table>
@@ -1952,22 +1977,19 @@ export function renderGameHeaderHTML(data) {
       ].filter(Boolean).join('')
     : `<tr><td colspan="2">Waiting on data from sources</td></tr>`;
 
-  return `
-    <div class="game-header">
-      <div class="game-header-linescore-row">
-        <div class="game-header-linescore">
-          <table class="linescore-table">
-            <thead><tr><th></th>${headerCells}<th class="rhe">R</th><th class="rhe">H</th><th class="rhe">E</th></tr></thead>
-            <tbody>
-              <tr><td class="team-name">${away.abbreviation}</td>${awayInnings}<td class="rhe"><strong>${ls.teams.away?.runs ?? ''}</strong></td><td class="rhe">${ls.teams.away?.hits ?? ''}</td><td class="rhe">${ls.teams.away?.errors ?? ''}</td></tr>
-              <tr><td class="team-name">${home.abbreviation}</td>${homeInnings}<td class="rhe"><strong>${ls.teams.home?.runs ?? ''}</strong></td><td class="rhe">${ls.teams.home?.hits ?? ''}</td><td class="rhe">${ls.teams.home?.errors ?? ''}</td></tr>
-            </tbody>
-          </table>
-        </div>
-
+  return {
+    linescore: `
+      <div class="game-header-linescore">
+        <table class="linescore-table">
+          <thead><tr><th>Team</th>${headerCells}<th class="rhe">R</th><th class="rhe">H</th><th class="rhe">E</th></tr></thead>
+          <tbody>
+            <tr><td class="team-name">${teamLogo(away.id)}${away.abbreviation}</td>${awayInnings}<td class="rhe"><strong>${ls.teams.away?.runs ?? ''}</strong></td><td class="rhe">${ls.teams.away?.hits ?? ''}</td><td class="rhe">${ls.teams.away?.errors ?? ''}</td></tr>
+            <tr><td class="team-name">${teamLogo(home.id)}${home.abbreviation}</td>${homeInnings}<td class="rhe"><strong>${ls.teams.home?.runs ?? ''}</strong></td><td class="rhe">${ls.teams.home?.hits ?? ''}</td><td class="rhe">${ls.teams.home?.errors ?? ''}</td></tr>
+          </tbody>
+        </table>
         ${decisionLines ? `<div class="decisions">${decisionLines}</div>` : ''}
-      </div>
-
+      </div>`,
+    gameInfo: `
       <div class="game-header-grid">
         <div>
           <table class="pitcher-stats-table">
@@ -1975,23 +1997,20 @@ export function renderGameHeaderHTML(data) {
             <tbody>${gameInfoRows}</tbody>
           </table>
         </div>
-
         <div>
           <table class="pitcher-stats-table">
             <thead><tr><th colspan="2">Weather</th></tr></thead>
             <tbody>${weatherRows}</tbody>
           </table>
         </div>
-
         <div>
           <table class="pitcher-stats-table">
             <thead><tr><th colspan="2">Umpires</th></tr></thead>
             <tbody>${hasUmps ? umpTableRows : '<tr><td colspan="2">Waiting on data from sources</td></tr>'}</tbody>
           </table>
         </div>
-
-      </div>
-    </div>`;
+      </div>`,
+  };
 }
 
 export function renderCoachingStaffHTML(data, side, teamName) {

@@ -41,7 +41,7 @@ export function renderRefreshControls(refreshFn, getGameState) {
   }
 
   function updateToggle() {
-    toggleBtn.setAttribute('aria-checked', running ? 'true' : 'false');
+    toggleBtn.checked = running;
     const bar = toggleBtn.closest('.refresh-controls');
     if (bar) bar.classList.toggle('refresh-active', running);
   }
@@ -76,11 +76,11 @@ export function renderRefreshControls(refreshFn, getGameState) {
     savePrefs();
   }
 
-  toggleBtn.addEventListener('click', () => {
-    if (running) {
-      stop();
-    } else {
+  toggleBtn.addEventListener('change', () => {
+    if (toggleBtn.checked) {
       start();
+    } else {
+      stop();
     }
   });
 
