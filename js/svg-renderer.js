@@ -318,12 +318,19 @@ function drawSubIndicator(g, CLR, x, y, subType, subNum, pStats, cellBgColor) {
   const lineW = L.SUB_LINE_W;
   const gap = 3; // space between line end and circle edge
 
-  // Helper: draw a vertical sub indicator line (plain bar).
+  // Helper: draw a vertical sub indicator with dotted squares (matches pitcher line style).
   function drawVerticalSubLine(lineX) {
-    g.appendChild(svgEl('line', {
-      x1: lineX, y1: y, x2: lineX, y2: y + L.ROW_HEIGHT,
-      stroke: CLR.sub, 'stroke-width': lineW,
-    }));
+    const sqSize = 5;
+    const sqGap = 4;
+    const sqStep = sqSize + sqGap;
+    const startY = y + 2;
+    const endY = y + L.ROW_HEIGHT - 2;
+    for (let sy = startY; sy + sqSize <= endY; sy += sqStep) {
+      g.appendChild(svgEl('rect', {
+        x: lineX - sqSize / 2, y: sy, width: sqSize, height: sqSize,
+        fill: CLR.sub,
+      }));
+    }
   }
 
   if (subType === 'pitcher') {
@@ -334,7 +341,7 @@ function drawSubIndicator(g, CLR, x, y, subType, subNum, pStats, cellBgColor) {
       fill: cellBgColor || CLR.cellBg, stroke: 'none',
     }));
     // Draw square blocks on either side of the label (or across full width if no stats)
-    const sqSize = 7; // perfect squares
+    const sqSize = 5; // perfect squares
     const sqGap = 4;  // gap between squares
     const sqStep = sqSize + sqGap;
 
@@ -380,11 +387,13 @@ function drawSubIndicator(g, CLR, x, y, subType, subNum, pStats, cellBgColor) {
       }
     }
   } else if (subType === 'PH') {
-    drawVerticalSubLine(x - 3);
+    // PH: left side of play cell — sub happens BEFORE the at-bat
+    drawVerticalSubLine(x + 4);
   } else if (subType === 'PR') {
-    drawVerticalSubLine(x + L.COL_WIDTH + 3);
+    // PR: right side of play cell — sub happens AFTER the at-bat
+    drawVerticalSubLine(x + L.COL_WIDTH - 4);
   } else if (subType === 'defensive') {
-    drawVerticalSubLine(x + L.COL_WIDTH + 3);
+    drawVerticalSubLine(x + L.COL_WIDTH - 4);
   }
 }
 
@@ -553,14 +562,20 @@ function drawLineup(svg, CLR, lineup, rowOffsets, boxscore, gameData, side, subM
       if (!isSub) {
         // No separate number; jersey # is already in the name label
       } else {
-        // Horizontal sub line at top of sub band
+        // Horizontal dotted sub line at top of sub band (matches play cell sub style)
         subCount++;
         const lineY = bandY;
+        const lineStartX = 4;
         const lineEndX = L.MARGIN_LEFT - 4;
-        g.appendChild(svgEl('line', {
-          x1: 4, y1: lineY, x2: lineEndX, y2: lineY,
-          stroke: CLR.sub, 'stroke-width': L.SUB_LINE_W,
-        }));
+        const sqSize = 5;
+        const sqGap = 4;
+        const sqStep = sqSize + sqGap;
+        for (let sx = lineStartX; sx + sqSize <= lineEndX; sx += sqStep) {
+          g.appendChild(svgEl('rect', {
+            x: sx, y: lineY - sqSize / 2, width: sqSize, height: sqSize,
+            fill: CLR.sub,
+          }));
+        }
       }
 
       // Align sub player text with the right edge of the circle
@@ -869,16 +884,19 @@ function drawAtBatCell(g, CLR, ab, x, y, hasPitcherSubBelow) {
       const notY = diamondCy + diamondR + 18;
 
       if (dpSplitMatch) {
+        // DP/TP: render in center of cell, same weight as other out notations
         const prefix = dpSplitMatch[1];
         const positions = dpSplitMatch[2];
-        const fitSize = Math.min(18, maxFitSize(Math.max(prefix.length, positions.length)));
-        g.appendChild(svgText(prefix, diamondCx, notY - fitSize * 0.3, {
-          'font-size': String(fitSize), 'font-weight': '700', 'font-family': L.MONO, fill: notationColor,
-          'text-anchor': 'middle',
+        const maxLen = Math.max(prefix.length, positions.length);
+        const fitSize = Math.min(Math.round(largeSize * 0.4), maxFitSize(maxLen));
+        const lineGap = fitSize * 0.55;
+        g.appendChild(svgText(prefix, diamondCx, diamondCy - lineGap, {
+          'font-size': String(fitSize), 'font-weight': '400', 'font-family': L.MONO, fill: notationColor,
+          'text-anchor': 'middle', 'dominant-baseline': 'central',
         }));
-        g.appendChild(svgText(positions, diamondCx, notY + fitSize * 0.6, {
-          'font-size': String(fitSize), 'font-weight': '700', 'font-family': L.MONO, fill: notationColor,
-          'text-anchor': 'middle',
+        g.appendChild(svgText(positions, diamondCx, diamondCy + lineGap, {
+          'font-size': String(fitSize), 'font-weight': '400', 'font-family': L.MONO, fill: notationColor,
+          'text-anchor': 'middle', 'dominant-baseline': 'central',
         }));
       } else {
         const fitSize = String(Math.min(20, maxFitSize(notation.length)));
@@ -891,7 +909,9 @@ function drawAtBatCell(g, CLR, ab, x, y, hasPitcherSubBelow) {
       // No diamond: notation centered in middle zone
       let notFontWeight = isWalk ? '900' : '400';
       let notFontSize;
-      const scale = isWalk ? 1 : isK ? 0.7 : 0.6;
+      const isDP = !!dpSplitMatch;
+      const scale = isWalk ? 1 : isK ? 0.7 : isDP ? 0.7 : 0.6;
+      if (isDP) notFontWeight = '700';
       const ideal = Math.round(largeSize * scale);
       notFontSize = String(Math.min(ideal, maxFitSize(notation.length)));
 
@@ -1229,11 +1249,25 @@ function drawDiamond(g, CLR, cx, cy, ab, isHR = false, scoredNotHR = false) {
       fill: CLR.text, stroke: CLR.text, 'stroke-width': L.DIAMOND_SW,
     }));
   } else if (scoredNotHR) {
-    // Runner scored (not HR): 50% opacity fill
-    g.appendChild(svgEl('polygon', {
-      points: pts,
-      fill: CLR.text, stroke: 'none', opacity: '0.5',
-    }));
+    // Runner scored (not HR): exactly 3 diagonal lines inside the diamond
+    const clipId = `hatch-clip-${cx}-${cy}`;
+    const defs = svgEl('defs', {});
+    const clipPath = svgEl('clipPath', { id: clipId });
+    clipPath.appendChild(svgEl('polygon', { points: pts }));
+    defs.appendChild(clipPath);
+    g.appendChild(defs);
+    const hatchG = svgEl('g', { 'clip-path': `url(#${clipId})` });
+    const sw = L.BASE_PATH_SW;
+    const spacing = R * 0.5;
+    for (let i = -1; i <= 1; i++) {
+      const offset = i * spacing;
+      hatchG.appendChild(svgEl('line', {
+        x1: cx - R - 5, y1: cy + offset + R + 5,
+        x2: cx + R + 5, y2: cy + offset - R - 5,
+        stroke: CLR.text, 'stroke-width': sw, 'stroke-linecap': 'square',
+      }));
+    }
+    g.appendChild(hatchG);
   }
 
   // Base path lines from runner journeys, drawn as polylines for clean corners
@@ -1281,6 +1315,9 @@ function drawDiamond(g, CLR, cx, cy, ab, isHR = false, scoredNotHR = false) {
       }
 
       if (runner.isOut) {
+        // Skip drawing other runners' out markers in the batter's cell (DP case)
+        // — those outs belong in the runner's own cell, not duplicated here
+        if (runner.playerId !== ab.batterId) continue;
         const outR = Math.round(L.SUB_CIRCLE_R * 1.45);
         if (outSeg) {
           drawOutMarker(g, outMx, outMy, CLR.outBadge, runner.outNumber, CLR.bg, outR);
@@ -1438,13 +1475,18 @@ function drawBatterStats(svg, CLR, lineup, rowOffsets, batterStats, colMap, grid
       if (!stats) continue;
       const bandMidY = bandY + bandHeight / 2;
 
-      // Draw horizontal blue sub line across stats columns (matches lineup divider)
+      // Draw horizontal dotted sub line across stats columns (matches lineup divider)
       if (player.isSubstitute) {
         const statsEndX = baseX + STAT_HEADERS.length * L.STATS_COL_WIDTH;
-        g.appendChild(svgEl('line', {
-          x1: baseX, y1: bandY, x2: statsEndX, y2: bandY,
-          stroke: CLR.sub, 'stroke-width': L.SUB_LINE_W,
-        }));
+        const sqSize = 5;
+        const sqGap = 4;
+        const sqStep = sqSize + sqGap;
+        for (let sx = baseX; sx + sqSize <= statsEndX; sx += sqStep) {
+          g.appendChild(svgEl('rect', {
+            x: sx, y: bandY - sqSize / 2, width: sqSize, height: sqSize,
+            fill: CLR.sub,
+          }));
+        }
       }
 
       const values = [stats.ab, stats.r, stats.h, stats.rbi];
@@ -1826,12 +1868,12 @@ export function renderTeamComparisonHTML(data, standings) {
         <thead><tr><th>Team</th><th>W-L</th><th>PCT</th></tr></thead>
         <tbody>
           <tr>
-            <td>${teamLogo(away.id)}${away.abbreviation}</td>
+            <td>${teamLogo(away.id, '1.125em')}${away.abbreviation}</td>
             <td>${away.record.wins}-${away.record.losses}</td>
             <td>${away.record.winningPercentage}</td>
           </tr>
           <tr>
-            <td>${teamLogo(home.id)}${home.abbreviation}</td>
+            <td>${teamLogo(home.id, '1.125em')}${home.abbreviation}</td>
             <td>${home.record.wins}-${home.record.losses}</td>
             <td>${home.record.winningPercentage}</td>
           </tr>
@@ -1889,7 +1931,7 @@ export function renderTeamComparisonHTML(data, standings) {
         </thead>
         <tbody>
           <tr>
-            <td>${teamLogo(away.id)}${away.abbreviation}</td>
+            <td>${teamLogo(away.id, '1.125em')}${away.abbreviation}</td>
             <td>${awaySt?.leagueRecord?.wins ?? away.record.wins}-${awaySt?.leagueRecord?.losses ?? away.record.losses}</td>
             <td>${awayGB}</td>
             <td>${splitRecord(awaySplits, 'home')}</td>
@@ -1898,7 +1940,7 @@ export function renderTeamComparisonHTML(data, standings) {
             <td>${interleagueRecord(awayLeagueRecs, awayLeagueId)}</td>
           </tr>
           <tr>
-            <td>${teamLogo(home.id)}${home.abbreviation}</td>
+            <td>${teamLogo(home.id, '1.125em')}${home.abbreviation}</td>
             <td>${homeSt?.leagueRecord?.wins ?? home.record.wins}-${homeSt?.leagueRecord?.losses ?? home.record.losses}</td>
             <td>${homeGB}</td>
             <td>${splitRecord(homeSplits, 'home')}</td>
@@ -1985,8 +2027,8 @@ export function renderGameHeaderHTML(data) {
         <table class="linescore-table">
           <thead><tr><th>Team</th>${headerCells}<th class="rhe">R</th><th class="rhe">H</th><th class="rhe">E</th></tr></thead>
           <tbody>
-            <tr><td class="team-name">${teamLogo(away.id)}${away.abbreviation}</td>${awayInnings}<td class="rhe"><strong>${ls.teams.away?.runs ?? ''}</strong></td><td class="rhe">${ls.teams.away?.hits ?? ''}</td><td class="rhe">${ls.teams.away?.errors ?? ''}</td></tr>
-            <tr><td class="team-name">${teamLogo(home.id)}${home.abbreviation}</td>${homeInnings}<td class="rhe"><strong>${ls.teams.home?.runs ?? ''}</strong></td><td class="rhe">${ls.teams.home?.hits ?? ''}</td><td class="rhe">${ls.teams.home?.errors ?? ''}</td></tr>
+            <tr><td class="team-name">${teamLogo(away.id, '1.125em')}${away.abbreviation}</td>${awayInnings}<td class="rhe"><strong>${ls.teams.away?.runs ?? ''}</strong></td><td class="rhe">${ls.teams.away?.hits ?? ''}</td><td class="rhe">${ls.teams.away?.errors ?? ''}</td></tr>
+            <tr><td class="team-name">${teamLogo(home.id, '1.125em')}${home.abbreviation}</td>${homeInnings}<td class="rhe"><strong>${ls.teams.home?.runs ?? ''}</strong></td><td class="rhe">${ls.teams.home?.hits ?? ''}</td><td class="rhe">${ls.teams.home?.errors ?? ''}</td></tr>
           </tbody>
         </table>
         ${decisionLines ? `<div class="decisions">${decisionLines}</div>` : ''}

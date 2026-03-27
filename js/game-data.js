@@ -358,9 +358,14 @@ export function buildSubstitutionMap(allPlays, halfInning, lineup) {
       if (subType && slot) {
         const key = `${slot}-${inning}`;
         if (!subMap.has(key)) subMap.set(key, []);
-        // Avoid duplicate entries for same player/type/inning
         const existing = subMap.get(key);
-        if (!existing.some(s => s.playerId === playerId && s.type === subType)) {
+        const samePlayerIdx = existing.findIndex(s => s.playerId === playerId);
+        if (samePlayerIdx !== -1) {
+          // PH/PR take priority over defensive — don't let defensive overwrite
+          if (subType !== 'defensive') {
+            existing[samePlayerIdx].type = subType;
+          }
+        } else if (!existing.some(s => s.type === subType)) {
           existing.push({ type: subType, playerId });
         }
       }

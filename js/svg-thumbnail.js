@@ -309,13 +309,29 @@ export function drawCell(svg, cellX, cellY, ab) {
     }
   }
 
-  // 50% fill when batter scored (not HR) — works with or without base path segments
+  // Scored (not HR): 3 diagonal hatch lines clipped to diamond
   if (batterScored) {
-    svg.appendChild(el('polygon', {
-      class: 'th-t',
-      points: dPts(cx, hasSegs ? dcy : cy, DR),
-      opacity: '0.5',
-    }));
+    const hatchCy = hasSegs ? dcy : cy;
+    const pts = dPts(cx, hatchCy, DR);
+    const clipId = `th-hatch-${cx}-${hatchCy}`;
+    const defs = el('defs', {});
+    const clip = el('clipPath', { id: clipId });
+    clip.appendChild(el('polygon', { points: pts }));
+    defs.appendChild(clip);
+    svg.appendChild(defs);
+    const hatchG = el('g', { 'clip-path': `url(#${clipId})` });
+    const sw = 1.5;
+    const spacing = DR * 0.5;
+    for (let i = -1; i <= 1; i++) {
+      const offset = i * spacing;
+      hatchG.appendChild(el('line', {
+        class: 'th-s',
+        x1: cx - DR - 2, y1: hatchCy + offset + DR + 2,
+        x2: cx + DR + 2, y2: hatchCy + offset - DR - 2,
+        'stroke-width': sw,
+      }));
+    }
+    svg.appendChild(hatchG);
   }
 
   // ── Notation text ──
