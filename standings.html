@@ -56,14 +56,18 @@
 
     const container = document.getElementById('standings-container');
 
+    window.showProgress?.();
     fetchStandings(season).then(data => {
       const html = renderStandingsHTML(data);
       if (html) {
         container.innerHTML = html;
+      window.hideProgress?.();
       } else {
+        window.hideProgress?.();
         container.innerHTML = '<p>No standings data available.</p>';
       }
     }).catch(err => {
+      window.hideProgress?.();
       container.innerHTML = `<p>Failed to load standings: ${err.message}</p>`;
     });
   </script>

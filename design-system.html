@@ -202,6 +202,13 @@
   </div>
 </div>
 
+<h2>Loading Bar</h2>
+<p>Rainbow gradient progress bar shown at the top of the page while data is loading. Appears after a 1-second delay to avoid flashing on fast loads. Animates from 0% to 90% width, then snaps to 100% and fades when loading completes.</p>
+<div style="position:relative;height:4px;margin:16px 0;border:1px solid var(--grid-line);">
+  <div class="progress-bar" style="position:relative;opacity:1;width:100%;animation:progress-grow 2s ease-in-out infinite;"></div>
+</div>
+<p style="font-size:0.85em;color:var(--text-secondary);">The bar loops above for preview. In production it plays once and fades out.</p>
+
 <h2>MLB Team Colors</h2>
 <p>Official primary and secondary colors for all 30 MLB teams. Text color (white or black) is chosen to meet WCAG AA contrast ratio (4.5:1 minimum).</p>
 <table class="team-colors-table" style="width:100%;border-collapse:collapse;font-size:0.85em;">

@@ -596,13 +596,15 @@ function drawLineup(svg, CLR, lineup, rowOffsets, boxscore, gameData, side, subM
       const wrapper = document.createElement('div');
       wrapper.className = 'lineup-name-html';
 
-      // Shorten name if needed: "F. Lastname"
+      // Shorten name if needed: "F. Lastname Jr."
       let displayName = player.name;
       const maxChars = 18;
       if (displayName.length > maxChars && displayName.includes(' ')) {
+        const suffixes = ['Jr.', 'Sr.', 'II', 'III', 'IV'];
         const parts = displayName.split(' ');
+        const suffix = suffixes.includes(parts[parts.length - 1]) ? ' ' + parts.pop() : '';
         const last = parts[parts.length - 1];
-        displayName = parts[0][0] + '. ' + last;
+        displayName = parts[0][0] + '. ' + last + suffix;
       }
 
       // Line 1: position + name link + bat side

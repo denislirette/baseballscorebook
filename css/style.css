@@ -269,20 +269,13 @@ strong, b { font-weight: 600; }
   position: absolute;
   top: 0;
   left: 0;
-  height: 5px;
+  height: 4px;
   width: 0%;
   z-index: 9999;
-  background: var(--bg);
+  background: linear-gradient(90deg, #e74c3c, #f39c12, #2ecc71, #3498db, #9b59b6);
+  background-size: 200% 100%;
   opacity: 0;
   transition: width 0.3s ease, opacity 0.2s;
-}
-
-.progress-bar::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  background: color-mix(in srgb, var(--bg) 50%, transparent);
 }
 
 .progress-bar.progress-active {

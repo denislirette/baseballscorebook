@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Wiki, BaseballScorecard.org</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script>
+    if (localStorage.getItem('theme') === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  </script>
+  <style>
+    .wiki-live { border: 1px solid var(--grid-line); padding: 8px; margin: 12px 0; overflow-x: auto; background: var(--card-bg); }
+    .wiki-live-caption { font-size: 0.8em; color: var(--text-secondary); margin-top: 4px; }
+    .wiki-note { background: var(--surface); border: 1px solid var(--grid-line); padding: 10px 14px; margin: 12px 0; font-size: 0.95em; }
+    .wiki-note strong { display: block; margin-bottom: 2px; }
+  </style>
+</head>
+<body>
+
+  <header class="app-header">
+    <h1>System Wiki</h1>
+  </header>
+
+  <div class="page-with-subnav">
+    <aside class="subnav">
+      <nav aria-label="Wiki sections">
+        <p class="subnav-group">Overview</p>
+        <ul>
+          <li class="subnav-indent"><a href="#overview">What is a Scorecard?</a></li>
+          <li class="subnav-indent"><a href="#play-cell">The Play Cell</a></li>
+        </ul>
+        <p class="subnav-group">Notation</p>
+        <ul>
+          <li class="subnav-indent"><a href="#notation-outs">Outs and Contact</a></li>
+          <li class="subnav-indent"><a href="#notation-hits">Hits</a></li>
+          <li class="subnav-indent"><a href="#notation-walks">Walks and HBP</a></li>
+          <li class="subnav-indent"><a href="#notation-dp">Double Plays</a></li>
+          <li class="subnav-indent"><a href="#notation-sac">Sacrifice Plays</a></li>
+          <li class="subnav-indent"><a href="#notation-runner">Runner Events</a></li>
+          <li class="subnav-indent"><a href="#notation-errors">Errors</a></li>
+          <li class="subnav-indent"><a href="#notation-special">Special Cases</a></li>
+        </ul>
+        <p class="subnav-group">Diamond</p>
+        <ul>
+          <li class="subnav-indent"><a href="#diamond-hr">Home Run</a></li>
+          <li class="subnav-indent"><a href="#diamond-scored">Scored Runner</a></li>
+          <li class="subnav-indent"><a href="#diamond-hash">Hash Marks</a></li>
+          <li class="subnav-indent"><a href="#diamond-out-markers">Out Markers</a></li>
+          <li class="subnav-indent"><a href="#diamond-third-out">Third Out Notch</a></li>
+        </ul>
+        <p class="subnav-group">Substitutions</p>
+        <ul>
+          <li class="subnav-indent"><a href="#subs-ph">Pinch Hitter</a></li>
+          <li class="subnav-indent"><a href="#subs-pr">Pinch Runner</a></li>
+          <li class="subnav-indent"><a href="#subs-pitcher">Pitcher Changes</a></li>
+          <li class="subnav-indent"><a href="#subs-rules">Rules Summary</a></li>
+        </ul>
+        <p class="subnav-group">Pitches</p>
+        <ul>
+          <li class="subnav-indent"><a href="#pitches-codes">Call Codes</a></li>
+          <li class="subnav-indent"><a href="#pitches-display">Display Format</a></li>
+          <li class="subnav-indent"><a href="#pitches-zone">Strike Zone</a></li>
+          <li class="subnav-indent"><a href="#pitches-abs">ABS Challenges</a></li>
+        </ul>
+        <p class="subnav-group">Reference</p>
+        <ul>
+          <li class="subnav-indent"><a href="#lineup">Lineup</a></li>
+          <li class="subnav-indent"><a href="#positions">Position Numbers</a></li>
+          <li class="subnav-indent"><a href="#arsenal">Pitch Arsenal</a></li>
+          <li class="subnav-indent"><a href="#indicators">Indicators</a></li>
+          <li class="subnav-indent"><a href="#design">Design System</a></li>
+          <li class="subnav-indent"><a href="#data">Data Sources</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="page-content">
+
+      <h1>System Wiki</h1>
+      <p>This is the living reference for how BaseballScorecard.org interprets MLB game data and renders it as a traditional scorecard. All diagrams on this page are rendered using the same code that draws the actual scorecards, so they always reflect the current version.</p>
+
+      <!-- ═══════ OVERVIEW ═══════ -->
+      <h2 id="overview">What is a Baseball Scorecard?</h2>
+      <p>A baseball scorecard is a paper-and-pencil system used to record every event in a baseball game. Each batter gets a cell, and within that cell, the scorer marks what happened: the pitches thrown, the result of the at-bat, where runners moved on the bases, and how outs were recorded.</p>
+      <p>BaseballScorecard.org renders these scorecards digitally using live MLB data. Every pitch, every at-bat, every substitution is translated from the MLB Stats API (GUMBO feed) into the visual language of traditional scorekeeping. The system follows the Bob Carpenter scorebook layout with conventions from benjamincrom/baseball notation.</p>
+
+      <h2 id="play-cell">The Play Cell</h2>
+      <p>The play cell is the fundamental unit. Each cell represents one batter's plate appearance in one inning.</p>
+      <ul>
+        <li><strong>Top-left</strong>: Out badge (numbered circle: 1, 2, or 3)</li>
+        <li><strong>Top-right</strong>: Count (balls-strikes) and pitch sequence column</li>
+        <li><strong>Center</strong>: Diamond (base paths) or large notation text</li>
+        <li><strong>Below diamond</strong>: Scoring notation (e.g., G6-3, F8)</li>
+        <li><strong>Bottom-left</strong>: RBI indicator diamonds</li>
+        <li><strong>Bottom-right</strong>: Mini strike zone (when 10 or fewer pitches)</li>
+        <li><strong>Left edge</strong>: PH sub line (dotted, before the at-bat)</li>
+        <li><strong>Right edge</strong>: PR sub line (dotted, after the at-bat)</li>
+        <li><strong>Bottom edge</strong>: Pitcher change line (dotted squares with stats)</li>
+      </ul>
+
+      <div class="wiki-note">
+        <strong>Count calculation</strong>
+        The count shows balls-strikes at the end of the at-bat. Balls: count B and * codes. Strikes: count C, S, F, W, T but cap at 2. Foul balls after 2 strikes do not increment.
+      </div>
+
+      <!-- ═══════ NOTATION ═══════ -->
+      <h2 id="notation-outs">Outs and Contact</h2>
+      <table>
+        <tr><th>Notation</th><th>Meaning</th><th>How to read it</th></tr>
+        <tr><td><code>K</code></td><td>Strikeout swinging</td><td>Batter swung and missed on strike 3</td></tr>
+        <tr><td><code>&#xA4D8;</code></td><td>Strikeout looking</td><td>Umpire called strike 3 (backwards K)</td></tr>
+        <tr><td><code>F8</code></td><td>Fly out to CF</td><td>Fly ball caught by center fielder (#8)</td></tr>
+        <tr><td><code>L7</code></td><td>Line out to LF</td><td>Line drive caught by left fielder (#7)</td></tr>
+        <tr><td><code>P4</code></td><td>Pop out to 2B</td><td>Pop fly caught by second baseman (#4)</td></tr>
+        <tr><td><code>G6-3</code></td><td>Ground out SS to 1B</td><td>Grounder to SS (#6), thrown to 1B (#3)</td></tr>
+        <tr><td><code>G4-3</code></td><td>Ground out 2B to 1B</td><td>Grounder to 2B (#4), thrown to 1B (#3)</td></tr>
+      </table>
+      <div class="wiki-note">
+        <strong>Prefix meanings</strong>
+        <code>F</code> = fly ball, <code>L</code> = line drive, <code>P</code> = pop up, <code>G</code> = ground ball. Numbers trace the ball's path through the fielders' hands.
+      </div>
+
+      <h2 id="notation-hits">Hits</h2>
+      <div id="live-hash" class="wiki-live"></div>
+      <p class="wiki-live-caption">Live render: hash marks on the HP-1B segment. 1 = single, 2 = double, 3 = triple.</p>
+      <table>
+        <tr><th>Notation</th><th>Diamond</th></tr>
+        <tr><td><code>1B</code> Single</td><td>HP-1B path, 1 hash mark</td></tr>
+        <tr><td><code>2B</code> Double</td><td>HP-1B-2B path, 2 hash marks</td></tr>
+        <tr><td><code>3B</code> Triple</td><td>HP-1B-2B-3B path, 3 hash marks</td></tr>
+        <tr><td><code>HR</code> Home Run</td><td>Solid filled black diamond, "HR" in white</td></tr>
+      </table>
+
+      <h2 id="notation-walks">Walks and HBP</h2>
+      <table>
+        <tr><th>Notation</th><th>Meaning</th><th>Style</th></tr>
+        <tr><td><code>BB</code></td><td>Base on balls (walk)</td><td>Bold (900 weight), largest scale</td></tr>
+        <tr><td><code>IBB</code></td><td>Intentional walk</td><td>Bold (900 weight)</td></tr>
+        <tr><td><code>HBP</code></td><td>Hit by pitch</td><td>Bold (900 weight)</td></tr>
+        <tr><td><code>CI</code></td><td>Catcher's interference</td><td>Bold (900 weight)</td></tr>
+      </table>
+
+      <h2 id="notation-dp">Double and Triple Plays</h2>
+      <table>
+        <tr><th>Notation</th><th>Meaning</th></tr>
+        <tr><td><code>DP6-4-3</code></td><td>Double play: SS to 2B to 1B</td></tr>
+        <tr><td><code>DP5-4-3</code></td><td>Double play: 3B to 2B to 1B</td></tr>
+        <tr><td><code>TP5-4-3</code></td><td>Triple play: 3B to 2B to 1B</td></tr>
+        <tr><td><code>KDP</code></td><td>Strikeout + caught stealing double play</td></tr>
+      </table>
+      <div class="wiki-note">
+        <strong>Double play out rule</strong>
+        Each out number appears exactly once per inning. The batter's cell shows only the batter's out. The other runner's out appears in their own cell. The same out number must never appear twice in the same inning.
+      </div>
+
+      <h2 id="notation-sac">Sacrifice Plays</h2>
+      <table>
+        <tr><th>Notation</th><th>Meaning</th></tr>
+        <tr><td><code>SH5-4</code></td><td>Sacrifice bunt: 3B to 2B</td></tr>
+        <tr><td><code>SF8</code></td><td>Sacrifice fly to CF</td></tr>
+        <tr><td><code>FC6-3</code></td><td>Fielder's choice: SS to 1B</td></tr>
+      </table>
+
+      <h2 id="notation-runner">Runner Events</h2>
+      <p>These happen to runners already on base during another batter's at-bat.</p>
+      <table>
+        <tr><th>Notation</th><th>Meaning</th></tr>
+        <tr><td><code>SB</code></td><td>Stolen base</td></tr>
+        <tr><td><code>CS</code></td><td>Caught stealing</td></tr>
+        <tr><td><code>PO</code></td><td>Pickoff</td></tr>
+        <tr><td><code>POE</code></td><td>Pickoff error</td></tr>
+        <tr><td><code>POCS</code></td><td>Pickoff + caught stealing</td></tr>
+        <tr><td><code>WP</code></td><td>Wild pitch</td></tr>
+        <tr><td><code>PB</code></td><td>Passed ball</td></tr>
+        <tr><td><code>BK</code></td><td>Balk</td></tr>
+        <tr><td><code>OBS</code></td><td>Obstruction</td></tr>
+      </table>
+
+      <h2 id="notation-errors">Errors</h2>
+      <table>
+        <tr><th>Notation</th><th>Meaning</th></tr>
+        <tr><td><code>E6</code></td><td>Error by shortstop</td></tr>
+        <tr><td><code>E9</code></td><td>Error by right fielder</td></tr>
+        <tr><td><code>E2</code></td><td>Error by catcher</td></tr>
+      </table>
+
+      <h2 id="notation-special">Special Cases</h2>
+      <table>
+        <tr><th>Case</th><th>Notation</th><th>Explanation</th></tr>
+        <tr><td>Called third strike</td><td><code>&#xA4D8;</code></td><td>Backwards K. Used when last pitch callCode is 'C'.</td></tr>
+        <tr><td>Dropped third strike</td><td><code>K WP</code></td><td>Strikeout but batter reaches 1B via wild pitch, passed ball, or error.</td></tr>
+        <tr><td>Infield fly rule</td><td><code>F9(IFF)</code></td><td>Suffix added when API flags infield fly.</td></tr>
+        <tr><td>Fielder's choice</td><td><code>FC6-3</code></td><td>Batter reaches; fielder retired a different runner.</td></tr>
+      </table>
+
+      <!-- ═══════ DIAMOND ═══════ -->
+      <h2 id="diamond-hr">Home Run Diamond</h2>
+      <div id="live-hr" class="wiki-live"></div>
+      <p class="wiki-live-caption">Live render: solid black diamond with white "HR" text.</p>
+
+      <h2 id="diamond-scored">Scored Runner (Hatch Lines)</h2>
+      <div id="live-scored" class="wiki-live"></div>
+      <p class="wiki-live-caption">Live render: 3 diagonal hatch lines clipped to the diamond boundary.</p>
+      <p>When a runner scores on a play that is not a home run, the diamond shows exactly 3 diagonal hatch lines. The lines are drawn at 45 degrees, evenly spaced (R x 0.5 apart), clipped to the diamond, and use the same stroke weight as base paths.</p>
+
+      <h2 id="diamond-hash">Hash Marks (Hits)</h2>
+      <p>Short perpendicular lines on the HP-1B segment. Count matches the base reached: 1 for single, 2 for double, 3 for triple.</p>
+
+      <h2 id="diamond-out-markers">Out Markers</h2>
+      <p>When a runner is retired, the path is drawn to the midpoint between bases (truncated) and a numbered circle marks where the out occurred. Only the batter's own out appears in the batter's cell.</p>
+
+      <h2 id="diamond-third-out">Third Out Notch</h2>
+      <p>A 45-degree diagonal line in the bottom-right corner of the cell where the 3rd out occurs, marking the end of the half-inning.</p>
+
+      <!-- ═══════ SUBS ═══════ -->
+      <h2 id="subs-ph">Pinch Hitter (PH)</h2>
+      <p>Dotted line on the <strong>LEFT side</strong> of the play cell. The sub enters before the at-bat. The line is the "entry door" before the action.</p>
+
+      <h2 id="subs-pr">Pinch Runner (PR)</h2>
+      <p>Dotted line on the <strong>RIGHT side</strong> of the play cell. The sub enters after the at-bat. The line is the "exit door" after the batter's result.</p>
+
+      <h2 id="subs-pitcher">Pitcher Changes</h2>
+      <p>Horizontal dotted line at the bottom of the cell where the departing pitcher threw their last pitch. Includes accumulated stats: strikes / total pitches / strikeouts.</p>
+
+      <h2 id="subs-rules">Substitution Rules</h2>
+      <div class="wiki-note">
+        <strong>Rules</strong>
+        <ol>
+          <li>PH = LEFT (before at-bat). PR = RIGHT (after at-bat).</li>
+          <li>One player = one line. A player cannot be both PH and PR.</li>
+          <li>Two lines on one cell only when two different players substitute.</li>
+          <li>PH/PR types are never overwritten by defensive switch events.</li>
+          <li>All sub lines use the same 5px dotted square pattern.</li>
+          <li>In bat-around situations, PH/PR lines are suppressed.</li>
+        </ol>
+      </div>
+
+      <!-- ═══════ PITCHES ═══════ -->
+      <h2 id="pitches-codes">Pitch Call Codes</h2>
+      <table>
+        <tr><th>Code</th><th>Meaning</th><th>Color</th></tr>
+        <tr><td><code>B</code></td><td>Ball</td><td>Dark</td></tr>
+        <tr><td><code>C</code></td><td>Called strike</td><td>Red</td></tr>
+        <tr><td><code>S</code></td><td>Swinging strike</td><td>Red</td></tr>
+        <tr><td><code>F</code></td><td>Foul ball</td><td>Red</td></tr>
+        <tr><td><code>X</code></td><td>Ball in play</td><td>Green (bold)</td></tr>
+        <tr><td><code>T</code></td><td>Foul tip</td><td>Red</td></tr>
+        <tr><td><code>H</code></td><td>Hit by pitch</td><td>Dark</td></tr>
+        <tr><td><code>M</code></td><td>Missed bunt</td><td>Red</td></tr>
+        <tr><td><code>*</code></td><td>Pitchout / other</td><td>Dark</td></tr>
+      </table>
+
+      <h2 id="pitches-display">Display Format</h2>
+      <p>Each pitch renders as: speed (left) + type code (right). Example: <code>94 FF</code> = 94 mph four-seam fastball. In-play pitches are bold. Color indicates ball/strike/in-play.</p>
+
+      <h2 id="pitches-zone">Mini Strike Zone</h2>
+      <p>When 10 or fewer pitches, a mini zone appears at the bottom-right. Each pitch plotted at its actual location. Zone dimensions adjust per batter/pitcher height. Faded batter/pitcher silhouettes at 25% opacity.</p>
+
+      <h2 id="pitches-abs">ABS Challenge Badges</h2>
+      <p>Purple square badge next to challenged pitches: <strong>W</strong> (won, call overturned) or <strong>L</strong> (lost, call stands). Text always white for contrast.</p>
+
+      <!-- ═══════ REFERENCE ═══════ -->
+      <h2 id="lineup">Lineup</h2>
+      <ul>
+        <li><strong>Starters</strong>: Weight 800, default text color</li>
+        <li><strong>Substitutes</strong>: Weight 600, sub color, horizontal dotted divider above</li>
+        <li>Player names link to Baseball Savant statcast pages</li>
+        <li>Below name: jersey number, season AVG, season OPS</li>
+        <li>Batting order encoding: <code>slot x 100 + subIndex</code> (e.g., 101 = slot 1, first player)</li>
+      </ul>
+
+      <h2 id="positions">Position Numbers</h2>
+      <table>
+        <tr><th>#</th><th>Position</th><th>#</th><th>Position</th></tr>
+        <tr><td>1</td><td>Pitcher (P)</td><td>6</td><td>Shortstop (SS)</td></tr>
+        <tr><td>2</td><td>Catcher (C)</td><td>7</td><td>Left Field (LF)</td></tr>
+        <tr><td>3</td><td>First Base (1B)</td><td>8</td><td>Center Field (CF)</td></tr>
+        <tr><td>4</td><td>Second Base (2B)</td><td>9</td><td>Right Field (RF)</td></tr>
+        <tr><td>5</td><td>Third Base (3B)</td><td></td><td></td></tr>
+      </table>
+      <p>When you see <code>G6-3</code>: ground ball to shortstop (6), thrown to first baseman (3).</p>
+
+      <h2 id="arsenal">Pitch Arsenal</h2>
+      <p>Season pitch repertoire from the MLB pitchArsenal API. Format: <code>FF (48%, 93.6)</code> = four-seam fastball, 48% usage, 93.6 mph. Always uses season data (falls back to previous year at season start).</p>
+      <table>
+        <tr><th>Code</th><th>Pitch</th><th>Code</th><th>Pitch</th></tr>
+        <tr><td>FF</td><td>Four-seam Fastball</td><td>SL</td><td>Slider</td></tr>
+        <tr><td>SI</td><td>Sinker</td><td>ST</td><td>Sweeper</td></tr>
+        <tr><td>FC</td><td>Cutter</td><td>FS</td><td>Splitter</td></tr>
+        <tr><td>CH</td><td>Changeup</td><td>KC</td><td>Knuckle Curve</td></tr>
+        <tr><td>CU</td><td>Curveball</td><td>FO</td><td>Forkball</td></tr>
+      </table>
+
+      <h2 id="indicators">Indicator Icons</h2>
+      <ul>
+        <li><strong>Out badge</strong>: Numbered circle (1/2/3) in top-left corner. Radius = SUB_CIRCLE_R x 1.45.</li>
+        <li><strong>RBI diamond</strong>: Small filled diamond in bottom-left. One per RBI.</li>
+        <li><strong>Sub letter</strong>: Sequential letters (A, B, C...) in lineup area, never in play cells.</li>
+        <li>All indicator icons share the same base size (SUB_CIRCLE_R) for visual consistency.</li>
+      </ul>
+
+      <h2 id="design">Design System</h2>
+      <ul>
+        <li>All borders: <code>1px solid var(--grid-line)</code>, square corners, no shadows</li>
+        <li>All table data: left-aligned (never centered)</li>
+        <li>Team abbreviations: never bold in tables</li>
+        <li>Never combine bold AND italic</li>
+        <li>All sub lines: 5px squares, 4px gaps, consistent everywhere</li>
+        <li>Section titles larger than column headers (hierarchy)</li>
+        <li>Reuse existing patterns, never introduce new styles when existing ones fit</li>
+      </ul>
+
+      <h2 id="data">Data Sources</h2>
+      <table>
+        <tr><th>Source</th><th>Endpoint</th><th>Purpose</th></tr>
+        <tr><td>GUMBO feed</td><td><code>/api/v1.1/game/{gamePk}/feed/live</code></td><td>Play-by-play, pitches, boxscores, runners</td></tr>
+        <tr><td>pitchArsenal</td><td><code>/api/v1/people?hydrate=stats(type=pitchArsenal)</code></td><td>Season pitch repertoire</td></tr>
+        <tr><td>Standings</td><td><code>/api/v1/standings</code></td><td>W-L records, splits, L10, streak</td></tr>
+        <tr><td>Coaches</td><td><code>/api/v1/teams/{id}/coaches</code></td><td>Manager, pitching coach, base coaches</td></tr>
+      </table>
+      <p>All data from the MLB Stats API (free, no auth, no CORS). Player links go to Baseball Savant.</p>
+
+    </main>
+  </div>
+
+  <script type="module" src="/js/nav.js"></script>
+
+  <!-- Live diagrams using actual CSS variables -->
+  <script type="module">
+  function el(tag, attrs) {
+    const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+    return e;
+  }
+  function svg(w, h) {
+    return el('svg', { width: w, height: h, viewBox: `0 0 ${w} ${h}` });
+  }
+  function clr(v) {
+    return getComputedStyle(document.documentElement).getPropertyValue(v).trim() || '#1c1918';
+  }
+
+  function render() {
+    const text = clr('--sc-text');
+    const bg = clr('--sc-bg');
+
+    // HR diamond
+    const hrEl = document.getElementById('live-hr');
+    if (hrEl) {
+      hrEl.innerHTML = '';
+      const s = svg(120, 120);
+      const R = 40, cx = 60, cy = 60;
+      const pts = `${cx},${cy+R} ${cx+R},${cy} ${cx},${cy-R} ${cx-R},${cy}`;
+      s.appendChild(el('polygon', { points: pts, fill: text, stroke: text, 'stroke-width': '2.5' }));
+      const t = el('text', { x: cx, y: cy, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: bg, 'font-size': '22', 'font-weight': '700', 'font-family': 'monospace' });
+      t.textContent = 'HR';
+      s.appendChild(t);
+      hrEl.appendChild(s);
+    }
+
+    // Scored hatch
+    const scEl = document.getElementById('live-scored');
+    if (scEl) {
+      scEl.innerHTML = '';
+      const s = svg(120, 120);
+      const R = 40, cx = 60, cy = 60;
+      const pts = `${cx},${cy+R} ${cx+R},${cy} ${cx},${cy-R} ${cx-R},${cy}`;
+      s.appendChild(el('polygon', { points: pts, fill: 'none', stroke: text, 'stroke-width': '2.5' }));
+      const defs = el('defs', {});
+      const clip = el('clipPath', { id: 'wiki-sc' });
+      clip.appendChild(el('polygon', { points: pts }));
+      defs.appendChild(clip);
+      s.appendChild(defs);
+      const g = el('g', { 'clip-path': 'url(#wiki-sc)' });
+      const sp = R * 0.5;
+      for (let i = -1; i <= 1; i++) {
+        g.appendChild(el('line', { x1: cx-R-5, y1: cy+i*sp+R+5, x2: cx+R+5, y2: cy+i*sp-R-5, stroke: text, 'stroke-width': '2.5' }));
+      }
+      s.appendChild(g);
+      scEl.appendChild(s);
+    }
+
+    // Hash marks
+    const hashEl = document.getElementById('live-hash');
+    if (hashEl) {
+      hashEl.innerHTML = '';
+      const s = svg(400, 130);
+      const R = 35;
+      ['Single', 'Double', 'Triple'].forEach((label, idx) => {
+        const hashes = idx + 1;
+        const cx = 60 + idx * 130, cy = 55;
+        const pts = `${cx},${cy+R} ${cx+R},${cy} ${cx},${cy-R} ${cx-R},${cy}`;
+        s.appendChild(el('polygon', { points: pts, fill: 'none', stroke: text, 'stroke-width': '2' }));
+        const bases = [[cx,cy+R],[cx+R,cy],[cx,cy-R],[cx-R,cy]];
+        const pp = bases.slice(0, hashes+1).map(b=>b.join(',')).join(' ');
+        s.appendChild(el('polyline', { points: pp, fill: 'none', stroke: text, 'stroke-width': '3' }));
+        const sc = R/67, hl = 15.5*sc, sp = 13.7*sc;
+        const mx = (cx+cx+R)/2, my = (cy+R+cy)/2;
+        for (let h = 0; h < hashes; h++) {
+          const off = (h-(hashes-1)/2)*sp;
+          const hx = mx+off*0.707, hy = my-off*0.707;
+          s.appendChild(el('line', { x1: hx-hl*0.707, y1: hy-hl*0.707, x2: hx+hl*0.707, y2: hy+hl*0.707, stroke: text, 'stroke-width': '2.5' }));
+        }
+        const t = el('text', { x: cx, y: cy+R+18, 'text-anchor': 'middle', fill: text, 'font-size': '12', opacity: '0.5' });
+        t.textContent = label;
+        s.appendChild(t);
+      });
+      hashEl.appendChild(s);
+    }
+  }
+
+  render();
+  new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  </script>
+</body>
+</html>
