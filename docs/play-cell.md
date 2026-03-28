@@ -4,63 +4,58 @@ Each play cell represents one batter's plate appearance in one inning. It's the 
 
 ## Examples
 
-These are rendered using the actual rendering engine. Same code, same colors, same stroke widths as the live site.
+These are rendered using the actual rendering engine from the live site. Same code, same colors, same stroke widths. If the rendering changes, these examples change.
 
-<ClientOnly><div class="live-preview">
-  <LivePlayCell notation="G6-3" :out="1" label="Groundout" description="Ground ball to SS, thrown to 1B"
-    :pitches="[{call:'S',speed:94,type:'FF'},{call:'B',speed:87,type:'CH'},{call:'F',speed:91,type:'SL'},{call:'X',speed:96,type:'FF'}]"/>
-  <LivePlayCell notation="K" :out="2" label="Strikeout" description="Swinging strikeout"
-    :pitches="[{call:'B',speed:95,type:'FF'},{call:'C',speed:88,type:'CH'},{call:'S',speed:95,type:'FF'},{call:'S',speed:82,type:'CU'}]"/>
-  <LivePlayCell notation="BB" label="Walk" description="Base on balls (4 balls)"
-    :pitches="[{call:'B',speed:93,type:'FF'},{call:'C',speed:87,type:'CH'},{call:'B',speed:94,type:'FF'},{call:'B',speed:92,type:'FF'},{call:'B',speed:88,type:'CH'}]"
-    :runners="[{playerId:1,segments:[{from:'HP',to:'1B'}],currentBase:'1B',scored:false,isOut:false}]"/>
-  <LivePlayCell notation="F8" :out="1" label="Fly Out" description="Fly ball caught by CF"
-    :pitches="[{call:'C',speed:94,type:'FF'},{call:'B',speed:80,type:'CU'},{call:'X',speed:93,type:'FF'}]"/>
-</div></ClientOnly>
+<ClientOnly>
+<div class="live-preview">
+  <LivePlayCell example="groundout" />
+  <LivePlayCell example="strikeout" />
+  <LivePlayCell example="walk" />
+  <LivePlayCell example="flyout" />
+</div>
+</ClientOnly>
 
 ## Hits
 
-<ClientOnly><div class="live-preview">
-  <LivePlayCell notation="1B" label="Single" description="1 hash mark on HP-1B path"
-    :pitches="[{call:'X',speed:93,type:'FF'}]"
-    :runners="[{playerId:1,segments:[{from:'HP',to:'1B'}],currentBase:'1B',scored:false,isOut:false}]"/>
-  <LivePlayCell notation="2B" :rbi="1" label="Double" description="2 hash marks, path to 2B"
-    :pitches="[{call:'C',speed:94,type:'FF'},{call:'X',speed:89,type:'SL'}]"
-    :runners="[{playerId:1,segments:[{from:'HP',to:'1B'},{from:'1B',to:'2B'}],currentBase:'2B',scored:false,isOut:false}]"/>
-  <LivePlayCell notation="3B" :rbi="2" label="Triple" description="3 hash marks, path to 3B"
-    :pitches="[{call:'X',speed:93,type:'FF'}]"
-    :runners="[{playerId:1,segments:[{from:'HP',to:'1B'},{from:'1B',to:'2B'},{from:'2B',to:'3B'}],currentBase:'3B',scored:false,isOut:false}]"/>
-  <LivePlayCell notation="HR" :rbi="2" label="Home Run" description="Solid filled diamond"
-    :pitches="[{call:'B',speed:94,type:'FF'},{call:'S',speed:87,type:'SL'},{call:'X',speed:88,type:'CH'}]"
-    :runners="[{playerId:1,segments:[{from:'HP',to:'1B'},{from:'1B',to:'2B'},{from:'2B',to:'3B'},{from:'3B',to:'HP'}],currentBase:null,scored:true,isOut:false}]"/>
-</div></ClientOnly>
+<ClientOnly>
+<div class="live-preview">
+  <LivePlayCell example="single" />
+  <LivePlayCell example="double" />
+  <LivePlayCell example="triple" />
+  <LivePlayCell example="hr" />
+</div>
+</ClientOnly>
 
 ## Scored Runners
 
-<ClientOnly><div class="live-preview">
-  <LivePlayCell notation="1B" label="Scored (not HR)" description="3 diagonal hatch lines inside the diamond"
-    :pitches="[{call:'B',speed:91,type:'SI'},{call:'F',speed:93,type:'FF'},{call:'X',speed:87,type:'CH'}]"
-    :runners="[{playerId:1,segments:[{from:'HP',to:'1B'},{from:'1B',to:'2B'},{from:'2B',to:'3B'},{from:'3B',to:'HP'}],currentBase:null,scored:true,isOut:false}]"
-    :rbi="1"/>
-  <LivePlayCell notation="HR" :rbi="4" label="Grand Slam" description="Solid diamond, 4 RBI"
-    :pitches="[{call:'B',speed:94,type:'FF'},{call:'S',speed:87,type:'SL'},{call:'B',speed:95,type:'FF'},{call:'X',speed:92,type:'FF'}]"
-    :runners="[{playerId:1,segments:[{from:'HP',to:'1B'},{from:'1B',to:'2B'},{from:'2B',to:'3B'},{from:'3B',to:'HP'}],currentBase:null,scored:true,isOut:false}]"/>
-</div></ClientOnly>
+When a runner scores, the diamond is filled with 3 diagonal hatch lines (not a solid color). Home runs get a solid black diamond instead.
+
+<ClientOnly>
+<div class="live-preview">
+  <LivePlayCell example="scored" />
+  <LivePlayCell example="grandsalam" />
+</div>
+</ClientOnly>
 
 ## Other Common Results
 
-<ClientOnly><div class="live-preview">
-  <LivePlayCell notation="HBP" label="Hit By Pitch" description="Batter awarded first base"
-    :pitches="[{call:'B',speed:93,type:'FF'},{call:'H',speed:88,type:'SL'}]"
-    :runners="[{playerId:1,segments:[{from:'HP',to:'1B'}],currentBase:'1B',scored:false,isOut:false}]"/>
-  <LivePlayCell notation="E6" label="Error" description="Batter reaches on fielding mistake"
-    :pitches="[{call:'S',speed:94,type:'FF'},{call:'X',speed:89,type:'SL'}]"
-    :runners="[{playerId:1,segments:[{from:'HP',to:'1B'}],currentBase:'1B',scored:false,isOut:false}]"/>
-  <LivePlayCell notation="SF8" :out="1" :rbi="1" label="Sac Fly" description="Fly out that scores a runner"
-    :pitches="[{call:'B',speed:92,type:'FF'},{call:'X',speed:88,type:'CH'}]"/>
-  <LivePlayCell notation="L7" :out="2" label="Line Out" description="Line drive caught by LF"
-    :pitches="[{call:'X',speed:91,type:'SI'}]"/>
-</div></ClientOnly>
+<ClientOnly>
+<div class="live-preview">
+  <LivePlayCell example="hbp" />
+  <LivePlayCell example="error" />
+  <LivePlayCell example="sacfly" />
+  <LivePlayCell example="lineout" />
+</div>
+</ClientOnly>
+
+## Double Play
+
+<ClientOnly>
+<div class="live-preview">
+  <LivePlayCell example="dp" />
+  <LivePlayCell example="called-k" />
+</div>
+</ClientOnly>
 
 ## Zones
 

@@ -6,270 +6,189 @@
   <title>Component Examples</title>
   <link rel="stylesheet" href="/css/style.css">
   <script>
-    if (localStorage.getItem('theme') === 'dark') {
+    // Accept theme from URL param or parent frame
+    const params = new URLSearchParams(location.search);
+    const theme = params.get('theme');
+    if (theme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else if (!theme && localStorage.getItem('theme') === 'dark') {
       document.documentElement.setAttribute('data-theme', 'dark');
     }
-    // Allow parent frame to set theme
     window.addEventListener('message', (e) => {
-      if (e.data?.theme) {
-        document.documentElement.setAttribute('data-theme', e.data.theme);
-      }
+      if (e.data === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+      if (e.data === 'light') document.documentElement.removeAttribute('data-theme');
     });
   </script>
   <style>
-    body { margin: 0; padding: 0; background: transparent; overflow: hidden; }
-    .example-cell { display: inline-block; }
-    .example-grid { display: flex; flex-wrap: wrap; gap: 16px; padding: 16px; }
+    body { margin: 0; padding: 0; background: var(--sc-cell-bg, #faf9f6); }
+    .examples { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px; justify-content: center; }
     .example-item { text-align: center; }
-    .example-label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; font-family: -apple-system, sans-serif; }
+    .example-label { font-size: 11px; color: var(--text-secondary, #6b6462); margin-top: 4px; font-family: -apple-system, sans-serif; }
   </style>
 </head>
 <body>
-  <div id="container"></div>
+  <div id="root" class="examples"></div>
 
   <script type="module">
-    import { drawAtBatCell, drawDiamond, drawSubIndicator, getColors, refreshLayout } from '/js/svg-renderer.js';
+    import { drawAtBatCell, getColors, refreshLayout } from '/js/svg-renderer.js';
 
     const params = new URLSearchParams(location.search);
-    const show = params.get('show') || 'all';
-    const container = document.getElementById('container');
-
-    // Get real colors from CSS
+    const show = params.get('show');
+    const root = document.getElementById('root');
     const CLR = getColors();
+    const L = refreshLayout();
 
-    // Mock at-bat data for each example
-    const examples = {
+    const W = L.COL_WIDTH;
+    const H = L.ROW_HEIGHT;
+
+    function mkPitches(arr) {
+      return arr.map(p => ({ callCode: p[0], speed: p[1], typeCode: p[2] }));
+    }
+
+    function mkRunners(playerId, bases, scored = false, isOut = false) {
+      if (!bases || bases.length === 0) return [];
+      const order = ['HP', '1B', '2B', '3B', 'HP'];
+      const segments = [];
+      for (let i = 0; i < bases; i++) {
+        segments.push({ from: order[i], to: order[i + 1] });
+      }
+      return [{
+        playerId,
+        segments,
+        currentBase: scored ? null : order[bases],
+        scored,
+        isOut,
+        outBase: null,
+        outNumber: null,
+      }];
+    }
+
+    const all = {
       groundout: {
         label: 'Groundout (G6-3)',
-        ab: {
-          batterId: 1, notation: 'G6-3', outNumber: 1,
-          pitchSequence: [
-            { callCode: 'S', speed: 94, typeCode: 'FF' },
-            { callCode: 'B', speed: 87, typeCode: 'CH' },
-            { callCode: 'F', speed: 91, typeCode: 'SL' },
-            { callCode: 'X', speed: 96, typeCode: 'FF' },
-          ],
-          cumulativeRunners: [],
-          result: { rbi: 0 },
-        },
+        ab: { batterId: 1, notation: 'G6-3', outNumber: 1,
+          pitchSequence: mkPitches([['S',94,'FF'],['B',87,'CH'],['F',91,'SL'],['X',96,'FF']]),
+          cumulativeRunners: [], result: { rbi: 0 } },
       },
       strikeout: {
         label: 'Strikeout (K)',
-        ab: {
-          batterId: 2, notation: 'K', outNumber: 2,
-          pitchSequence: [
-            { callCode: 'B', speed: 95, typeCode: 'FF' },
-            { callCode: 'C', speed: 88, typeCode: 'CH' },
-            { callCode: 'S', speed: 95, typeCode: 'FF' },
-            { callCode: 'S', speed: 82, typeCode: 'CU' },
-          ],
-          cumulativeRunners: [],
-          result: { rbi: 0 },
-        },
+        ab: { batterId: 2, notation: 'K', outNumber: 2,
+          pitchSequence: mkPitches([['B',95,'FF'],['C',88,'CH'],['S',95,'FF'],['S',82,'CU']]),
+          cumulativeRunners: [], result: { rbi: 0 } },
       },
       'called-k': {
-        label: 'Called Third Strike (\u{A4D8})',
-        ab: {
-          batterId: 3, notation: '\u{A4D8}', outNumber: 3,
-          pitchSequence: [
-            { callCode: 'B', speed: 93, typeCode: 'FF' },
-            { callCode: 'F', speed: 87, typeCode: 'SL' },
-            { callCode: 'B', speed: 94, typeCode: 'FF' },
-            { callCode: 'C', speed: 80, typeCode: 'CU' },
-          ],
-          cumulativeRunners: [],
-          result: { rbi: 0 },
-        },
-      },
-      walk: {
-        label: 'Walk (BB)',
-        ab: {
-          batterId: 4, notation: 'BB', outNumber: null,
-          pitchSequence: [
-            { callCode: 'B', speed: 93, typeCode: 'FF' },
-            { callCode: 'C', speed: 87, typeCode: 'CH' },
-            { callCode: 'B', speed: 94, typeCode: 'FF' },
-            { callCode: 'B', speed: 92, typeCode: 'FF' },
-            { callCode: 'B', speed: 88, typeCode: 'CH' },
-          ],
-          cumulativeRunners: [
-            { playerId: 4, segments: [{ from: 'HP', to: '1B' }], currentBase: '1B', scored: false, isOut: false },
-          ],
-          result: { rbi: 0 },
-        },
-      },
-      single: {
-        label: 'Single (1B)',
-        ab: {
-          batterId: 5, notation: '1B', outNumber: null,
-          pitchSequence: [
-            { callCode: 'B', speed: 91, typeCode: 'SI' },
-            { callCode: 'X', speed: 86, typeCode: 'CH' },
-          ],
-          cumulativeRunners: [
-            { playerId: 5, segments: [{ from: 'HP', to: '1B' }], currentBase: '1B', scored: false, isOut: false },
-          ],
-          result: { rbi: 0 },
-        },
-      },
-      double: {
-        label: 'Double (2B)',
-        ab: {
-          batterId: 6, notation: '2B', outNumber: null,
-          pitchSequence: [
-            { callCode: 'C', speed: 94, typeCode: 'FF' },
-            { callCode: 'X', speed: 89, typeCode: 'SL' },
-          ],
-          cumulativeRunners: [
-            { playerId: 6, segments: [{ from: 'HP', to: '1B' }, { from: '1B', to: '2B' }], currentBase: '2B', scored: false, isOut: false },
-          ],
-          result: { rbi: 1 },
-        },
-      },
-      triple: {
-        label: 'Triple (3B)',
-        ab: {
-          batterId: 7, notation: '3B', outNumber: null,
-          pitchSequence: [
-            { callCode: 'X', speed: 93, typeCode: 'FF' },
-          ],
-          cumulativeRunners: [
-            { playerId: 7, segments: [{ from: 'HP', to: '1B' }, { from: '1B', to: '2B' }, { from: '2B', to: '3B' }], currentBase: '3B', scored: false, isOut: false },
-          ],
-          result: { rbi: 2 },
-        },
-      },
-      hr: {
-        label: 'Home Run (HR)',
-        ab: {
-          batterId: 8, notation: 'HR', outNumber: null,
-          pitchSequence: [
-            { callCode: 'B', speed: 94, typeCode: 'FF' },
-            { callCode: 'S', speed: 87, typeCode: 'SL' },
-            { callCode: 'B', speed: 95, typeCode: 'FF' },
-            { callCode: 'X', speed: 88, typeCode: 'CH' },
-          ],
-          cumulativeRunners: [
-            { playerId: 8, segments: [{ from: 'HP', to: '1B' }, { from: '1B', to: '2B' }, { from: '2B', to: '3B' }, { from: '3B', to: 'HP' }], currentBase: null, scored: true, isOut: false },
-          ],
-          result: { rbi: 2 },
-        },
-      },
-      'scored-single': {
-        label: 'Scored on Single',
-        ab: {
-          batterId: 9, notation: '1B', outNumber: null,
-          pitchSequence: [
-            { callCode: 'B', speed: 91, typeCode: 'SI' },
-            { callCode: 'F', speed: 93, typeCode: 'FF' },
-            { callCode: 'X', speed: 87, typeCode: 'CH' },
-          ],
-          cumulativeRunners: [
-            { playerId: 9, segments: [{ from: 'HP', to: '1B' }, { from: '1B', to: '2B' }, { from: '2B', to: '3B' }, { from: '3B', to: 'HP' }], currentBase: null, scored: true, isOut: false },
-          ],
-          result: { rbi: 1 },
-        },
+        label: 'Called K (\u{A4D8})',
+        ab: { batterId: 3, notation: '\u{A4D8}', outNumber: 3,
+          pitchSequence: mkPitches([['B',93,'FF'],['F',87,'SL'],['B',94,'FF'],['C',80,'CU']]),
+          cumulativeRunners: [], result: { rbi: 0 } },
       },
       flyout: {
         label: 'Fly Out (F8)',
-        ab: {
-          batterId: 10, notation: 'F8', outNumber: 1,
-          pitchSequence: [
-            { callCode: 'C', speed: 94, typeCode: 'FF' },
-            { callCode: 'B', speed: 80, typeCode: 'CU' },
-            { callCode: 'X', speed: 93, typeCode: 'FF' },
-          ],
-          cumulativeRunners: [],
-          result: { rbi: 0 },
-        },
+        ab: { batterId: 4, notation: 'F8', outNumber: 1,
+          pitchSequence: mkPitches([['C',94,'FF'],['B',80,'CU'],['X',93,'FF']]),
+          cumulativeRunners: [], result: { rbi: 0 } },
       },
       lineout: {
         label: 'Line Out (L7)',
-        ab: {
-          batterId: 11, notation: 'L7', outNumber: 2,
-          pitchSequence: [
-            { callCode: 'X', speed: 91, typeCode: 'SI' },
-          ],
-          cumulativeRunners: [],
-          result: { rbi: 0 },
-        },
+        ab: { batterId: 5, notation: 'L7', outNumber: 2,
+          pitchSequence: mkPitches([['X',91,'SI']]),
+          cumulativeRunners: [], result: { rbi: 0 } },
+      },
+      walk: {
+        label: 'Walk (BB)',
+        ab: { batterId: 6, notation: 'BB', outNumber: null,
+          pitchSequence: mkPitches([['B',93,'FF'],['C',87,'CH'],['B',94,'FF'],['B',92,'FF'],['B',88,'CH']]),
+          cumulativeRunners: mkRunners(6, 1), result: { rbi: 0 } },
       },
       hbp: {
         label: 'Hit By Pitch (HBP)',
-        ab: {
-          batterId: 12, notation: 'HBP', outNumber: null,
-          pitchSequence: [
-            { callCode: 'B', speed: 93, typeCode: 'FF' },
-            { callCode: 'H', speed: 88, typeCode: 'SL' },
-          ],
-          cumulativeRunners: [
-            { playerId: 12, segments: [{ from: 'HP', to: '1B' }], currentBase: '1B', scored: false, isOut: false },
-          ],
-          result: { rbi: 0 },
-        },
+        ab: { batterId: 7, notation: 'HBP', outNumber: null,
+          pitchSequence: mkPitches([['B',93,'FF'],['H',88,'SL']]),
+          cumulativeRunners: mkRunners(7, 1), result: { rbi: 0 } },
+      },
+      single: {
+        label: 'Single (1B)',
+        ab: { batterId: 8, notation: '1B', outNumber: null,
+          pitchSequence: mkPitches([['B',91,'SI'],['X',86,'CH']]),
+          cumulativeRunners: mkRunners(8, 1), result: { rbi: 0 } },
+      },
+      double: {
+        label: 'Double (2B)',
+        ab: { batterId: 9, notation: '2B', outNumber: null,
+          pitchSequence: mkPitches([['C',94,'FF'],['X',89,'SL']]),
+          cumulativeRunners: mkRunners(9, 2), result: { rbi: 1 } },
+      },
+      triple: {
+        label: 'Triple (3B)',
+        ab: { batterId: 10, notation: '3B', outNumber: null,
+          pitchSequence: mkPitches([['X',93,'FF']]),
+          cumulativeRunners: mkRunners(10, 3), result: { rbi: 2 } },
+      },
+      hr: {
+        label: 'Home Run (HR)',
+        ab: { batterId: 11, notation: 'HR', outNumber: null,
+          pitchSequence: mkPitches([['B',94,'FF'],['S',87,'SL'],['B',95,'FF'],['X',88,'CH']]),
+          cumulativeRunners: mkRunners(11, 4, true), result: { rbi: 2 } },
+      },
+      scored: {
+        label: 'Scored (not HR)',
+        ab: { batterId: 12, notation: '1B', outNumber: null,
+          pitchSequence: mkPitches([['B',91,'SI'],['F',93,'FF'],['X',87,'CH']]),
+          cumulativeRunners: mkRunners(12, 4, true), result: { rbi: 1 } },
+      },
+      grandsalam: {
+        label: 'Grand Slam',
+        ab: { batterId: 13, notation: 'HR', outNumber: null,
+          pitchSequence: mkPitches([['B',94,'FF'],['S',87,'SL'],['B',95,'FF'],['X',92,'FF']]),
+          cumulativeRunners: mkRunners(13, 4, true), result: { rbi: 4 } },
       },
       error: {
         label: 'Error (E6)',
-        ab: {
-          batterId: 13, notation: 'E6', outNumber: null,
-          pitchSequence: [
-            { callCode: 'S', speed: 94, typeCode: 'FF' },
-            { callCode: 'X', speed: 89, typeCode: 'SL' },
-          ],
-          cumulativeRunners: [
-            { playerId: 13, segments: [{ from: 'HP', to: '1B' }], currentBase: '1B', scored: false, isOut: false },
-          ],
-          result: { rbi: 0 },
-        },
+        ab: { batterId: 14, notation: 'E6', outNumber: null,
+          pitchSequence: mkPitches([['S',94,'FF'],['X',89,'SL']]),
+          cumulativeRunners: mkRunners(14, 1), result: { rbi: 0 } },
       },
       sacfly: {
         label: 'Sac Fly (SF8)',
-        ab: {
-          batterId: 14, notation: 'SF8', outNumber: 1,
-          pitchSequence: [
-            { callCode: 'B', speed: 92, typeCode: 'FF' },
-            { callCode: 'X', speed: 88, typeCode: 'CH' },
-          ],
-          cumulativeRunners: [],
-          result: { rbi: 1 },
-        },
+        ab: { batterId: 15, notation: 'SF8', outNumber: 1,
+          pitchSequence: mkPitches([['B',92,'FF'],['X',88,'CH']]),
+          cumulativeRunners: [], result: { rbi: 1 } },
+      },
+      dp: {
+        label: 'Double Play (DP643)',
+        ab: { batterId: 16, notation: 'DP643', outNumber: 3,
+          pitchSequence: mkPitches([['B',93,'FF'],['X',91,'SI']]),
+          cumulativeRunners: [], result: { rbi: 0 } },
       },
     };
 
-    // Render requested examples
-    const toRender = show === 'all' ? Object.keys(examples) : show.split(',');
+    const keys = show ? show.split(',') : Object.keys(all);
 
-    const grid = document.createElement('div');
-    grid.className = 'example-grid';
-
-    for (const key of toRender) {
-      const ex = examples[key];
+    for (const key of keys) {
+      const ex = all[key];
       if (!ex) continue;
 
       const item = document.createElement('div');
       item.className = 'example-item';
-      item.id = key;
 
       const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      const cellW = 200;
-      const cellH = 200;
-      svg.setAttribute('width', cellW);
-      svg.setAttribute('height', cellH);
-      svg.setAttribute('viewBox', `0 0 ${cellW} ${cellH}`);
+      svg.setAttribute('width', W);
+      svg.setAttribute('height', H);
+      svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
 
-      // Draw cell background
+      // Cell background
       const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-      rect.setAttribute('width', cellW);
-      rect.setAttribute('height', cellH);
+      rect.setAttribute('width', W);
+      rect.setAttribute('height', H);
       rect.setAttribute('fill', CLR.cellBg);
       rect.setAttribute('stroke', CLR.grid);
       rect.setAttribute('stroke-width', '1');
       svg.appendChild(rect);
 
       try {
-        drawAtBatCell(svg, CLR, ex.ab, 0, 0, cellW, cellH);
+        drawAtBatCell(svg, CLR, ex.ab, 0, 0, false);
       } catch (e) {
-        console.warn(`Failed to render ${key}:`, e);
+        console.error(key, e);
       }
 
       item.appendChild(svg);
@@ -279,10 +198,8 @@
       label.textContent = ex.label;
       item.appendChild(label);
 
-      grid.appendChild(item);
+      root.appendChild(item);
     }
-
-    container.appendChild(grid);
   </script>
 </body>
 </html>

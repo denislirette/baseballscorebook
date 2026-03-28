@@ -125,6 +125,7 @@ export default defineConfig({
         accessibility: 'accessibility.html',
         analytics: 'analytics.html',
         disclaimer: 'disclaimer.html',
+        examples: 'examples.html',
       },
     },
   },
