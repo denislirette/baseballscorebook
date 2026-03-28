@@ -132,11 +132,13 @@ export function buildScorecardGrid(allPlays, halfInning, lineup, boxscore, side)
       // Extra innings: runner placed on base (Manfred runner)
       if (ev.type === 'action' && ev.details?.event === 'Runner Placed On Base') {
         const placedId = ev.player?.id;
-        if (placedId && journeys) {
-          // Create a journey starting at 2B for the placed runner
+        if (placedId) {
+          // Create a journey starting at 2B
           if (!journeys.has(placedId)) {
             journeys.set(placedId, { segments: [], currentBase: '2B', scored: false, isOut: false, outBase: null });
           }
+          // Mark this at-bat so we attach the placed runner's journey to it later
+          ab._placedRunnerId = placedId;
         }
       }
       // Track pinch-runner replacements so their journey merges onto the original batter's cell
@@ -257,31 +259,24 @@ export function buildScorecardGrid(allPlays, halfInning, lineup, boxscore, side)
         }];
       } else if (journey.currentBase || journey.segments.length > 0) {
         // Placed runner (extra innings Manfred runner): didn't bat this inning.
-        // Attach to the FIRST at-bat cell in this inning where the placed runner
-        // appears as a runner (i.e., the first play where they moved or were on base).
-        let attached = false;
+        // Find the cell that was marked with _placedRunnerId during first pass.
         for (const [gridKey, gridCells] of grid) {
           if (!gridKey.endsWith(`-${inning}`)) continue;
           for (const cell of gridCells) {
-            // Check if any runner in this at-bat matches the placed runner
-            if (cell.runners?.some(r => r.playerId === playerId)) {
+            if (cell._placedRunnerId === playerId) {
               if (!cell.cumulativeRunners) cell.cumulativeRunners = [];
-              if (!cell.cumulativeRunners.some(cr => cr.playerId === playerId)) {
-                cell.cumulativeRunners.push({
-                  playerId,
-                  segments: [...journey.segments],
-                  currentBase: journey.currentBase,
-                  scored: journey.scored,
-                  isOut: journey.isOut,
-                  outBase: journey.outBase,
-                  outNumber: journey.outNumber || null,
-                });
-              }
-              attached = true;
+              cell.cumulativeRunners.push({
+                playerId,
+                segments: [...journey.segments],
+                currentBase: journey.currentBase,
+                scored: journey.scored,
+                isOut: journey.isOut,
+                outBase: journey.outBase,
+                outNumber: journey.outNumber || null,
+              });
               break;
             }
           }
-          if (attached) break;
         }
       }
     }
