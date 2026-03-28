@@ -144,6 +144,75 @@
   color: #7bafd4 !important;
 }
 
+/* Sidebar: active and hover states must be visible in dark mode */
+.dark .VPSidebarItem.is-active > .item > .link > .text {
+  color: #f5f2e9 !important;
+}
+.dark .VPSidebarItem > .item > .link:hover > .text {
+  color: #f5f2e9 !important;
+}
+.dark .VPSidebarItem > .item > .link > .text {
+  color: #a8a49e !important;
+}
+.dark .VPSidebarItem.is-active > .item > .indicator {
+  background-color: #f5f2e9 !important;
+}
+
+/* Sidebar group headings in dark mode */
+.dark .VPSidebarItem.level-0 > .item > .text {
+  color: #f5f2e9 !important;
+}
+
+/* Nav links in dark mode */
+.dark .VPNavBarMenuLink .text {
+  color: #a8a49e !important;
+}
+.dark .VPNavBarMenuLink:hover .text {
+  color: #f5f2e9 !important;
+}
+
+/* Search button dark mode */
+.dark .DocSearch-Button {
+  color: #a8a49e !important;
+}
+
+/* Footer dark mode */
+.dark .VPFooter .message,
+.dark .VPFooter .copyright {
+  color: #7e7a76 !important;
+}
+
+/* Table header and cell borders in dark mode */
+.dark .vp-doc table th {
+  background-color: #292524 !important;
+  color: #f5f2e9 !important;
+}
+.dark .vp-doc table td {
+  color: #f5f2e9 !important;
+}
+.dark .vp-doc table th,
+.dark .vp-doc table td {
+  border-color: #7e7a76 !important;
+}
+
+/* On this page sidebar in dark mode */
+.dark .VPDocAsideOutline .outline-link {
+  color: #a8a49e !important;
+}
+.dark .VPDocAsideOutline .outline-link.active {
+  color: #f5f2e9 !important;
+}
+
+/* Edit link in dark mode */
+.dark .VPDocFooter .edit-link-button {
+  color: #7bafd4 !important;
+}
+
+/* Last updated text */
+.dark .VPDocFooter .VPLastUpdated {
+  color: #7e7a76 !important;
+}
+
 /* All content left-aligned per design system */
 .vp-doc ul, .vp-doc ol, .vp-doc p, .vp-doc h1, .vp-doc h2, .vp-doc h3, .vp-doc h4, .vp-doc table {
   text-align: left !important;
