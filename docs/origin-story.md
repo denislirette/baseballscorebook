@@ -24,21 +24,14 @@ The toolchain: Claude Code for development, Figma for design, GitHub for version
 
 The scorecard follows the Bob Carpenter scorebook layout, adapted for screens. A few rules govern everything:
 
-- **Clarity over decoration**: no drop shadows, no rounded corners, no gradients. Square borders, left-aligned data, consistent spacing.
-- **Accessibility**: WCAG AA contrast ratios, keyboard navigation, screen reader support, skip-to-content links.
-- **Consistency**: every table, every border, every indicator icon follows the same rules everywhere. If something looks different from the rest of the site, it's a bug.
-- **Educational purpose**: team logos help users identify teams while learning to read scorecards. All logos are the trademark and property of their respective owners.
+* **Clarity over decoration**: no drop shadows, no rounded corners, no gradients. Square borders, left-aligned data, consistent spacing.
+* **Accessibility**: WCAG AA contrast ratios, keyboard navigation, screen reader support, skip-to-content links.
+* **Consistency**: every table, every border, every indicator icon follows the same rules everywhere. If something looks different from the rest of the site, it's a bug.
+* **Educational purpose**: team logos help users identify teams while learning to read scorecards. All logos are the trademark and property of their respective owners.
 
 ## Timeline
 
-| When | Version | What happened |
-|------|---------|---------------|
-| Week 1 | v0.1 | First render. Fixtures, grid, [pitch sequences](pitch-sequences.md) |
-| Week 1 | v0.5 | [Diamond](diamond.md) with base paths and runner annotations |
-| Week 1 | v0.7 | Pitcher stats, game header, standings, schedule |
-| Week 2 | v0.8 | Team logos, [pitch arsenals](pitch-sequences.md#pitch-arsenal), SEO |
-| Week 2 | v0.9 | [Substitution](substitutions.md) redesign, [DP fix](diamond.md#out-markers), [hatch lines](diamond.md#scored-runner-hatch-lines) |
-| Week 2 | v0.9.1 | GitBook wiki, rainbow loading bar |
+<table><thead><tr><th width="116.25390625">Version</th><th>What happened</th></tr></thead><tbody><tr><td>v0.1</td><td>First render. Fixtures, grid, <a href="pitch-sequences.md">pitch sequences</a></td></tr><tr><td>v0.5</td><td><a href="diamond.md">Diamond</a> with base paths and runner annotations</td></tr><tr><td>v0.7</td><td>Pitcher stats, game header, standings, schedule</td></tr><tr><td>v0.8</td><td>Team logos, <a href="pitch-sequences.md#pitch-arsenal">pitch arsenals</a>, SEO</td></tr><tr><td>v0.9</td><td><a href="substitutions.md">Substitution</a> redesign, <a href="diamond.md#out-markers">DP fix</a>, <a href="diamond.md#scored-runner-hatch-lines">hatch lines</a></td></tr><tr><td>v0.9.1</td><td>GitBook wiki, rainbow loading bar</td></tr></tbody></table>
 
 ## What's next
 
