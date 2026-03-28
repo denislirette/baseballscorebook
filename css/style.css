@@ -809,14 +809,15 @@ strong, b { font-weight: 600; }
    ═══════════════════════════════════════════════════════ */
 
 .game-top-row { display: flex; gap: 16px; align-items: stretch; margin-bottom: 16px; }
-.game-top-row > .team-comparison { flex: 35; margin: 0; display: flex; flex-direction: column; min-width: 0; }
+.game-top-row > .team-comparison { flex: 1; margin: 0; display: flex; flex-direction: column; min-width: 0; }
 .game-top-row > .team-comparison .pitcher-stats-table { width: 100%; flex: 1; }
-.game-top-row > .game-header-linescore { flex: 65; display: flex; flex-direction: column; min-width: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.game-top-row > .game-header-linescore { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .game-top-row > .game-header-linescore .linescore-table { width: 100%; flex: 1; }
 .team-comparison { margin: 0; }
 .team-comparison { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .team-comparison .pitcher-stats-table { width: auto; }
 .team-comparison .pitcher-stats-table td:first-child { white-space: nowrap; }
+.team-comparison .pitcher-stats-table td { white-space: nowrap; }
 @media (max-width: 900px) {
   .game-top-row { flex-direction: column; }
   .game-top-row > .team-comparison .pitcher-stats-table { width: 100%; }
