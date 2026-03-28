@@ -1905,14 +1905,15 @@ export function renderTeamComparisonHTML(data, standings) {
 
   let divHeaders, awayDivCells, homeDivCells;
 
+  // Always show E, C, W columns — use away team's league for headers
+  divHeaders = awayDivIds.map(id => `<th>${DIV_SHORT[id]}</th>`).join('');
+  awayDivCells = awayDivIds.map(id => `<td>${divRecord(awayDivRecs, id)}</td>`).join('');
   if (sameLeague) {
-    divHeaders = awayDivIds.map(id => `<th>${DIV_SHORT[id]}</th>`).join('');
-    awayDivCells = awayDivIds.map(id => `<td>${divRecord(awayDivRecs, id)}</td>`).join('');
     homeDivCells = awayDivIds.map(id => `<td>${divRecord(homeDivRecs, id)}</td>`).join('');
   } else {
-    divHeaders = `<th>Div</th>`;
-    awayDivCells = `<td>${divRecord(awayDivRecs, away.division?.id)}</td>`;
-    homeDivCells = `<td>${divRecord(homeDivRecs, home.division?.id)}</td>`;
+    // Inter-league: home team uses their own league's division IDs
+    const homeDivIds = homeLeagueId === 103 ? alDivs : nlDivs;
+    homeDivCells = awayDivIds.map((_, i) => `<td>${divRecord(homeDivRecs, homeDivIds[i])}</td>`).join('');
   }
 
   const awayGB = awaySt?.divisionGamesBack || '-';
@@ -2012,7 +2013,7 @@ export function renderGameHeaderHTML(data) {
     dateStr ? `<tr><td class="pitcher-name">Date</td><td>${dateStr}</td></tr>` : '',
     firstPitchStr ? `<tr><td class="pitcher-name">First Pitch</td><td>${firstPitchStr}</td></tr>` : '',
     durationStr ? `<tr><td class="pitcher-name">Duration</td><td>${durationStr}</td></tr>` : '',
-    info.venue ? `<tr><td class="pitcher-name">Venue</td><td>${info.venue}${info.attendance || info.venueCapacity ? ` (${info.attendance ? info.attendance.toLocaleString() : '0'} / ${info.venueCapacity ? info.venueCapacity.toLocaleString() : '-'})` : ''}</td></tr>` : '',
+    info.venue ? `<tr><td class="pitcher-name">Venue</td><td>${info.venue}${info.attendance ? ` (${info.attendance.toLocaleString()} / ${info.venueCapacity ? info.venueCapacity.toLocaleString() : '-'})` : info.venueCapacity ? ` (${info.venueCapacity.toLocaleString()})` : ''}</td></tr>` : '',
   ].filter(Boolean).join('');
 
   // Weather table rows - always show, with fallback
@@ -2027,10 +2028,10 @@ export function renderGameHeaderHTML(data) {
     linescore: `
       <div class="game-header-linescore">
         <table class="linescore-table">
-          <thead><tr><th>Team</th>${headerCells}<th class="rhe">R</th><th class="rhe">H</th><th class="rhe">E</th></tr></thead>
+          <thead><tr><th>Team</th>${headerCells}<th class="rhe">R</th><th class="rhe">H</th><th class="rhe">E</th><th class="rhe">LOB</th></tr></thead>
           <tbody>
-            <tr><td class="team-name">${teamLogo(away.id, '1.125em')}${away.abbreviation}</td>${awayInnings}<td class="rhe"><strong>${ls.teams.away?.runs ?? ''}</strong></td><td class="rhe">${ls.teams.away?.hits ?? ''}</td><td class="rhe">${ls.teams.away?.errors ?? ''}</td></tr>
-            <tr><td class="team-name">${teamLogo(home.id, '1.125em')}${home.abbreviation}</td>${homeInnings}<td class="rhe"><strong>${ls.teams.home?.runs ?? ''}</strong></td><td class="rhe">${ls.teams.home?.hits ?? ''}</td><td class="rhe">${ls.teams.home?.errors ?? ''}</td></tr>
+            <tr><td class="team-name">${away.abbreviation}</td>${awayInnings}<td class="rhe"><strong>${ls.teams.away?.runs ?? ''}</strong></td><td class="rhe">${ls.teams.away?.hits ?? ''}</td><td class="rhe">${ls.teams.away?.errors ?? ''}</td><td class="rhe">${ls.teams.away?.leftOnBase ?? ''}</td></tr>
+            <tr><td class="team-name">${home.abbreviation}</td>${homeInnings}<td class="rhe"><strong>${ls.teams.home?.runs ?? ''}</strong></td><td class="rhe">${ls.teams.home?.hits ?? ''}</td><td class="rhe">${ls.teams.home?.errors ?? ''}</td><td class="rhe">${ls.teams.home?.leftOnBase ?? ''}</td></tr>
           </tbody>
         </table>
         ${decisionLines ? `<div class="decisions">${decisionLines}</div>` : ''}
