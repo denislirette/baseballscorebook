@@ -1,89 +1,196 @@
 # Design System
 
-A strict set of visual rules that maintain consistency across every page and component. Any new element should look like it belongs. If something looks different from the rest of the site, it's a bug.
+Every visual decision on BaseballScorecard.org follows these rules. If something looks different from the rest of the site, it's a bug.
 
-## Core principles
+## Color Palette
 
-- **Apple-inspired minimalism**: clear, legible, utility-focused. No decoration that doesn't serve a purpose.
-- **Consistency over novelty**: reuse existing patterns. Never introduce a new style when an existing one fits.
-- **Accessibility first**: WCAG AA contrast ratios everywhere. Keyboard navigation. Screen reader support.
+### Light Mode
 
-## Borders
+| Swatch | Token | Hex | Usage |
+|--------|-------|-----|-------|
+| ![](https://via.placeholder.com/20/1c1918/1c1918) | `--sc-text` | `#1c1918` | Primary text, diamond outlines |
+| ![](https://via.placeholder.com/20/6b6462/6b6462) | `--sc-text-light` | `#6b6462` | Secondary text, stats |
+| ![](https://via.placeholder.com/20/faf9f6/faf9f6) | `--sc-bg` | `#faf9f6` | Page background |
+| ![](https://via.placeholder.com/20/e8e6e1/e8e6e1) | `--sc-cell-bg-empty` | `#e8e6e1` | Empty cells, header backgrounds |
+| ![](https://via.placeholder.com/20/f2f0ec/f2f0ec) | `--sc-cell-bg-future` | `#f2f0ec` | Future inning cells |
+| ![](https://via.placeholder.com/20/868278/868278) | `--grid-line` | `#868278` | All borders and dividers |
+| ![](https://via.placeholder.com/20/377049/377049) | `--sc-scored` | `#377049` | Scored runners, active states, in-play pitches |
+| ![](https://via.placeholder.com/20/a04a49/a04a49) | `--sc-out` | `#a04a49` | Out paths, strike pitch color |
+| ![](https://via.placeholder.com/20/44403a/44403a) | `--sc-sub` | `#44403a` | Substitution indicators (light mode) |
+| ![](https://via.placeholder.com/20/2a6d8d/2a6d8d) | `--sc-pitcher-line` | `#2a6d8d` | Pitcher change lines |
+| ![](https://via.placeholder.com/20/7B2D8E/7B2D8E) | `--sc-challenge` | `#7B2D8E` | ABS challenge badges |
+| ![](https://via.placeholder.com/20/e0f0e4/e0f0e4) | `--sc-active-cell` | `#e0f0e4` | Live batter cell highlight |
 
-- All structural borders: `1px solid var(--grid-line)`
-- Square corners always, `border-radius: 0`
-- No drop shadows anywhere
-- The only exception: the linescore R/H/E separator uses `2.5px` to visually separate inning scores from totals
+### Dark Mode
+
+| Swatch | Token | Hex | Usage |
+|--------|-------|-----|-------|
+| ![](https://via.placeholder.com/20/f5f2e9/f5f2e9) | `--sc-text` | `#f5f2e9` | Primary text |
+| ![](https://via.placeholder.com/20/1c1918/1c1918) | `--sc-bg` | `#1c1918` | Page background |
+| ![](https://via.placeholder.com/20/292524/292524) | `--sc-cell-bg` | `#292524` | Play cell background |
+| ![](https://via.placeholder.com/20/7e7a76/7e7a76) | `--grid-line` | `#7e7a76` | Borders |
+| ![](https://via.placeholder.com/20/d4d0c8/d4d0c8) | `--sc-sub` | `#d4d0c8` | Substitution indicators (dark mode) |
+
+All colors are CSS custom properties on `:root` and `[data-theme="dark"]`. Theme switching toggles the `data-theme` attribute on `<html>`. No JavaScript needed for the swap itself.
+
+## Brand Colors
+
+| Swatch | Name | Hex | Where |
+|--------|------|-----|-------|
+| ![](https://via.placeholder.com/20/377049/377049) | Primary Green | `#377049` | Scored runners, active states, refresh bar |
+| ![](https://via.placeholder.com/20/1c1918/1c1918) | Stone Dark | `#1c1918` | Text, nav bar, diamond outlines |
+| ![](https://via.placeholder.com/20/868278/868278) | Stone Mid | `#868278` | Grid lines, structure |
+| ![](https://via.placeholder.com/20/faf9f6/faf9f6) | Stone Light | `#faf9f6` | Backgrounds |
 
 ## Typography
 
-- Never combine bold AND italic on the same element. Use one or the other.
-- Team abbreviations (NYY, SF, etc.) are **never bold** in tables
+**Font stack**: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, Helvetica, sans-serif`
+
+**Body size**: `clamp(1rem, 1.5vw + 0.75rem, 1.375rem)` (responsive, scales with viewport)
+
+| Element | Size | Weight | Notes |
+|---------|------|--------|-------|
+| Team name (section header) | `2.25em` | 700 | Logo + name, scales to `1.25em` on mobile |
+| Lineup player name | `clamp(1.1rem, 0.8vw + 1rem, 1.5rem)` | 800 (starter), 600 (sub) | Responsive |
+| Table data | `1em` | 400 | All `pitcher-stats-table` content |
+| Table header | `1em` | 700 | Column headers |
+| Section title header | `1.1em` | 700 | Spanning headers like "Tigers BULLPEN (12)" |
+| Pitch sequence | Monospace | 400/700 | 700 for in-play pitches |
+| Scoring notation (large) | `largeSize * 0.6` | 400 | G6-3, F8, L7 |
+| Scoring notation (walks) | `largeSize * 1.0` | 900 | BB, IBB, HBP |
+| Footer fine print | `0.85em` | 400 | Copyright text |
+
+### Rules
+
+- Never combine bold AND italic on the same element
+- Team abbreviations (NYY, SF) are never bold in tables
 - Only full team names in section headers are bold
-- All table data is **left-aligned** (never centered, centered data is harder to scan)
+- All table data is left-aligned, never centered
+
+## Links
+
+All links use underline styling with these tokens:
+
+| State | Color | Decoration |
+|-------|-------|------------|
+| Default | `var(--link)` | Underline, 2px offset |
+| Hover | `var(--link-hover)` | Thicker underline |
+| Visited | `var(--visited)` | Purple tint |
+
+External links (player names) include a small external icon SVG indicating the link opens in a new tab. Player links go to [Baseball Savant](https://baseballsavant.mlb.com) statcast pages.
+
+## Borders
+
+| Use | Style | Notes |
+|-----|-------|-------|
+| All structural borders | `1px solid var(--grid-line)` | Tables, cards, sections |
+| Square corners | `border-radius: 0` | Everywhere, no exceptions |
+| Drop shadows | None | Never used |
+| Linescore RHE separator | `2.5px solid var(--text)` | Only exception to 1px rule |
+| Scorecard grid bold lines | `2.5px` | Row/inning boundaries |
+| Scorecard grid thin lines | `0.75px` | Bat-around sub-columns |
+
+## Grid System
+
+The main site uses flexbox for layout, not CSS grid (except the standings page and game cards).
+
+| Layout | Desktop | Mobile |
+|--------|---------|--------|
+| W-L table + Linescore | Side by side (35% / 65%) | Stacked |
+| Game Info / Weather / Umpires | 3 columns, `flex: 1` each | Stacked |
+| Team stats (AVG, ERA, etc.) | Horizontal flex row | Stacked, full width |
+| Standings | 2-column CSS grid | 1 column |
+| Game cards | Wrapping flex | Full width |
+
+`body { overflow-x: hidden }` prevents horizontal page scroll. Wide tables scroll inside their own containers.
 
 ## Tables
 
-All data tables use the `pitcher-stats-table` class for consistent styling:
+All data tables use `pitcher-stats-table` for consistent styling:
+
 - `1px` cell borders using `var(--grid-line)`
 - Left-aligned data
 - Header row with `var(--surface)` background
-- Section title rows (spanning headers) are `1.1em`, larger than column headers to create hierarchy
+- Header font weight: 700
+- Section title rows are `1.1em`, larger than column headers
+- Data font: tabular-nums for number alignment
 
-## Substitution lines
+## Substitution Lines
 
-All substitution indicators use the same pattern everywhere:
+All sub indicators use the same pattern:
+
 - **5px squares** with **4px gaps**
-- Same color token: `var(--sc-sub)`
-- Used in: play cell PH/PR lines, lineup horizontal dividers, stats column dividers, pitcher change lines
+- Color: `var(--sc-sub)` (dark on light, bright on dark)
+- WCAG AA contrast: 9:1+ ratio in both themes
 
-## Indicator icons
+Used in:
+- Play cell PH/PR vertical lines
+- Lineup horizontal dividers between players
+- Stats column horizontal dividers
+- Pitcher change horizontal lines (with stats label in center)
 
-All indicator icons share the same base size (`SUB_CIRCLE_R`) for visual consistency:
-- Out badges (numbered circles)
-- RBI diamonds (small filled diamonds)
-- Sub letters (A, B, C in lineup area)
+See [Substitutions](substitutions.md) for placement rules.
 
-The HR diamond is intentionally larger. It's separate from indicator sizing.
+## Indicator Icons
 
-## Team logos
+All indicators share the same base size (`SUB_CIRCLE_R`):
 
-Team logos are displayed for educational purposes to help users identify teams. They are the trademark and property of their respective owners.
+| Icon | Shape | Where | Size |
+|------|-------|-------|------|
+| Out badge | Numbered circle (1/2/3) | Top-left of play cell | `SUB_CIRCLE_R * 1.45` |
+| RBI diamond | Small filled diamond | Bottom-left of play cell | `SUB_CIRCLE_R` |
+| Sub letter | Letter (A, B, C) | Lineup area only | `SUB_CIRCLE_R` |
+| HR diamond | Large filled diamond | Center of play cell | `DIAMOND_R` (larger, separate) |
 
-- Light mode: cap logos optimized for light backgrounds
-- Dark mode: cap logos optimized for dark backgrounds
-- Swap is automatic via CSS class toggling
-- `vertical-align: middle` ensures logos center with text at any size
+## Play Cell Anatomy
 
-## Loading bar
+See [The Play Cell](play-cell.md) for the full breakdown. Key zones:
 
-Rainbow gradient progress bar shown at the top of the page while data loads:
-- Colors: red, orange, green, blue, purple gradient
-- Appears after a 1-second delay (no flash for fast loads)
-- Animates from 0% to 90%, then snaps to 100% and fades
-- Height: 4px
-- Present on all data-loading pages (game, schedule, standings)
+- **Top-left**: Out badge
+- **Top-right**: Count + pitch column
+- **Center**: Diamond or notation
+- **Bottom-left**: RBI diamonds
+- **Bottom-right**: Mini strike zone
+- **Left edge**: PH sub line
+- **Right edge**: PR sub line
+- **Bottom edge**: Pitcher change line
 
-## Color tokens
+## Loading Bar
 
-All colors are defined as CSS custom properties on `:root` and `[data-theme="dark"]`. Theme switching needs no JavaScript, just toggle the `data-theme` attribute on `<html>`.
+Rainbow gradient progress bar at the top of the page during data loading.
 
-Key tokens:
-- `--sc-text`: primary text and diamond outlines
-- `--sc-bg`: page background
-- `--sc-cell-bg`: play cell background
-- `--sc-cell-bg-empty`: empty cell background (slightly darker)
-- `--sc-grid-line`: all structural borders
-- `--sc-sub`: substitution indicator color
-- `--sc-pitch-strike`: red for strikes
-- `--sc-pitch-in-play`: green for balls in play
-- `--sc-pitch-ball`: dark for balls
-- `--sc-challenge`: purple for ABS challenge badges
+- **Gradient**: red → orange → green → blue → purple
+- **Height**: 4px
+- **Delay**: appears after 1 second (no flash for fast loads)
+- **Animation**: 0% to 90% width over 2 seconds, then snaps to 100% and fades
+- **Pages**: game, schedule, standings
 
-## Responsive design
+## Team Logos
 
-- Desktop: side-by-side layouts (W-L table 35%, linescore 65%)
-- Tablet (< 900px): stacked layouts
-- Mobile (< 480px): full-width everything, day name hidden from date picker
-- `body { overflow-x: hidden }` prevents horizontal scroll at any viewport
-- Wide tables (linescore, W-L comparison) scroll within their own containers
+Displayed for educational purposes. All logos are the trademark and property of their respective owners.
+
+- 30 teams, SVG format
+- Light mode variants: `/img/logos/light/{teamId}.svg`
+- Dark mode variants: `/img/logos/dark/{teamId}.svg`
+- Auto-swap via CSS: `.team-logo-light` visible in light mode, `.team-logo-dark` in dark mode
+- `vertical-align: middle` for alignment with text at any size
+- Source: MLB Static (`mlbstatic.com/team-logos/team-cap-on-light/` and `team-cap-on-dark/`)
+
+## Responsive Breakpoints
+
+| Breakpoint | What changes |
+|------------|-------------|
+| Desktop (> 900px) | Side-by-side layouts, full subnav sidebar |
+| Tablet (< 900px) | Stacked layouts, subnav hidden |
+| Mobile (< 480px) | Full-width everything, day name hidden in date picker, team stats tables 100% width |
+
+## Accessibility
+
+- WCAG AA contrast ratios on all text and UI components
+- Skip-to-content link (first focusable element)
+- `tabindex="-1"` on `<main>` for skip link focus
+- `aria-label` on all interactive elements
+- `aria-live="polite"` on auto-refresh status
+- `role="switch"` / native checkbox for auto-refresh toggle
+- Keyboard navigation: all interactive elements reachable via Tab
+- See [Accessibility](ACCESSIBILITY.md) for the full statement

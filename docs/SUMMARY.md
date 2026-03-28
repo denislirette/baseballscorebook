@@ -16,11 +16,11 @@
 * [Pitch Sequences](pitch-sequences.md)
 * [Substitutions](substitutions.md)
 * [Position Numbers](positions.md)
+* [Common Plays Explained](common-plays.md)
 
 ## Baseball Rules
 
 * [Rules Reference](baseball-rules.md)
-* [Common Plays Explained](common-plays.md)
 
 ## Design
 

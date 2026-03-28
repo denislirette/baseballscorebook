@@ -1,8 +1,100 @@
-# BaseballScorecard.org: Technical Reference
+# Technical Reference
 
-> This document explains how the entire system works so another developer (or AI) can review, debug, and extend it. It covers architecture, data flow, file responsibilities, key data structures, scoring rules, and known gaps.
->
-> Scoring logic is grounded in official MLB rules and traditional hand-scoring conventions. Where a rule has a specific MLB rulebook citation, it is noted inline. Where the system makes a deliberate style choice that deviates from one valid convention in favour of another, that choice is explained.
+How the system works, for developers and contributors.
+
+Scoring logic follows official MLB rules and traditional hand-scoring conventions. Where a rule has a specific MLB rulebook citation, it's noted inline. Where the system makes a deliberate style choice, the reasoning is explained.
+
+## Tech Stack
+
+| Layer | Technology | Why |
+|-------|-----------|-----|
+| Language | Vanilla JavaScript (ES modules) | No framework overhead, direct DOM control for SVG |
+| Build | Vite 6 | Fast dev server, ESM-native, simple config |
+| Hosting | Netlify | Auto-deploy from GitHub, free tier, CDN |
+| Data | MLB Stats API (GUMBO feed) | Free, no auth, no CORS, real-time |
+| Styling | CSS custom properties | Theme switching without JS, responsive clamp() |
+| Version control | GitHub | Public repo, issues, releases |
+| Documentation | GitBook | Syncs from `/docs` folder in the repo |
+| Design | Figma | Layout, typography, visual language |
+| Development | Claude Code | Back-end development, data transforms, project infrastructure |
+
+## System Architecture
+
+```mermaid
+flowchart LR
+    A[MLB Stats API] -->|GUMBO feed| B[api.js]
+    A -->|pitchArsenal| B
+    A -->|standings| B
+    A -->|coaches| B
+    B --> C[game-data.js]
+    C -->|lineup, grid, subs, pitches| D[svg-renderer.js]
+    C -->|thumbnail data| E[svg-thumbnail.js]
+    D -->|SVG scorecard| F[game.html]
+    E -->|mini scorecards| G[index.html]
+    B -->|schedule data| H[schedule.js]
+    H -->|game cards| G
+    B -->|standings data| I[standings.js]
+    I -->|division tables| J[standings.html]
+```
+
+## How a Game Renders
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant S as scorecard.js
+    participant A as api.js
+    participant G as game-data.js
+    participant R as svg-renderer.js
+
+    U->>S: Click game card
+    S->>A: fetchLiveFeed(gamePk)
+    A-->>S: GUMBO JSON
+    S->>A: fetchStandings, fetchCoaches, fetchTeamStats (parallel)
+    S->>A: fetchPitchArsenals (async, re-renders when done)
+    S->>G: buildTeamLineup, buildScorecardGrid, buildSubstitutionMap
+    G-->>S: lineup, grid, subMap, pitchSequences
+    S->>R: renderTeamScorecard, renderPitcherStatsHTML, renderGameHeaderHTML
+    R-->>S: SVG elements + HTML tables
+    S->>U: DOM swap (replaceChildren)
+```
+
+## Development Workflow
+
+### Local setup
+
+```bash
+git clone https://github.com/denislirette/baseballscorecard.git
+cd baseballscorecard
+npm install
+npm run dev        # starts Vite at localhost:5173
+```
+
+Add `?dev` to any URL to load from fixtures instead of the live API.
+
+### Dev mode
+
+A yellow "DEVELOPMENT" banner appears at the bottom of every page in dev mode. This is injected by a Vite plugin and never appears in production.
+
+### Process for bugs and features
+
+1. **Identify**: find the bug in the live game or during testing
+2. **Branch**: create a feature branch from `master`
+3. **Fix**: make the change, test against live game data and the fixture game (gamePk 777242, LAA @ TOR, July 4 2025)
+4. **Verify**: check the render visually at multiple breakpoints
+5. **Commit**: descriptive commit message, reference the issue if applicable
+6. **Push**: push to master (or PR for larger changes)
+7. **Release**: bump version in `nav.js`, create GitHub release with notes
+8. **Document**: update wiki pages in `/docs/` if the change affects rendering rules, design system, or user-facing behavior
+9. **Deploy**: Netlify auto-deploys from master. Static assets must be in `/public/` for the Vite build.
+
+### Fixture testing
+
+The primary test game is LAA @ TOR, July 4 2025 (gamePk 777242). It's a 10-inning, 4-3 walkoff with substitutions, extra innings, and a variety of play types. Load it at:
+
+```
+http://localhost:5173/game.html?gamePk=777242&dev
+```
 
 ---
 
