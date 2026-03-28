@@ -135,6 +135,15 @@
   background: var(--sc-sub);
 }
 
+/* Links must be visible in both themes */
+.vp-doc a {
+  color: var(--vp-c-brand-1) !important;
+  text-decoration: underline !important;
+}
+.dark .vp-doc a {
+  color: #7bafd4 !important;
+}
+
 /* All content left-aligned per design system */
 .vp-doc ul, .vp-doc ol, .vp-doc p, .vp-doc h1, .vp-doc h2, .vp-doc h3, .vp-doc h4, .vp-doc table {
   text-align: left !important;
