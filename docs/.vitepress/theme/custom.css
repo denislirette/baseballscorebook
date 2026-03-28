@@ -135,6 +135,11 @@
   background: var(--sc-sub);
 }
 
+/* All content left-aligned per design system */
+.vp-doc ul, .vp-doc ol, .vp-doc p, .vp-doc h1, .vp-doc h2, .vp-doc h3, .vp-doc h4, .vp-doc table {
+  text-align: left !important;
+}
+
 /* Force inline code to use theme-aware colors */
 .vp-doc :not(pre) > code {
   background-color: var(--vp-c-bg-mute) !important;
