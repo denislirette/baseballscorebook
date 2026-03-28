@@ -10,7 +10,6 @@ export default defineConfig({
   ],
 
   themeConfig: {
-    logo: '/favicon.svg',
     siteTitle: 'BaseballScorecard.org Docs',
 
     nav: [

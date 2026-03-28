@@ -7,7 +7,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 
 const props = defineProps({
   notation: { type: String, default: '' },
@@ -21,56 +21,64 @@ const props = defineProps({
 })
 
 const cellContainer = ref(null)
+let observer = null
 
 async function render() {
+  if (typeof window === 'undefined') return
   if (!cellContainer.value) return
 
-  // Dynamic import of the REAL rendering code
-  const { drawAtBatCell, getColors, refreshLayout } = await import('../../../../js/svg-renderer.js')
+  try {
+    const { drawAtBatCell, getColors, refreshLayout } = await import('../../../../js/svg-renderer.js')
 
-  // Refresh layout to get current constants
-  const L = refreshLayout()
-  const CLR = getColors()
+    const L = refreshLayout()
+    const CLR = getColors()
 
-  // Build the at-bat data object
-  const ab = {
-    batterId: 1,
-    notation: props.notation,
-    outNumber: props.out || null,
-    pitchSequence: props.pitches.map(p => ({
-      callCode: p.call || 'X',
-      speed: p.speed,
-      typeCode: p.type,
-    })),
-    cumulativeRunners: props.runners,
-    result: { rbi: props.rbi },
+    const ab = {
+      batterId: 1,
+      notation: props.notation,
+      outNumber: props.out || null,
+      pitchSequence: props.pitches.map(p => ({
+        callCode: p.call || 'X',
+        speed: p.speed,
+        typeCode: p.type,
+      })),
+      cumulativeRunners: props.runners,
+      result: { rbi: props.rbi },
+    }
+
+    const ns = 'http://www.w3.org/2000/svg'
+    const svg = document.createElementNS(ns, 'svg')
+    svg.setAttribute('width', props.size)
+    svg.setAttribute('height', props.size)
+    svg.setAttribute('viewBox', `0 0 ${L.COL_WIDTH} ${L.ROW_HEIGHT}`)
+
+    const rect = document.createElementNS(ns, 'rect')
+    rect.setAttribute('width', L.COL_WIDTH)
+    rect.setAttribute('height', L.ROW_HEIGHT)
+    rect.setAttribute('fill', CLR.cellBg)
+    rect.setAttribute('stroke', CLR.grid)
+    rect.setAttribute('stroke-width', '1')
+    svg.appendChild(rect)
+
+    drawAtBatCell(svg, CLR, ab, 0, 0, false)
+
+    cellContainer.value.innerHTML = ''
+    cellContainer.value.appendChild(svg)
+  } catch (e) {
+    console.warn('LivePlayCell render failed:', e)
   }
-
-  // Create SVG
-  const ns = 'http://www.w3.org/2000/svg'
-  const svg = document.createElementNS(ns, 'svg')
-  svg.setAttribute('width', props.size)
-  svg.setAttribute('height', props.size)
-  svg.setAttribute('viewBox', `0 0 ${L.COL_WIDTH} ${L.ROW_HEIGHT}`)
-
-  // Cell background
-  const rect = document.createElementNS(ns, 'rect')
-  rect.setAttribute('width', L.COL_WIDTH)
-  rect.setAttribute('height', L.ROW_HEIGHT)
-  rect.setAttribute('fill', CLR.cellBg)
-  rect.setAttribute('stroke', CLR.grid)
-  rect.setAttribute('stroke-width', '1')
-  svg.appendChild(rect)
-
-  // Draw with the REAL function
-  drawAtBatCell(svg, CLR, ab, 0, 0, false)
-
-  // Replace contents
-  cellContainer.value.innerHTML = ''
-  cellContainer.value.appendChild(svg)
 }
 
-onMounted(render)
+onMounted(() => {
+  render()
+  // Re-render on theme change
+  observer = new MutationObserver(render)
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-theme'] })
+})
+
+onUnmounted(() => {
+  if (observer) observer.disconnect()
+})
 </script>
 
 <style scoped>

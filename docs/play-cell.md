@@ -6,7 +6,7 @@ Each play cell represents one batter's plate appearance in one inning. It's the 
 
 These are rendered using the actual rendering engine. Same code, same colors, same stroke widths as the live site.
 
-<div class="live-preview">
+<ClientOnly><div class="live-preview">
   <LivePlayCell notation="G6-3" :out="1" label="Groundout" description="Ground ball to SS, thrown to 1B"
     :pitches="[{call:'S',speed:94,type:'FF'},{call:'B',speed:87,type:'CH'},{call:'F',speed:91,type:'SL'},{call:'X',speed:96,type:'FF'}]"/>
   <LivePlayCell notation="K" :out="2" label="Strikeout" description="Swinging strikeout"
@@ -16,11 +16,11 @@ These are rendered using the actual rendering engine. Same code, same colors, sa
     :runners="[{playerId:1,segments:[{from:'HP',to:'1B'}],currentBase:'1B',scored:false,isOut:false}]"/>
   <LivePlayCell notation="F8" :out="1" label="Fly Out" description="Fly ball caught by CF"
     :pitches="[{call:'C',speed:94,type:'FF'},{call:'B',speed:80,type:'CU'},{call:'X',speed:93,type:'FF'}]"/>
-</div>
+</div></ClientOnly>
 
 ## Hits
 
-<div class="live-preview">
+<ClientOnly><div class="live-preview">
   <LivePlayCell notation="1B" label="Single" description="1 hash mark on HP-1B path"
     :pitches="[{call:'X',speed:93,type:'FF'}]"
     :runners="[{playerId:1,segments:[{from:'HP',to:'1B'}],currentBase:'1B',scored:false,isOut:false}]"/>
@@ -33,11 +33,11 @@ These are rendered using the actual rendering engine. Same code, same colors, sa
   <LivePlayCell notation="HR" :rbi="2" label="Home Run" description="Solid filled diamond"
     :pitches="[{call:'B',speed:94,type:'FF'},{call:'S',speed:87,type:'SL'},{call:'X',speed:88,type:'CH'}]"
     :runners="[{playerId:1,segments:[{from:'HP',to:'1B'},{from:'1B',to:'2B'},{from:'2B',to:'3B'},{from:'3B',to:'HP'}],currentBase:null,scored:true,isOut:false}]"/>
-</div>
+</div></ClientOnly>
 
 ## Scored Runners
 
-<div class="live-preview">
+<ClientOnly><div class="live-preview">
   <LivePlayCell notation="1B" label="Scored (not HR)" description="3 diagonal hatch lines inside the diamond"
     :pitches="[{call:'B',speed:91,type:'SI'},{call:'F',speed:93,type:'FF'},{call:'X',speed:87,type:'CH'}]"
     :runners="[{playerId:1,segments:[{from:'HP',to:'1B'},{from:'1B',to:'2B'},{from:'2B',to:'3B'},{from:'3B',to:'HP'}],currentBase:null,scored:true,isOut:false}]"
@@ -45,11 +45,11 @@ These are rendered using the actual rendering engine. Same code, same colors, sa
   <LivePlayCell notation="HR" :rbi="4" label="Grand Slam" description="Solid diamond, 4 RBI"
     :pitches="[{call:'B',speed:94,type:'FF'},{call:'S',speed:87,type:'SL'},{call:'B',speed:95,type:'FF'},{call:'X',speed:92,type:'FF'}]"
     :runners="[{playerId:1,segments:[{from:'HP',to:'1B'},{from:'1B',to:'2B'},{from:'2B',to:'3B'},{from:'3B',to:'HP'}],currentBase:null,scored:true,isOut:false}]"/>
-</div>
+</div></ClientOnly>
 
 ## Other Common Results
 
-<div class="live-preview">
+<ClientOnly><div class="live-preview">
   <LivePlayCell notation="HBP" label="Hit By Pitch" description="Batter awarded first base"
     :pitches="[{call:'B',speed:93,type:'FF'},{call:'H',speed:88,type:'SL'}]"
     :runners="[{playerId:1,segments:[{from:'HP',to:'1B'}],currentBase:'1B',scored:false,isOut:false}]"/>
@@ -60,7 +60,7 @@ These are rendered using the actual rendering engine. Same code, same colors, sa
     :pitches="[{call:'B',speed:92,type:'FF'},{call:'X',speed:88,type:'CH'}]"/>
   <LivePlayCell notation="L7" :out="2" label="Line Out" description="Line drive caught by LF"
     :pitches="[{call:'X',speed:91,type:'SI'}]"/>
-</div>
+</div></ClientOnly>
 
 ## Zones
 
