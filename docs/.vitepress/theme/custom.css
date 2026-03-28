@@ -1,22 +1,31 @@
-/* BaseballScorecard.org brand colors applied to VitePress */
-:root {
-  --vp-c-brand-1: #1c1918;
-  --vp-c-brand-2: #44403a;
-  --vp-c-brand-3: #6b6462;
-  --vp-c-brand-soft: rgba(28, 25, 24, 0.08);
+/* BaseballScorecard.org Docs — matches the main site's design system */
 
-  /* Stone palette */
+/* ══════════════════════════════════
+   BRAND COLORS (light mode)
+   ══════════════════════════════════ */
+:root {
+  --vp-c-brand-1: #294991;
+  --vp-c-brand-2: #1e3a6d;
+  --vp-c-brand-3: #152a4f;
+  --vp-c-brand-soft: rgba(41, 73, 145, 0.1);
+
+  /* Stone palette — matches main site */
   --vp-c-bg: #faf9f6;
   --vp-c-bg-soft: #f2f0ec;
   --vp-c-bg-mute: #e8e6e1;
+  --vp-c-bg-alt: #f2f0ec;
 
   --vp-c-text-1: #1c1918;
   --vp-c-text-2: #6b6462;
   --vp-c-text-3: #868278;
 
   --vp-c-divider: #868278;
+  --vp-c-gutter: #e8e6e1;
 
-  /* Scorecard tokens for live previews (must match style.css :root) */
+  /* Sidebar */
+  --vp-sidebar-bg-color: #faf9f6;
+
+  /* Scorecard tokens for live previews */
   --sc-text: #1c1918;
   --sc-text-light: #6b6462;
   --sc-text-muted: #6b6462;
@@ -46,16 +55,28 @@
   --link: #294991;
 }
 
+/* ══════════════════════════════════
+   DARK MODE
+   ══════════════════════════════════ */
 .dark {
   --vp-c-bg: #1c1918;
   --vp-c-bg-soft: #292524;
   --vp-c-bg-mute: #3a3632;
+  --vp-c-bg-alt: #292524;
 
   --vp-c-text-1: #f5f2e9;
   --vp-c-text-2: #a8a49e;
   --vp-c-text-3: #7e7a76;
 
-  --vp-c-divider: #7e7a76;
+  --vp-c-divider: #44403a;
+  --vp-c-gutter: #292524;
+
+  --vp-c-brand-1: #7bafd4;
+  --vp-c-brand-2: #5a94c0;
+  --vp-c-brand-3: #4a80a8;
+  --vp-c-brand-soft: rgba(123, 175, 212, 0.1);
+
+  --vp-sidebar-bg-color: #1c1918;
 
   --sc-text: #f5f2e9;
   --sc-text-light: #a8a49e;
@@ -85,29 +106,102 @@
   --link: #7bafd4;
 }
 
-/* Color swatch component */
-.color-swatch {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin: 4px 0;
+/* ══════════════════════════════════
+   TYPOGRAPHY — match main site
+   ══════════════════════════════════ */
+.vp-doc {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, Helvetica, sans-serif;
 }
-.color-swatch-box {
-  width: 32px;
-  height: 32px;
-  border-radius: 4px;
-  border: 1px solid var(--vp-c-divider);
-  flex-shrink: 0;
+.vp-doc p {
+  margin-bottom: 1.25em;
+  line-height: 1.6;
 }
-.color-swatch-large {
-  width: 64px;
-  height: 64px;
+.vp-doc li {
+  margin-bottom: 0.5em;
+  line-height: 1.6;
+}
+.vp-doc ul, .vp-doc ol {
+  padding-left: 1.25em;
+}
+.vp-doc h1 {
+  font-size: 1.8em;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.vp-doc h2 {
+  font-size: 1.3em;
+  font-weight: 700;
+  margin-top: 2.5em;
+  padding-bottom: 0.4em;
+  border-bottom: 1px solid var(--vp-c-divider);
+}
+.vp-doc h3 {
+  font-size: 1.05em;
+  font-weight: 700;
+  margin-top: 1.5em;
 }
 
-/* Live preview containers */
+/* Sidebar — match subnav from main site */
+.VPSidebar {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, Helvetica, sans-serif !important;
+}
+.VPSidebarItem .text {
+  font-size: 0.85em !important;
+}
+.VPSidebarItem.level-0 > .item > .text {
+  font-size: 0.85em !important;
+  font-weight: 700 !important;
+}
+
+/* ══════════════════════════════════
+   LINKS — always visible, always underlined
+   ══════════════════════════════════ */
+.vp-doc a {
+  color: var(--vp-c-brand-1) !important;
+  text-decoration: underline !important;
+  text-underline-offset: 2px;
+}
+
+/* ══════════════════════════════════
+   INLINE CODE — theme-aware
+   ══════════════════════════════════ */
+.vp-doc :not(pre) > code {
+  background-color: var(--vp-c-bg-mute) !important;
+  color: var(--vp-c-text-1) !important;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+/* ══════════════════════════════════
+   TABLES — left-aligned, consistent borders
+   ══════════════════════════════════ */
+.vp-doc table {
+  border-collapse: collapse;
+}
+.vp-doc table th,
+.vp-doc table td {
+  text-align: left !important;
+  border: 1px solid var(--vp-c-divider) !important;
+  padding: 6px 12px;
+}
+.vp-doc table th {
+  background: var(--vp-c-bg-mute) !important;
+  font-weight: 700;
+}
+
+/* ══════════════════════════════════
+   ALL TEXT LEFT-ALIGNED
+   ══════════════════════════════════ */
+.vp-doc ul, .vp-doc ol, .vp-doc p,
+.vp-doc h1, .vp-doc h2, .vp-doc h3, .vp-doc h4 {
+  text-align: left !important;
+}
+
+/* ══════════════════════════════════
+   LIVE PREVIEW CONTAINERS
+   ══════════════════════════════════ */
 .live-preview {
   border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
+  border-radius: 4px;
   padding: 24px;
   margin: 16px 0;
   background: var(--vp-c-bg-soft);
@@ -115,114 +209,6 @@
   justify-content: center;
   gap: 32px;
   flex-wrap: wrap;
-}
-.live-preview-label {
-  font-size: 0.8em;
-  color: var(--vp-c-text-3);
-  text-align: center;
-  margin-top: 8px;
-}
-
-/* Dot pattern preview */
-.dot-pattern {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-.dot-square {
-  width: 5px;
-  height: 5px;
-  background: var(--sc-sub);
-}
-
-/* Links must be visible in both themes */
-.vp-doc a {
-  color: var(--vp-c-brand-1) !important;
-  text-decoration: underline !important;
-}
-.dark .vp-doc a {
-  color: #7bafd4 !important;
-}
-
-/* Sidebar: active and hover states must be visible in dark mode */
-.dark .VPSidebarItem.is-active > .item > .link > .text {
-  color: #f5f2e9 !important;
-}
-.dark .VPSidebarItem > .item > .link:hover > .text {
-  color: #f5f2e9 !important;
-}
-.dark .VPSidebarItem > .item > .link > .text {
-  color: #a8a49e !important;
-}
-.dark .VPSidebarItem.is-active > .item > .indicator {
-  background-color: #f5f2e9 !important;
-}
-
-/* Sidebar group headings in dark mode */
-.dark .VPSidebarItem.level-0 > .item > .text {
-  color: #f5f2e9 !important;
-}
-
-/* Nav links in dark mode */
-.dark .VPNavBarMenuLink .text {
-  color: #a8a49e !important;
-}
-.dark .VPNavBarMenuLink:hover .text {
-  color: #f5f2e9 !important;
-}
-
-/* Search button dark mode */
-.dark .DocSearch-Button {
-  color: #a8a49e !important;
-}
-
-/* Footer dark mode */
-.dark .VPFooter .message,
-.dark .VPFooter .copyright {
-  color: #7e7a76 !important;
-}
-
-/* Table header and cell borders in dark mode */
-.dark .vp-doc table th {
-  background-color: #292524 !important;
-  color: #f5f2e9 !important;
-}
-.dark .vp-doc table td {
-  color: #f5f2e9 !important;
-}
-.dark .vp-doc table th,
-.dark .vp-doc table td {
-  border-color: #7e7a76 !important;
-}
-
-/* On this page sidebar in dark mode */
-.dark .VPDocAsideOutline .outline-link {
-  color: #a8a49e !important;
-}
-.dark .VPDocAsideOutline .outline-link.active {
-  color: #f5f2e9 !important;
-}
-
-/* Edit link in dark mode */
-.dark .VPDocFooter .edit-link-button {
-  color: #7bafd4 !important;
-}
-
-/* Last updated text */
-.dark .VPDocFooter .VPLastUpdated {
-  color: #7e7a76 !important;
-}
-
-/* All content left-aligned per design system */
-.vp-doc ul, .vp-doc ol, .vp-doc p, .vp-doc h1, .vp-doc h2, .vp-doc h3, .vp-doc h4, .vp-doc table {
-  text-align: left !important;
-}
-
-/* Force inline code to use theme-aware colors */
-.vp-doc :not(pre) > code {
-  background-color: var(--vp-c-bg-mute) !important;
-  color: var(--vp-c-text-1) !important;
-  transition: background-color 0.3s, color 0.3s;
 }
 
 /* Component preview cards */
@@ -240,3 +226,23 @@
 .preview-info { text-align: center; }
 .preview-label { font-weight: 600; font-size: 0.85em; }
 .preview-desc { font-size: 0.75em; color: var(--vp-c-text-3); max-width: 160px; }
+
+/* Color swatch display */
+.color-swatch-box {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  border: 1px solid var(--vp-c-divider);
+  vertical-align: middle;
+}
+.color-swatch-large {
+  width: 64px;
+  height: 64px;
+}
+.live-preview-label {
+  font-size: 0.8em;
+  color: var(--vp-c-text-3);
+  text-align: center;
+  margin-top: 8px;
+}
