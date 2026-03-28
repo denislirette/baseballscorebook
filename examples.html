@@ -30,6 +30,10 @@
   <div id="root" class="examples"></div>
 
   <script type="module">
+    window.onerror = (msg, src, line) => {
+      document.getElementById('root').innerHTML = `<div style="color:red;padding:16px;font-size:14px;">Error: ${msg}<br>at ${src}:${line}</div>`;
+    };
+
     import { drawAtBatCell, getColors, refreshLayout } from '/js/svg-renderer.js';
 
     const params = new URLSearchParams(location.search);
@@ -189,6 +193,10 @@
         drawAtBatCell(svg, CLR, ex.ab, 0, 0, false);
       } catch (e) {
         console.error(key, e);
+        const errDiv = document.createElement('div');
+        errDiv.style.cssText = 'color:red;font-size:10px;max-width:200px;word-break:break-all;';
+        errDiv.textContent = key + ': ' + e.message;
+        item.appendChild(errDiv);
       }
 
       item.appendChild(svg);
