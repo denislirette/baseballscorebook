@@ -35,3 +35,5 @@ css/local.css
 js/style-panel.js
 
 drafts/
+docs/.vitepress/cache/
+docs/.vitepress/dist/

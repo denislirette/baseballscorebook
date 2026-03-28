@@ -107,7 +107,7 @@ There's no automated test suite yet (it's on the list). For now testing means:
 2. Compare your rendered output against the MLB Gameday play-by-play for the same game
 3. Check pitch sequences, play notation, runner paths, and substitution indicators
 
-The [TECHNICAL-REFERENCE.md](TECHNICAL-REFERENCE.md) has detailed docs on the data structures, scoring rules, and rendering logic. The [NOTES.md](NOTES.md) has development history and the current to-do list.
+The [Technical Reference](technical-reference.md) has detailed docs on the data structures, scoring rules, and rendering logic.
 
 ## Pull request guidelines
 
