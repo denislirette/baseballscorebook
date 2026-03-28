@@ -1,5 +1,7 @@
 # Common Plays Explained
 
+For a quick reference table of all notation codes, see [How to Read a Scorecard](scoring-notation.md).
+
 The most common plays you'll see on a scorecard and what happened on the field.
 
 ## Groundout (G6-3)

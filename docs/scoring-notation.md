@@ -1,5 +1,7 @@
 # How to Read a Scorecard
 
+For detailed explanations of common plays with field context, see [Common Plays Explained](common-plays.md).
+
 Every play on a baseball scorecard is captured as a short code that tells you exactly what happened.
 
 ## Position numbers
@@ -50,7 +52,7 @@ Hash marks are short perpendicular lines drawn across the home-to-first segment.
 | `HBP` | Hit by pitch, pitch hits the batter, takes first |
 | `CI` | Catcher's interference, batter awarded first |
 
-These render in bold because reaching base without contact is significant.
+These render in heavy weight (900) because reaching base without contact is significant.
 
 ## Double plays and triple plays
 

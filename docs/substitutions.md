@@ -39,7 +39,7 @@ A defensive switch event can never overwrite a PH or PR substitution type. This 
 
 1. **PH = LEFT** side of the cell. Sub happens before the at-bat.
 2. **PR = RIGHT** side of the cell. Sub happens after the at-bat.
-3. **One player = one line.** A single player cannot be both PH and PR.
+3. **One player = one line.** A single player cannot be both PH and PR in the same at-bat.
 4. **Two lines on one cell** are only possible when two different players substitute (rare).
 5. **PH/PR types are never overwritten** by defensive switch events.
 6. **Pitcher sub lines** appear at the bottom of cells, with stats when available.

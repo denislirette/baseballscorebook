@@ -2,7 +2,7 @@
 
 ## How it started
 
-Denis Lirette is a designer whose interests overlap in a few specific areas: AI and automation, Figma, MCP, data visualization, and integrations. He's also a nerd for baseball scorekeeping, the pencil-and-paper kind where you translate a whole game into symbols on a single sheet.
+Denis Lirette is a designer whose interests overlap in a few specific areas: AI and automation, Figma, Model Context Protocol (MCP), data visualization, and integrations. He's also a nerd for baseball scorekeeping, the pencil-and-paper kind where you translate a whole game into symbols on a single sheet.
 
 Paper scorecards tell the story of a baseball game in a way no box score or highlight reel can. Every pitch, every ground ball, every stolen base, all captured in symbols and numbers. But keeping score by hand requires being at the game or watching live, and the learning curve is steep for newcomers.
 

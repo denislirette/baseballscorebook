@@ -1,6 +1,6 @@
 # Technical Reference
 
-How the system works, for developers and contributors.
+How the system works, for developers and contributors. This document serves both human contributors reading the code and AI-assisted development tools (like Claude Code) that need to understand the system's data structures and rendering logic.
 
 Scoring logic follows official MLB rules and traditional hand-scoring conventions. Where a rule has a specific MLB rulebook citation, it's noted inline. Where the system makes a deliberate style choice, the reasoning is explained.
 
@@ -20,44 +20,28 @@ Scoring logic follows official MLB rules and traditional hand-scoring convention
 
 ## System Architecture
 
-```mermaid
-flowchart LR
-    A[MLB Stats API] -->|GUMBO feed| B[api.js]
-    A -->|pitchArsenal| B
-    A -->|standings| B
-    A -->|coaches| B
-    B --> C[game-data.js]
-    C -->|lineup, grid, subs, pitches| D[svg-renderer.js]
-    C -->|thumbnail data| E[svg-thumbnail.js]
-    D -->|SVG scorecard| F[game.html]
-    E -->|mini scorecards| G[index.html]
-    B -->|schedule data| H[schedule.js]
-    H -->|game cards| G
-    B -->|standings data| I[standings.js]
-    I -->|division tables| J[standings.html]
-```
+The system has three layers:
+
+1. **Data layer** (`api.js`): fetches from the MLB Stats API -- GUMBO live feed, pitch arsenals, standings, and coaches.
+2. **Transform layer** (`game-data.js`): parses raw API data into scorecard structures -- lineup, grid, substitution maps, pitch sequences, and notation.
+3. **Render layer** (`svg-renderer.js`, `svg-thumbnail.js`): draws SVG scorecards and HTML tables from the transformed data.
+
+Pages and their data sources:
+- `game.html` -- full scorecard, fed by `game-data.js` and `svg-renderer.js`
+- `index.html` -- game picker with mini scorecard thumbnails, fed by `schedule.js` and `svg-thumbnail.js`
+- `standings.html` -- division tables, fed by `standings.js`
 
 ## How a Game Renders
 
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant S as scorecard.js
-    participant A as api.js
-    participant G as game-data.js
-    participant R as svg-renderer.js
+When a user clicks a game card on the picker page:
 
-    U->>S: Click game card
-    S->>A: fetchLiveFeed(gamePk)
-    A-->>S: GUMBO JSON
-    S->>A: fetchStandings, fetchCoaches, fetchTeamStats (parallel)
-    S->>A: fetchPitchArsenals (async, re-renders when done)
-    S->>G: buildTeamLineup, buildScorecardGrid, buildSubstitutionMap
-    G-->>S: lineup, grid, subMap, pitchSequences
-    S->>R: renderTeamScorecard, renderPitcherStatsHTML, renderGameHeaderHTML
-    R-->>S: SVG elements + HTML tables
-    S->>U: DOM swap (replaceChildren)
-```
+1. `scorecard.js` reads the `gamePk` from the URL
+2. `api.js` fetches the GUMBO live feed for that game
+3. In parallel, `api.js` fetches standings, coaches, and team stats
+4. `game-data.js` transforms the GUMBO data: `buildTeamLineup`, `buildScorecardGrid`, `buildSubstitutionMap`
+5. `svg-renderer.js` draws the SVG scorecard (one per team) and builds HTML tables for pitcher stats, linescore, and game header
+6. `scorecard.js` swaps the rendered elements into the DOM via `replaceChildren`
+7. Pitch arsenal data loads asynchronously and triggers a re-render when available
 
 ## Development Workflow
 
@@ -90,7 +74,7 @@ A yellow "DEVELOPMENT" banner appears at the bottom of every page in dev mode. T
 
 ### Fixture testing
 
-The primary test game is LAA @ TOR, July 4 2025 (gamePk 777242). It's a 10-inning, 4-3 walkoff with substitutions, extra innings, and a variety of play types. Load it at:
+The primary test game is LAA @ TOR, July 4 2025 (gamePk 777242). This game was chosen because it covers a wide range of edge cases in a single fixture: extra innings (10), a walkoff, multiple substitutions (PH, PR, defensive switches, pitcher changes), and a variety of play types (double plays, sacrifice bunts, stolen bases, errors). Load it at:
 
 ```
 http://localhost:5173/game.html?gamePk=777242&dev
@@ -339,7 +323,7 @@ Every fielder has a number. This is the foundation of all out notation.
 | `triple` | `3B` | 3B | |
 | `home_run` | `HR` | HR | Fill diamond regardless of other runners |
 | `field_out` | trajectory + positions | G6-3, F8, L7, P4 | See trajectory detection below |
-| `grounded_into_double_play` | `G` + positions | G6-4-3 | See double play section below |
+| `grounded_into_double_play` | `DP` + positions | DP6-4-3 | See double play section below |
 | `strikeout_double_play` | `K` + positions | K2-3 | Dropped third strike, batter thrown out; see dropped third strike |
 | `sac_bunt` | `SH` + positions | SH1-3 | Does not count as official at-bat (MLB Rule 9.08) |
 | `sac_fly` | `SF` + position | SF9 | Does not count as official at-bat (MLB Rule 9.08); runner must score |
@@ -387,7 +371,7 @@ If the `credits` array is empty or missing, fall back to parsing `result.descrip
 
 ### Double Play Notation
 
-The system currently uses `DP6-4-3` as a prefix. The Bob Carpenter convention, which this system is modeled on, uses a trajectory prefix instead: `G6-4-3`. The fielder chain length (three fielders) already implies a double play to any scorer. Using `G` is preferred for consistency with all other ground ball outs.
+The system uses `DP` as a prefix for double plays: `DP6-4-3`. The fielder chain (three or more positions) combined with the `DP` prefix makes the play unambiguous. While some scorebooks use the trajectory prefix (`G6-4-3`) and rely on the chain length to imply a double play, this system uses the explicit `DP` prefix for clarity.
 
 For a strikeout double play (dropped third strike), write `K` then the fielder sequence: `K2-3` means the catcher threw to first after a dropped third strike.
 
@@ -463,10 +447,10 @@ Each at-bat cell has a pitch column on the left (width = `PITCH_COL_W`, default 
 | `S` | Red | Swinging strike |
 | `F` | Red | Foul ball |
 | `T` | Red | Foul tip (catcher catches it cleanly; counts as a strike; can retire batter on K) |
-| `W` | Red | Swinging strike on a blocked ball (catcher blocks but does not catch; batter can run on strike three) |
-| `X` | Blue | In play, out recorded |
-| `D` | Blue | In play, no out (hit or error on a play where batter reaches) |
-| `E` | Blue | In play, error |
+| `W` | Red (`--sc-pitch-strike`) | Swinging strike on a blocked ball (catcher blocks but does not catch; batter can run on strike three) |
+| `X` | Green (`--sc-pitch-in-play`) | In play, out recorded |
+| `D` | Green (`--sc-pitch-in-play`) | In play, no out (hit or error on a play where batter reaches) |
+| `E` | Green (`--sc-pitch-in-play`) | In play, error |
 | `I` | Black | Intentional ball (part of IBB sequence) |
 | `N` | Black | No pitch (balk, illegal pitch, or other non-pitch event) |
 | `P` | Black | Pitchout |
@@ -534,14 +518,16 @@ Three specific cases that trip up scorers:
 
 ### Rendering substitution indicators (svg-renderer.js)
 
+All substitution indicators use dotted squares (5px squares with 4px gaps) in `var(--sc-sub)` color.
+
 | Sub Type | Visual |
 |----------|--------|
-| Pitcher sub | Dashed blue line across top of cell |
-| Pinch hitter (PH) | Solid blue line on left edge + circled number at bottom-left |
-| Pinch runner (PR) | Solid blue line on right edge + circled number at bottom-right |
-| Defensive sub | Solid blue line on right edge + circled number |
+| Pitcher sub | Dotted line across bottom of the cell where the departing pitcher threw their last pitch, with accumulated stats (strikes / pitches / K) |
+| Pinch hitter (PH) | Dotted line on **left** edge of the play cell + circled letter in the lineup area |
+| Pinch runner (PR) | Dotted line on **right** edge of the play cell + circled letter in the lineup area |
+| Defensive sub | Reflected in lineup display only; no line drawn in play cells |
 
-Label text appears at bottom of sub indicator area (P-SUB, PH, PR, D-SUB).
+The position of the line encodes the sub type: PH on the left (the "entry door" -- sub enters before the at-bat) and PR on the right (the "exit door" -- sub takes over after the at-bat). In the lineup area, PH shows `[Letter] PH` and PR shows `[Letter] PR`. In play cells, only the dotted line appears -- no PH/PR label.
 
 **Scoring rule for pinch hitters:** The pinch hitter takes the batting order slot of the player they replace. If the pinch hitter stays in the game defensively, they are now in the lineup permanently at that slot. If they are replaced immediately by a pinch runner, both the PH and the PR are recorded in the same slot, each with their own circled sub number.
 
@@ -696,7 +682,7 @@ All 8 original gaps have been addressed. Summary of fixes:
 1. **FC/Force Out fielder numbers:** ✅ Fixed. `parseFieldersChoice()` extracts fielder chain from `play.runners[].credits` array. Falls back to description parsing.
 2. **Runner-out indicators on diamonds:** ✅ Fixed. Out segments render in red (`CLR.out`), X marker drawn at `outBase` coordinates. Segments carry `isOutSegment` flag.
 3. **Stolen base / caught stealing on diamonds:** ✅ Fixed. Runner event field is parsed for advance type (`sb`, `cs`, `wp`, `pb`, `bk`). Segments carry `advanceType`. Annotations show "SB", "WP", etc. instead of base letters for non-hit advances.
-4. **DP notation prefix:** ✅ Fixed. `parseDoublePlay()` detects trajectory from description (ground/line/fly/pop) and uses appropriate prefix with hyphenated fielders (e.g., `G6-4-3`).
+4. **DP notation prefix:** ✅ Fixed. `parseDoublePlay()` extracts fielder positions and uses `DP` prefix with concatenated fielders (e.g., `DP643`).
 5. **Solo HR diamond not rendering:** ✅ Fixed. `alwaysDiamond` flag forces diamond rendering for HR, HBP, and CI events regardless of `hasRunners`.
 6. **Dropped third strike (W pitch code):** ✅ Fixed. `parseStrikeout()` checks if batter reached 1B on a strikeout and appends `WP`, `PB`, or `E2` to the K notation.
 7. **Infield fly rule:** ✅ Fixed. `parseFieldOut()` appends `(IFF)` when description contains "infield fly".

@@ -20,13 +20,13 @@ Speed is on the left, type code on the right. The color of the text tells you wh
 | `C` | Called strike | Red |
 | `S` | Swinging strike | Red |
 | `F` | Foul ball | Red |
-| `X` | Ball in play | Green (bold) |
-| `D` | In play, double play | Green (bold) |
-| `E` | In play, error | Green (bold) |
+| `X` | Ball in play | In-play (green in light, green in dark; bold) |
+| `D` | In play, double play | In-play (green in light, green in dark; bold) |
+| `E` | In play, error | In-play (green in light, green in dark; bold) |
 | `T` | Foul tip | Red |
 | `H` | Hit by pitch | Dark |
 | `M` | Missed bunt attempt | Red |
-| `W` | Ball (wild pitch) | Dark |
+| `W` | Swinging strike (blocked) | Red |
 | `*` | Pitchout / other | Dark |
 | `I` | Intentional ball | Dark |
 | `L` | Foul line drive | Red |
@@ -35,6 +35,8 @@ Speed is on the left, type code on the right. The color of the text tells you wh
 | `P` | Pitch out | Dark |
 
 In-play pitches (X, D, E) are rendered in bold to visually mark the pitch that ended the at-bat.
+
+Note: `W` is a swinging strike where the catcher blocked the ball but did not catch it cleanly. On strike three, this means the batter may attempt to reach first base (dropped third strike rule). It is NOT a ball or wild pitch -- it is scored as a strike and renders in red.
 
 ## Pitch type codes
 
@@ -56,6 +58,8 @@ When 10 or fewer pitches are thrown in an at-bat, a mini strike zone appears at 
 - Faded batter and pitcher silhouettes at 25% opacity show handedness
 
 ## ABS challenge badges
+
+ABS is not active in every MLB game. It is used in select games as part of MLB's ongoing evaluation of the technology. When a game does not use ABS, no challenge badges will appear.
 
 When a pitch is challenged through the Automated Ball-Strike (ABS) system, a purple square badge appears next to the pitch:
 

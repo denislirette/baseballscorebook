@@ -1,6 +1,6 @@
 # Home
 
-System wiki for [BaseballScorecard.org](https://baseballscorecard.org), a live digital scorecard that renders every pitch, at-bat, and substitution from MLB games into traditional paper scorekeeping notation.
+System wiki for [BaseballScorecard.org](https://baseballscorecard.org), a live digital scorecard that renders every pitch, at-bat, and substitution from MLB games into traditional scorekeeping notation.
 
 ## What is this?
 
