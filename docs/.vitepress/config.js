@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
+  base: '/baseballscorecard/',
   title: 'BaseballScorecard.org',
   description: 'System documentation for BaseballScorecard.org',
 
