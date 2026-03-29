@@ -1,6 +1,7 @@
 <template>
   <div class="live-cell-wrapper">
     <iframe
+      v-if="iframeSrc"
       :src="iframeSrc"
       :width="size"
       :height="size + 30"
@@ -18,16 +19,17 @@ export default {
     size: { type: Number, default: 200 },
     theme: { type: String, default: '' },
   },
-  computed: {
-    iframeSrc() {
-      const base = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-        ? 'http://localhost:5173'
-        : 'https://baseballscorecard.org';
-      const t = this.theme || (typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-      return `${base}/examples.html?show=${this.example}&theme=${t}`;
-    },
+  data() {
+    return { iframeSrc: '' };
   },
   mounted() {
+    // Build iframe URL only on client side to avoid SSR hydration mismatch
+    const base = window.location.hostname === 'localhost'
+      ? 'http://localhost:5173'
+      : 'https://baseballscorecard.org';
+    const t = this.theme || (document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    this.iframeSrc = `${base}/examples.html?show=${this.example}&theme=${t}`;
+
     // Re-set iframe theme when VitePress toggles dark mode
     this._observer = new MutationObserver(() => {
       const isDark = document.documentElement.classList.contains('dark');
