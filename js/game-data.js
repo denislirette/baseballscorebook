@@ -165,9 +165,16 @@ export function buildScorecardGrid(allPlays, halfInning, lineup, boxscore, side)
               for (const [pid, j] of journeys) {
                 if (pid !== prId && playerSlotMap.get(pid) === prSlot && j.currentBase && !j.scored && !j.isOut) {
                   prReplacedBy.set(pid, prId);
-                  // Create a journey for the PR at the original runner's base
-                  // so pickoff/CS outs during later at-bats get recorded on the PR's journey
-                  journeys.set(prId, { segments: [], currentBase: j.currentBase, scored: false, isOut: false, outBase: null });
+                  // Create a journey for the PR at the original runner's base.
+                  // Copy the placed runner's drawn segments (HP→1B→2B) so the PR's
+                  // diamond shows the full path from home plate.
+                  journeys.set(prId, {
+                    segments: [...j.segments],
+                    currentBase: j.currentBase,
+                    scored: false,
+                    isOut: false,
+                    outBase: null,
+                  });
                   break;
                 }
               }
@@ -266,7 +273,9 @@ export function buildScorecardGrid(allPlays, halfInning, lineup, boxscore, side)
           outNumber: journey.outNumber || null,
         }];
       } else if (journey.currentBase || journey.segments.length > 0) {
-        // Placed runner (extra innings Manfred runner): didn't bat this inning.
+        // Placed runner or PR who didn't bat this inning.
+        // Skip if this player was replaced by a PR (their journey merged onto the PR).
+        if (prReplacedBy.has(playerId)) continue;
         // Create a cell in their OWN slot for this inning showing their journey.
         const runnerJourney = {
           playerId,
@@ -403,7 +412,19 @@ export function buildSubstitutionMap(allPlays, halfInning, lineup) {
       } else if (event === 'Offensive Substitution') {
         // PH/PR: the substitute player enters the lineup
         slot = playerSlotMap.get(playerId) || playerSlotMap.get(play.matchup.batter.id);
-        subType = (desc.includes('pinch-runner') || desc.includes('pinch runner')) ? 'PR' : 'PH';
+        const isPR = desc.includes('pinch-runner') || desc.includes('pinch runner');
+        if (isPR) {
+          // Check if this PR is replacing a designated runner (placed on base).
+          // If so, the sub happened BEFORE the inning, so line goes on left (PH type).
+          const replacingDR = play.playEvents.some(ev2 =>
+            ev2.type === 'action' &&
+            ev2.details?.event === 'Runner Placed On Base' &&
+            playerSlotMap.get(ev2.player?.id) === slot
+          );
+          subType = replacingDR ? 'PH' : 'PR';
+        } else {
+          subType = 'PH';
+        }
       } else if (event === 'Runner Placed On Base') {
         // Extra innings designated runner: placed on 2B by rule.
         // Only add sub line if NOT immediately replaced by a PR in the same at-bat.
