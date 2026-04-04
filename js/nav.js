@@ -1,7 +1,7 @@
 // Global navigation + footer - injected dynamically on every page
 // Same header on every page: site title + nav links, classic HTML link style
 
-const VERSION = '1.0.1';
+const VERSION = '1.0.2';
 
 const IS_LOCAL = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
@@ -81,6 +81,7 @@ function initNav() {
   // ── Nav bar: same row as logo, pushed right ──
   const nav = document.createElement('nav');
   nav.className = 'nav-bar';
+  nav.id = 'main-nav';
   nav.setAttribute('role', 'navigation');
   nav.setAttribute('aria-label', 'Main navigation');
 
@@ -112,6 +113,12 @@ function initNav() {
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     themeBtn.innerHTML = isDark ? LIGHT_ICON : DARK_ICON;
     themeBtn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+    // Sync mobile theme button if it exists
+    const mobTheme = document.querySelector('.nav-mobile-theme');
+    if (mobTheme) {
+      mobTheme.textContent = isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+      mobTheme.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+    }
   }
 
   themeBtn.addEventListener('click', () => {
@@ -235,6 +242,7 @@ function initNav() {
       popupOpen = false;
       delayPopup.style.display = 'none';
     });
+
   });
 
   // Keyboard shortcuts: D for dark, L for light
@@ -256,8 +264,23 @@ function initNav() {
   hamburger.className = 'nav-hamburger';
   hamburger.setAttribute('aria-label', 'Open navigation menu');
   hamburger.setAttribute('aria-expanded', 'false');
+  hamburger.setAttribute('aria-controls', 'main-nav');
   hamburger.innerHTML = HAMBURGER_SVG;
   top.appendChild(hamburger);
+
+  // ── Mobile theme toggle (inside hamburger dropdown, styled as nav link) ──
+  const mobileTheme = document.createElement('a');
+  mobileTheme.className = 'nav-mobile-theme';
+  mobileTheme.href = '#';
+  const isDarkNow = document.documentElement.getAttribute('data-theme') === 'dark';
+  mobileTheme.textContent = isDarkNow ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+  mobileTheme.addEventListener('click', (e) => {
+    e.preventDefault();
+    themeBtn.click();
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    mobileTheme.textContent = dark ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+  });
+  nav.appendChild(mobileTheme);
 
   header.appendChild(top);
 
@@ -266,18 +289,29 @@ function initNav() {
 
   // ── Hamburger toggle ──
   hamburger.addEventListener('click', () => {
+    // Close delay popup if open
+    if (popupOpen) {
+      popupOpen = false;
+      delayPopup.style.display = 'none';
+    }
     const isOpen = nav.classList.toggle('nav-open');
     hamburger.innerHTML = isOpen ? CLOSE_SVG : HAMBURGER_SVG;
     hamburger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
     hamburger.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
+    if (isOpen) {
+      const firstLink = nav.querySelector('a');
+      if (firstLink) firstLink.focus();
+    }
   });
 
-  // Close menu on Escape
+  // Close menu on Escape — return focus to hamburger
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && nav.classList.contains('nav-open')) {
       nav.classList.remove('nav-open');
       hamburger.innerHTML = HAMBURGER_SVG;
       hamburger.setAttribute('aria-expanded', 'false');
+      hamburger.setAttribute('aria-label', 'Open navigation menu');
+      hamburger.focus();
     }
   });
 }
