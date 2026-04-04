@@ -22,9 +22,12 @@ export function filterPlaysByDelay(allPlays) {
   if (!cutoff) return allPlays;
   const cutoffISO = cutoff.toISOString();
   return allPlays.filter(play => {
-    const endTime = play.about?.endTime;
-    if (!endTime) return true;
-    return endTime <= cutoffISO;
+    // Filter by startTime: once an at-bat begins (delayed), the cell stays visible
+    // forever. Pitches and the result show in real-time as data arrives.
+    // Using endTime caused cells to blank for N seconds after a play completed.
+    const startTime = play.about?.startTime;
+    if (!startTime) return true;
+    return startTime <= cutoffISO;
   });
 }
 
