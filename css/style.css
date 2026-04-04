@@ -791,6 +791,8 @@ strong, b { font-weight: 600; }
 .delay-stop-btn { background: #a04a49; color: #fff; border-color: #a04a49; }
 .delay-stop-btn:hover { background: #8a3d3c; }
 
+/* Mobile-only nav items — hidden on desktop */
+.nav-mobile-theme { display: none; }
 
 
 /* ═══════════════════════════════════════════════════════
@@ -1753,8 +1755,23 @@ kbd {
   /* Mobile header: less padding */
   .header-top { padding: 16px var(--container-pad) 16px; }
 
-  /* Push theme + hamburger buttons to right edge */
-  .nav-theme-btn { margin-left: auto; }
+  /* Push delay + hamburger buttons to right edge; hide theme toggle (moved to dropdown) */
+  .nav-theme-btn { display: none; }
+  .delay-wrap { margin-left: auto; }
+
+  /* Delay popup: break out of .delay-wrap, full-width below header */
+  .delay-wrap { position: static; }
+  .delay-popup {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    min-width: 0;
+    width: auto;
+    border-left: none;
+    border-right: none;
+    padding: 12px var(--container-pad);
+  }
   .nav-hamburger { display: inline-flex; margin-left: 12px; }
   .nav-bar {
     display: none;
@@ -1772,10 +1789,14 @@ kbd {
   }
   .nav-bar.nav-open { display: flex; }
   .nav-bar a, .nav-bar button {
-    padding: 12px var(--container-pad);
+    padding: 14px var(--container-pad);
     border-bottom: 1px solid var(--grid-line);
+    font-size: 1.1em;
   }
   .nav-bar a.nav-active { border-bottom: 1px solid var(--grid-line); margin-bottom: 0; }
+
+  /* Mobile theme toggle — shown as regular nav link in dropdown */
+  .nav-mobile-theme { display: block; }
 
   /* Date nav full width on mobile */
   .date-nav { gap: 8px; }
