@@ -33,14 +33,18 @@ let cachedCoaches = null;
 const cachedTeamSeasonStats = {};
 
 let isInitialLoad = true;
+let lastFilteredPlayCount = -1; // Track filtered play count to skip no-op re-renders
 
 /**
  * Apply delay filter to a GUMBO feed object.
  * Returns the same object with plays and linescore filtered in place.
  */
 function applyDelayFilter(gumbo) {
+  const status = gumbo.gameData?.status?.abstractGameState;
+  const isLive = status === 'Live';
   const delay = getDelay();
-  if (delay > 0) {
+  // Only apply delay to live/in-progress games — completed and preview games show all data
+  if (delay > 0 && isLive) {
     gumbo.liveData.plays.allPlays = filterPlaysByDelay(gumbo.liveData.plays.allPlays);
     gumbo.liveData.linescore = filterLinescoreByDelay(gumbo.liveData.linescore, gumbo.liveData.plays.allPlays);
   }
@@ -50,9 +54,17 @@ function applyDelayFilter(gumbo) {
 /**
  * Re-filter cached raw data with the current delay and render instantly.
  * No API fetch — uses the last fetched GUMBO data with the new cutoff time.
+ * Skips the render if the filtered play count hasn't changed (no new plays crossed the cutoff).
  */
-function refilterAndRender() {
+function refilterAndRender(force = false) {
   if (!rawGumbo) return;
+
+  // Quick check: count how many plays pass the filter without deep-copying
+  if (!force) {
+    const allPlays = rawGumbo.liveData.plays.allPlays;
+    const filtered = filterPlaysByDelay(allPlays);
+    if (filtered.length === lastFilteredPlayCount) return; // Nothing new, skip render
+  }
 
   // Deep-copy the raw data so filtering doesn't mutate the cache
   const fresh = JSON.parse(JSON.stringify(rawGumbo));
@@ -63,6 +75,7 @@ function refilterAndRender() {
   if (gameData?._trends) fresh._trends = gameData._trends;
 
   gameData = applyDelayFilter(fresh);
+  lastFilteredPlayCount = gameData.liveData.plays.allPlays.length;
 
   const scrollY = window.scrollY;
   renderGame(gameData, standingsData, allTeamStatsData);
@@ -84,10 +97,12 @@ async function loadGame() {
 
     // Cache raw unfiltered data for instant delay re-filtering
     rawGumbo = gumbo;
+    lastFilteredPlayCount = -1; // Reset so next tick detects new data
 
     // Apply stream delay filter to a deep copy (don't mutate the cache)
     const workingCopy = getDelay() > 0 ? JSON.parse(JSON.stringify(gumbo)) : gumbo;
     gameData = applyDelayFilter(workingCopy);
+    lastFilteredPlayCount = gameData.liveData.plays.allPlays.length;
 
     const officialDate = gumbo.gameData?.datetime?.officialDate || '';
     const season = officialDate ? parseInt(officialDate.split('-')[0], 10) : new Date().getFullYear();
@@ -348,7 +363,8 @@ function renderTeamSection(data, side, allTeamStats) {
 }
 
 // Stream delay: instant re-filter from cached data (no API fetch)
-window._delayChanged = () => refilterAndRender();
+// Force render on user-initiated delay change (always update even if play count is same)
+window._delayChanged = () => refilterAndRender(true);
 
 // Listen for style editor messages (when embedded in iframe)
 function rerender() {
@@ -417,17 +433,21 @@ const TICK_INTERVAL = 1_000;    // Re-filter cached data every 1 second (advance
 let pollTimer = null;
 let tickTimer = null;
 
+function isGameLive() {
+  return rawGumbo?.gameData?.status?.abstractGameState === 'Live';
+}
+
 function isGameFinal() {
-  const status = rawGumbo?.gameData?.status?.abstractGameState;
-  return status === 'Final';
+  return rawGumbo?.gameData?.status?.abstractGameState === 'Final';
 }
 
 function startAutoRefresh() {
   stopAutoRefresh();
 
   // Tick: re-filter cached data every second so the delay cutoff advances in real-time
+  // Only for live games — completed games show all data immediately
   tickTimer = setInterval(() => {
-    if (rawGumbo && getDelay() > 0) refilterAndRender();
+    if (rawGumbo && getDelay() > 0 && isGameLive()) refilterAndRender();
   }, TICK_INTERVAL);
 
   // Poll: fetch fresh data from the API periodically
