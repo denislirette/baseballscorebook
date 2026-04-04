@@ -1201,11 +1201,13 @@ foreignObject .svg-player-link::after { display: none; }
 
 .standings-container {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr;
   gap: 8px;
   margin: 16px 0;
   font-variant-numeric: tabular-nums;
 }
+.standings-division[data-league="al"] { order: 0; }
+.standings-division[data-league="nl"] { order: 1; }
 
 .standings-division { overflow: hidden; }
 .standings-division .pitcher-stats-table { width: 100%; }
@@ -1743,7 +1745,6 @@ kbd {
 /* Tablet (≤ 768px) */
 @media (max-width: 768px) {
   :root { --container-pad: 12px; --grid-gap: 12px; }
-  .standings-container { grid-template-columns: repeat(2, 1fr); }
   .game-header-grid    { flex-direction: column; }
   .game-header-grid > div { width: 100%; }
   .game-header-grid table { width: 100%; }
@@ -1831,10 +1832,6 @@ kbd {
 /* Mobile (≤ 480px) */
 @media (max-width: 480px) {
   :root { --container-pad: 8px; --grid-gap: 8px; }
-  /* Stack by conference: AL E/C/W then NL E/C/W */
-  .standings-container { grid-template-columns: 1fr; }
-  .standings-division[data-league="al"] { order: 0; }
-  .standings-division[data-league="nl"] { order: 1; }
   .scorecard-section-header img { width: 36px; height: 36px; }
   .scorecard-section-header h2  { font-size: 1.1em; display: flex; align-items: center; gap: 8px; }
   .scorecard-section-header h2 .team-logo { height: 2.5em !important; }
