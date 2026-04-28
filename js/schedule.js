@@ -287,8 +287,5 @@ async function loadThumbnails(cards) {
   }
 }
 
-// Stream delay: nav button triggers reload
-window._delayChanged = () => setDate(currentDate);
-
 // Initialize
 setDate(currentDate);

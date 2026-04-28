@@ -7,7 +7,6 @@ function teamLogoHTML(teamId, teamName, size = '1.2em') {
 
 import { updateConfig, resetConfig } from './layout-config.js';
 import { fetchLiveFeed, fetchStandings, fetchAllTeamStats, fetchCoaches, fetchTeamSeasonStats, fetchPitchArsenals } from './api.js';
-import { filterPlaysByDelay, filterLinescoreByDelay, getDelay } from './time-delay.js';
 import { buildTeamLineup, computeLineupTrends, computeTeamRank } from './game-data.js';
 import {
   renderTeamScorecard,
@@ -26,61 +25,14 @@ const params = new URLSearchParams(window.location.search);
 const gamePk = params.get('gamePk');
 
 let gameData = null;
-let rawGumbo = null;        // Unfiltered GUMBO feed — cached for instant delay re-filtering
 let standingsData = null;
 let allTeamStatsData = null;
 let cachedCoaches = null;
+let cachedArsenals = null;
+let cachedTrends = null;
 const cachedTeamSeasonStats = {};
 
 let isInitialLoad = true;
-let lastFilteredPlayCount = -1; // Track filtered play count to skip no-op re-renders
-
-/**
- * Apply delay filter to a GUMBO feed object.
- * Returns the same object with plays and linescore filtered in place.
- */
-function applyDelayFilter(gumbo) {
-  const status = gumbo.gameData?.status?.abstractGameState;
-  const isLive = status === 'Live';
-  const delay = getDelay();
-  // Only apply delay to live/in-progress games — completed and preview games show all data
-  if (delay > 0 && isLive) {
-    gumbo.liveData.plays.allPlays = filterPlaysByDelay(gumbo.liveData.plays.allPlays);
-    gumbo.liveData.linescore = filterLinescoreByDelay(gumbo.liveData.linescore, gumbo.liveData.plays.allPlays);
-  }
-  return gumbo;
-}
-
-/**
- * Re-filter cached raw data with the current delay and render instantly.
- * No API fetch — uses the last fetched GUMBO data with the new cutoff time.
- * Skips the render if the filtered play count hasn't changed (no new plays crossed the cutoff).
- */
-function refilterAndRender(force = false) {
-  if (!rawGumbo) return;
-
-  // Quick check: count how many plays pass the filter without deep-copying
-  if (!force) {
-    const allPlays = rawGumbo.liveData.plays.allPlays;
-    const filtered = filterPlaysByDelay(allPlays);
-    if (filtered.length === lastFilteredPlayCount) return; // Nothing new, skip render
-  }
-
-  // Deep-copy the raw data so filtering doesn't mutate the cache
-  const fresh = JSON.parse(JSON.stringify(rawGumbo));
-
-  // Carry over cached enrichments (coaches, arsenals, trends)
-  if (gameData?._coaches) fresh._coaches = gameData._coaches;
-  if (gameData?._arsenals) fresh._arsenals = gameData._arsenals;
-  if (gameData?._trends) fresh._trends = gameData._trends;
-
-  gameData = applyDelayFilter(fresh);
-  lastFilteredPlayCount = gameData.liveData.plays.allPlays.length;
-
-  const scrollY = window.scrollY;
-  renderGame(gameData, standingsData, allTeamStatsData);
-  requestAnimationFrame(() => window.scrollTo(0, scrollY));
-}
 
 async function loadGame() {
   if (!gamePk) {
@@ -94,15 +46,7 @@ async function loadGame() {
   try {
     // Phase 1: Fetch GUMBO feed
     const gumbo = await fetchLiveFeed(gamePk);
-
-    // Cache raw unfiltered data for instant delay re-filtering
-    rawGumbo = gumbo;
-    lastFilteredPlayCount = -1; // Reset so next tick detects new data
-
-    // Apply stream delay filter to a deep copy (don't mutate the cache)
-    const workingCopy = getDelay() > 0 ? JSON.parse(JSON.stringify(gumbo)) : gumbo;
-    gameData = applyDelayFilter(workingCopy);
-    lastFilteredPlayCount = gameData.liveData.plays.allPlays.length;
+    gameData = gumbo;
 
     const officialDate = gumbo.gameData?.datetime?.officialDate || '';
     const season = officialDate ? parseInt(officialDate.split('-')[0], 10) : new Date().getFullYear();
@@ -136,6 +80,7 @@ async function loadGame() {
       ];
       const uniqueIds = [...new Set(allPitcherIds)];
       fetchPitchArsenals(uniqueIds, season).then(arsenals => {
+        cachedArsenals = arsenals;
         gameData._arsenals = arsenals;
         renderGame(gameData, standingsData, allTeamStatsData);
       }).catch(() => {});
@@ -143,6 +88,8 @@ async function loadGame() {
 
     // Always apply cached data to fresh gumbo object
     gameData._coaches = cachedCoaches || {};
+    if (cachedArsenals) gameData._arsenals = cachedArsenals;
+    if (cachedTrends) gameData._trends = cachedTrends;
 
     // Preserve scroll position during auto-refresh
     const scrollY = isInitialLoad ? 0 : window.scrollY;
@@ -163,9 +110,8 @@ async function loadGame() {
         computeLineupTrends(awayLineup, officialDate, season).catch(() => {}),
         computeLineupTrends(homeLineup, officialDate, season).catch(() => {}),
       ]).then(() => {
-        if (!gameData._trends) gameData._trends = {};
-        gameData._trends.away = awayLineup;
-        gameData._trends.home = homeLineup;
+        cachedTrends = { away: awayLineup, home: homeLineup };
+        gameData._trends = cachedTrends;
         renderGame(gameData, standingsData, allTeamStatsData);
       });
     }
@@ -362,10 +308,6 @@ function renderTeamSection(data, side, allTeamStats) {
   return section;
 }
 
-// Stream delay: instant re-filter from cached data (no API fetch)
-// Force render on user-initiated delay change (always update even if play count is same)
-window._delayChanged = () => refilterAndRender(true);
-
 // Listen for style editor messages (when embedded in iframe)
 function rerender() {
   if (gameData) renderGame(gameData, standingsData, allTeamStatsData);
@@ -427,30 +369,16 @@ localStorage.removeItem('detailsState');
 
 // ── Auto-refresh: keeps the scorecard live without manual browser refresh ──
 
-const POLL_INTERVAL = 10_000;   // Fetch fresh API data every 10 seconds
-const TICK_INTERVAL = 1_000;    // Re-filter cached data every 1 second (advances delay cutoff)
+const POLL_INTERVAL = 10_000;
 
 let pollTimer = null;
-let tickTimer = null;
-
-function isGameLive() {
-  return rawGumbo?.gameData?.status?.abstractGameState === 'Live';
-}
 
 function isGameFinal() {
-  return rawGumbo?.gameData?.status?.abstractGameState === 'Final';
+  return gameData?.gameData?.status?.abstractGameState === 'Final';
 }
 
 function startAutoRefresh() {
   stopAutoRefresh();
-
-  // Tick: re-filter cached data every second so the delay cutoff advances in real-time
-  // Only for live games — completed games show all data immediately
-  tickTimer = setInterval(() => {
-    if (rawGumbo && getDelay() > 0 && isGameLive()) refilterAndRender();
-  }, TICK_INTERVAL);
-
-  // Poll: fetch fresh data from the API periodically
   pollTimer = setInterval(async () => {
     if (isGameFinal()) {
       stopAutoRefresh();
@@ -462,9 +390,7 @@ function startAutoRefresh() {
 
 function stopAutoRefresh() {
   clearInterval(pollTimer);
-  clearInterval(tickTimer);
   pollTimer = null;
-  tickTimer = null;
 }
 
 // Initial load
