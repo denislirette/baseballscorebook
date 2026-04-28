@@ -48,6 +48,18 @@
       <button id="prev-day" class="date-btn" aria-label="Previous day">&#9664;</button>
       <div id="date-picker"></div>
       <button id="next-day" class="date-btn" aria-label="Next day">&#9654;</button>
+      <div class="view-toggle" role="group" aria-label="View mode">
+        <button id="view-thumbnails" class="date-btn view-toggle-btn" type="button" aria-label="Thumbnail view" aria-pressed="true">
+          <svg class="view-toggle-icon" viewBox="0 -960 960 960" width="22" height="22" aria-hidden="true" focusable="false" fill="currentColor">
+            <path d="M120-520v-320h320v320H120Zm0 400v-320h320v320H120Zm400-400v-320h320v320H520Zm0 400v-320h320v320H520ZM200-600h160v-160H200v160Zm400 0h160v-160H600v160Zm0 400h160v-160H600v160Zm-400 0h160v-160H200v160Z"/>
+          </svg>
+        </button>
+        <button id="view-list" class="date-btn view-toggle-btn" type="button" aria-label="List view" aria-pressed="false">
+          <svg class="view-toggle-icon" viewBox="0 -960 960 960" width="22" height="22" aria-hidden="true" focusable="false" fill="currentColor">
+            <path d="M280-280v-80h560v80H280Zm0-160v-80h560v80H280Zm0-160v-80h560v80H280ZM160-280q-17 0-28.5-11.5T120-320q0-17 11.5-28.5T160-360q17 0 28.5 11.5T200-320q0 17-11.5 28.5T160-280Zm0-160q-17 0-28.5-11.5T120-480q0-17 11.5-28.5T160-520q17 0 28.5 11.5T200-480q0 17-11.5 28.5T160-440Zm0-160q-17 0-28.5-11.5T120-640q0-17 11.5-28.5T160-680q17 0 28.5 11.5T200-640q0 17-11.5 28.5T160-600Z"/>
+          </svg>
+        </button>
+      </div>
     </div>
 
     <div id="games-grid" class="games-grid">

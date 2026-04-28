@@ -17,7 +17,6 @@ const FOOTER_LINKS = [
   { href: '/contact.html', label: 'Contact' },
   { href: '/disclaimer.html', label: 'Disclaimer' },
   { href: 'https://github.com/denislirette/baseballscorecard/blob/master/docs/ACCESSIBILITY.md', label: 'Accessibility Statement' },
-  { href: 'https://www.buymeacoffee.com/baseballscorecard.org', label: 'Buy Me a Coffee' },
 ];
 
 const HAMBURGER_SVG = '<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><rect y="3" width="20" height="2"/><rect y="9" width="20" height="2"/><rect y="15" width="20" height="2"/></svg>';

@@ -8,6 +8,35 @@ import { DatePicker } from './datepicker.js';
 const gamesGrid = document.getElementById('games-grid');
 const prevBtn = document.getElementById('prev-day');
 const nextBtn = document.getElementById('next-day');
+const thumbsBtn = document.getElementById('view-thumbnails');
+const listBtn = document.getElementById('view-list');
+
+const VIEW_MODE_KEY = 'view-mode';
+const VIEW_LIST = 'list';
+const VIEW_THUMBNAILS = 'thumbnails';
+
+function getViewMode() {
+  return localStorage.getItem(VIEW_MODE_KEY) === VIEW_LIST ? VIEW_LIST : VIEW_THUMBNAILS;
+}
+
+function applyViewMode(mode) {
+  const isList = mode === VIEW_LIST;
+  gamesGrid.classList.toggle('view-list', isList);
+  thumbsBtn?.setAttribute('aria-pressed', String(!isList));
+  listBtn?.setAttribute('aria-pressed', String(isList));
+}
+
+function setViewMode(mode) {
+  localStorage.setItem(VIEW_MODE_KEY, mode);
+  applyViewMode(mode);
+  // Re-render so we skip thumbnail fetches in list mode (or fetch them when switching to thumbnails)
+  loadGames();
+}
+
+thumbsBtn?.addEventListener('click', () => setViewMode(VIEW_THUMBNAILS));
+listBtn?.addEventListener('click', () => setViewMode(VIEW_LIST));
+
+applyViewMode(getViewMode());
 
 const devMode = isDevMode();
 
@@ -157,8 +186,10 @@ async function loadGames() {
       gamesGrid.appendChild(section);
     }
 
-    // Load thumbnails for completed/live games
-    loadThumbnails(cards);
+    // Load thumbnails for completed/live games (skipped in list view)
+    if (getViewMode() !== VIEW_LIST) {
+      loadThumbnails(cards);
+    }
   } catch (err) {
     gamesGrid.innerHTML = '';
     const p = document.createElement('p');

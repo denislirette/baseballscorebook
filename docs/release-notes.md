@@ -2,6 +2,17 @@
 
 Every version of BaseballScorecard.org, from the first render to the latest update.
 
+## v1.1.0 (April 28, 2026)
+
+- **Schedule view toggle**: switch the homepage between thumbnails and a compact list, persists via localStorage
+- **List view**: single-column rows with team logos, status pill, and score, left-aligned with a 720px cap so rows stay readable on wide monitors
+- **Material Symbols icons** for the toggle, sized to match the date navigation buttons
+- Removed Buy Me a Coffee link from the footer nav
+- **Play cell blanking fix**: filter by startTime instead of endTime so live cells don't briefly clear
+- **Live-only delay**: skip no-op re-renders and only apply the delay on live games
+- **Standings layout**: always stack East/Central/West with AL first, NL second, in DOM order
+- Updated golden screenshots for the standings single-column layout
+
 ## v1.0.1 (March 30, 2026)
 
 - **Stream delay moved to global nav**: stopwatch icon with popup picker, available on every page

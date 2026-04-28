@@ -677,6 +677,60 @@ strong, b { font-weight: 600; }
   padding: 12px 14px;
 }
 
+/* View toggle (thumbnails / list) — sits inside .date-nav, pushed right */
+.view-toggle {
+  display: inline-flex;
+  margin-left: auto;
+  align-self: stretch;
+}
+
+.view-toggle-btn {
+  padding: 6px 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+}
+
+.view-toggle-btn + .view-toggle-btn {
+  border-left: none;
+}
+
+.view-toggle-btn[aria-pressed="true"] {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+
+.view-toggle-icon {
+  display: block;
+}
+
+/* List view: single column, compact cards everywhere, no thumbnail, left aligned */
+.games-grid.view-list {
+  columns: auto;
+  column-count: 1;
+  max-width: 720px;
+  margin: 0;
+}
+
+.games-grid.view-list .game-card {
+  padding: 10px 12px;
+  font-size: 13px;
+}
+
+.games-grid.view-list .thumbnail-container {
+  display: none;
+}
+
+.games-grid.view-list .game-card-pitchers {
+  display: none;
+}
+
+.games-grid.view-list .cancelled-section .cancelled-grid {
+  grid-template-columns: 1fr;
+}
+
 
 /* Date + delay row */
 .date-delay-row {
