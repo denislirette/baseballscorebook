@@ -71,6 +71,38 @@ export function renderThumbnail(data) {
   return svg;
 }
 
+// Empty 9-inning scorecard frame for games that haven't started yet.
+// Same shape as renderThumbnail so cards line up regardless of game state.
+export function renderEmptyThumbnail(innings = 9) {
+  const { TH_CELL_SIZE: CS, TH_GAP: GAP } = getThumbnailConfig();
+  const w = innings * CS;
+  const gridH = 9 * CS;
+  const h = gridH * 2 + GAP;
+
+  const svg = el('svg', {
+    viewBox: `0 0 ${w} ${h}`,
+    width: '100%',
+    preserveAspectRatio: 'xMidYMid meet',
+    role: 'img',
+    'aria-label': 'Empty scorecard — game has not started',
+  });
+  svg.style.display = 'block';
+
+  drawGrid(svg, 0, 0, innings, null, 0);
+  drawGrid(svg, 0, gridH + GAP, innings, null, 0);
+
+  svg.appendChild(el('rect', {
+    x: 0, y: 0, width: w, height: gridH,
+    fill: 'none', 'stroke-width': 0.75, class: 'th-border',
+  }));
+  svg.appendChild(el('rect', {
+    x: 0, y: gridH + GAP, width: w, height: gridH,
+    fill: 'none', 'stroke-width': 0.75, class: 'th-border',
+  }));
+
+  return svg;
+}
+
 // ─── Grid lines ─────────────────────────────────────────────────
 
 function drawGrid(svg, ox, oy, cols, grid, lastPlayedInning) {

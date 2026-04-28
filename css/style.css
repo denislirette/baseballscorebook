@@ -706,12 +706,11 @@ strong, b { font-weight: 600; }
   display: block;
 }
 
-/* List view: single column, compact cards everywhere, no thumbnail, left aligned */
+/* List view: multi-column responsive tile grid, compact cards everywhere,
+   no thumbnails. Cards keep the "unstarted game" shape so they line up. */
 .games-grid.view-list {
-  columns: auto;
-  column-count: 1;
-  max-width: 720px;
-  margin: 0;
+  columns: 280px;
+  column-gap: var(--grid-gap);
 }
 
 .games-grid.view-list .game-card {
@@ -721,14 +720,6 @@ strong, b { font-weight: 600; }
 
 .games-grid.view-list .thumbnail-container {
   display: none;
-}
-
-.games-grid.view-list .game-card-pitchers {
-  display: none;
-}
-
-.games-grid.view-list .cancelled-section .cancelled-grid {
-  grid-template-columns: 1fr;
 }
 
 

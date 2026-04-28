@@ -2,7 +2,7 @@
 
 import { fetchSchedule, fetchLiveFeed, getGames, isDevMode } from './api.js';
 import { formatDate, parseDate, formatGameTime, gameStatusText } from './utils.js';
-import { renderThumbnail } from './svg-thumbnail.js';
+import { renderThumbnail, renderEmptyThumbnail } from './svg-thumbnail.js';
 import { DatePicker } from './datepicker.js';
 
 const gamesGrid = document.getElementById('games-grid');
@@ -186,8 +186,12 @@ async function loadGames() {
       gamesGrid.appendChild(section);
     }
 
-    // Load thumbnails for completed/live games (skipped in list view)
+    // Grid view: every card gets a thumbnail. Unstarted games get an empty
+    // scorecard frame immediately; active/finished games fetch the real one.
     if (getViewMode() !== VIEW_LIST) {
+      for (const { game, card } of cards) {
+        if (!isGameActive(game)) addEmptyThumbnail(card);
+      }
       loadThumbnails(cards);
     }
   } catch (err) {
@@ -215,7 +219,7 @@ function renderGameCard(game, dateStr) {
   const homeRecord = home.leagueRecord ? ` (${home.leagueRecord.wins}-${home.leagueRecord.losses})` : '';
 
   const a = document.createElement('a');
-  a.className = `game-card${!showScore && !isCancelled ? ' game-card-compact' : ''}`;
+  a.className = `game-card${isCancelled ? ' game-card-compact' : ''}`;
   a.href = `/game.html?gamePk=${game.gamePk}&date=${dateStr}${devParam()}`;
 
   a.innerHTML = `
@@ -256,6 +260,13 @@ function isGameActive(game) {
   return false;
 }
 
+function addEmptyThumbnail(card) {
+  const container = document.createElement('div');
+  container.className = 'thumbnail-container';
+  container.appendChild(renderEmptyThumbnail(9));
+  card.appendChild(container);
+}
+
 async function loadThumbnails(cards) {
   const toLoad = cards.filter(({ game }) => isGameActive(game));
 
@@ -266,13 +277,11 @@ async function loadThumbnails(cards) {
     await Promise.allSettled(batch.map(async ({ game, card }) => {
       try {
         const data = await fetchLiveFeed(game.gamePk);
-        // Only show thumbnail if at least one at-bat has happened
         const plays = data.liveData?.plays?.allPlays || [];
-        if (plays.length === 0) return;
 
         const container = document.createElement('div');
         container.className = 'thumbnail-container';
-        container.appendChild(renderThumbnail(data));
+        container.appendChild(plays.length === 0 ? renderEmptyThumbnail(9) : renderThumbnail(data));
         card.appendChild(container);
 
         // Widen the card for extra-inning games so cells stay full size
