@@ -4,6 +4,7 @@ import { fetchSchedule, fetchLiveFeed, getGames, isDevMode } from './api.js';
 import { formatDate, parseDate, formatGameTime, gameStatusText } from './utils.js';
 import { renderThumbnail, renderEmptyThumbnail } from './svg-thumbnail.js';
 import { DatePicker } from './datepicker.js';
+import { applyStreamDelay } from './time-delay.js';
 
 const gamesGrid = document.getElementById('games-grid');
 const prevBtn = document.getElementById('prev-day');
@@ -277,6 +278,7 @@ async function loadThumbnails(cards) {
     await Promise.allSettled(batch.map(async ({ game, card }) => {
       try {
         const data = await fetchLiveFeed(game.gamePk);
+        applyStreamDelay(data);
         const plays = data.liveData?.plays?.allPlays || [];
 
         const container = document.createElement('div');
@@ -296,5 +298,37 @@ async function loadThumbnails(cards) {
   }
 }
 
+// ── Auto-refresh: gated on the global Live toggle. Only polls while viewing
+// today's date — refreshing past schedules is pointless. ──
+
+const POLL_INTERVAL = 15_000;
+
+let pollTimer = null;
+
+function isToday(date) {
+  return formatDate(date) === formatDate(new Date());
+}
+
+function startAutoRefresh() {
+  stopAutoRefresh();
+  pollTimer = setInterval(() => {
+    if (!isToday(currentDate)) return;
+    loadGames();
+  }, POLL_INTERVAL);
+}
+
+function stopAutoRefresh() {
+  clearInterval(pollTimer);
+  pollTimer = null;
+}
+
+function syncAutoRefresh() {
+  if (window.isLiveMode?.()) startAutoRefresh();
+  else stopAutoRefresh();
+}
+
+window.addEventListener('live-mode-change', syncAutoRefresh);
+
 // Initialize
 setDate(currentDate);
+syncAutoRefresh();

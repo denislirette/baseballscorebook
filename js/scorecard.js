@@ -8,6 +8,7 @@ function teamLogoHTML(teamId, teamName, size = '1.2em') {
 import { updateConfig, resetConfig } from './layout-config.js';
 import { fetchLiveFeed, fetchStandings, fetchAllTeamStats, fetchCoaches, fetchTeamSeasonStats, fetchPitchArsenals } from './api.js';
 import { buildTeamLineup, computeLineupTrends, computeTeamRank } from './game-data.js';
+import { applyStreamDelay } from './time-delay.js';
 import {
   renderTeamScorecard,
   renderPitcherStatsHTML,
@@ -44,8 +45,10 @@ async function loadGame() {
   if (isInitialLoad) window.showProgress?.();
 
   try {
-    // Phase 1: Fetch GUMBO feed
+    // Phase 1: Fetch GUMBO feed. When Live mode is on, hold the displayed
+    // state 60s behind real-time so the page doesn't out-pace the broadcast.
     const gumbo = await fetchLiveFeed(gamePk);
+    applyStreamDelay(gumbo);
     gameData = gumbo;
 
     const officialDate = gumbo.gameData?.datetime?.officialDate || '';
@@ -367,9 +370,11 @@ function restoreDetailsState() {
 // Clean up old global details state
 localStorage.removeItem('detailsState');
 
-// ── Auto-refresh: keeps the scorecard live without manual browser refresh ──
+// ── Auto-refresh: keeps the scorecard live without manual browser refresh.
+// Gated on the global Live toggle (header button) — turning it off pauses
+// polling, turning it on restarts it. ──
 
-const POLL_INTERVAL = 10_000;
+const POLL_INTERVAL = 15_000;
 
 let pollTimer = null;
 
@@ -393,9 +398,16 @@ function stopAutoRefresh() {
   pollTimer = null;
 }
 
+function syncAutoRefresh() {
+  if (window.isLiveMode?.() && !isGameFinal()) startAutoRefresh();
+  else stopAutoRefresh();
+}
+
+window.addEventListener('live-mode-change', syncAutoRefresh);
+
 // Initial load
 loadGame().then(() => {
-  startAutoRefresh();
+  syncAutoRefresh();
 
   // Signal to parent (styles editor) that we're ready
   if (window.parent !== window) {

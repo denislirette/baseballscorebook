@@ -2,6 +2,23 @@
 
 Every version of BaseballScorecard.org, from the first render to the latest update.
 
+## v1.2.0 (May 2, 2026)
+
+- **Live toggle in header**: red "● Live" button next to the dark mode toggle, persistent across the home and game pages, persists via localStorage
+- **Opt-in auto-refresh**: pages no longer poll the MLB API by default — turn the Live toggle on to refresh every 15 seconds, off to freeze the view
+- **60-second stream delay**: when Live is on, the scorecard renders 60 seconds behind the broadcast so the page doesn't out-pace the TV; only filters live in-progress games, not finals
+- **Reading order in games grid**: schedule cards now flow left-to-right, top-to-bottom (CSS Grid) instead of column-first, matching how readers scan a page
+- Auto-refresh polling on the schedule page only runs while viewing today's date — no more pointless re-fetches of past schedules
+
+## v1.1.2 (April 28, 2026)
+
+- **Empty thumbnails** for unstarted games so every card has a scorecard frame, not just the started ones
+- **Responsive list view**: compact rows reflow at narrow widths
+
+## v1.1.1 (April 28, 2026)
+
+- **Stream delay removed** pending re-design — auto-delay logic had bugs that needed to be reworked before re-shipping
+
 ## v1.1.0 (April 28, 2026)
 
 - **Schedule view toggle**: switch the homepage between thumbnails and a compact list, persists via localStorage

@@ -385,6 +385,41 @@ strong, b { font-weight: 600; }
 
 .nav-theme-btn:hover { background: var(--surface); }
 
+/* Live auto-refresh toggle — sits next to the theme button on every page.
+   Inactive: plain bordered button with red dot. Active: solid red w/ white text. */
+.nav-live-btn {
+  background: none;
+  border: 1px solid var(--grid-line);
+  color: var(--text);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.875em;
+  font-weight: 600;
+  padding: 0 12px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.nav-live-btn:hover { background: var(--surface); }
+
+.nav-live-btn .live-dot {
+  color: var(--sc-out);
+  font-size: 0.7em;
+  line-height: 1;
+}
+
+.nav-live-btn[aria-pressed="true"] {
+  background: var(--sc-out);
+  color: #fff;
+  border-color: var(--sc-out);
+}
+
+.nav-live-btn[aria-pressed="true"]:hover { background: var(--sc-out); }
+.nav-live-btn[aria-pressed="true"] .live-dot { color: #fff; }
+
 /* Hamburger hidden on desktop, shown on mobile */
 .nav-hamburger {
   display: none;
@@ -571,8 +606,10 @@ strong, b { font-weight: 600; }
    ═══════════════════════════════════════════════════════ */
 
 .games-grid {
-  columns: 280px;
-  column-gap: var(--grid-gap);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--grid-gap);
+  align-items: start;
   padding: var(--grid-gap) var(--container-pad);
   width: 100%;
 }
@@ -588,8 +625,6 @@ strong, b { font-weight: 600; }
   display: flex;
   flex-direction: column;
   font-size: 14px;
-  break-inside: avoid;
-  margin-bottom: var(--grid-gap);
 }
 
 .game-card:hover,
@@ -652,7 +687,7 @@ strong, b { font-weight: 600; }
 }
 
 .cancelled-section {
-  column-span: all;
+  grid-column: 1 / -1;
   margin-top: 8px;
 }
 .cancelled-section > .games-grid {
@@ -664,7 +699,7 @@ strong, b { font-weight: 600; }
   font-weight: 600;
   color: var(--text-secondary);
   margin: 0 0 8px;
-  column-span: all;
+  grid-column: 1 / -1;
 }
 
 .cancelled-grid {
@@ -706,13 +741,8 @@ strong, b { font-weight: 600; }
   display: block;
 }
 
-/* List view: multi-column responsive tile grid, compact cards everywhere,
-   no thumbnails. Cards keep the "unstarted game" shape so they line up. */
-.games-grid.view-list {
-  columns: 280px;
-  column-gap: var(--grid-gap);
-}
-
+/* List view: same responsive tile grid, compact cards everywhere, no
+   thumbnails. Cards keep the "unstarted game" shape so they line up. */
 .games-grid.view-list .game-card {
   padding: 10px 12px;
   font-size: 13px;
@@ -721,7 +751,6 @@ strong, b { font-weight: 600; }
 .games-grid.view-list .thumbnail-container {
   display: none;
 }
-
 
 /* Mobile-only nav items — hidden on desktop */
 .nav-bar .nav-mobile-theme { display: none; }
@@ -1688,6 +1717,9 @@ kbd {
 
   /* Push hamburger button to right edge; hide theme toggle (moved to dropdown) */
   .nav-theme-btn { display: none; }
+  /* Live button stays visible on mobile so the auto-refresh state is always
+     glanceable; shrink it a touch to make room for the hamburger. */
+  .nav-live-btn { padding: 0 8px; min-height: 36px; font-size: 0.8em; }
   .nav-hamburger { display: inline-flex; margin-left: auto; }
   .nav-bar {
     display: none;

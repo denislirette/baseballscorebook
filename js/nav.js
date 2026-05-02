@@ -1,7 +1,7 @@
 // Global navigation + footer - injected dynamically on every page
 // Same header on every page: site title + nav links, classic HTML link style
 
-const VERSION = '1.1.2';
+const VERSION = '1.2.0';
 
 const IS_LOCAL = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
@@ -18,6 +18,11 @@ const FOOTER_LINKS = [
   { href: '/disclaimer.html', label: 'Disclaimer' },
   { href: 'https://github.com/denislirette/baseballscorecard/blob/master/docs/ACCESSIBILITY.md', label: 'Accessibility Statement' },
 ];
+
+// Live mode is a global toggle — schedule and scorecard pages gate their
+// auto-refresh polling on this. Exposed before nav renders so modules can
+// check it during their initial load.
+window.isLiveMode = () => localStorage.getItem('live-mode') === 'on';
 
 const HAMBURGER_SVG = '<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><rect y="3" width="20" height="2"/><rect y="9" width="20" height="2"/><rect y="15" width="20" height="2"/></svg>';
 const CLOSE_SVG = '<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M4.3 4.3L15.7 15.7M15.7 4.3L4.3 15.7" stroke="currentColor" stroke-width="2" fill="none"/></svg>';
@@ -100,6 +105,30 @@ function initNav() {
   }
 
   top.appendChild(nav);
+
+  // Live auto-refresh toggle — persistent across pages, fires `live-mode-change`
+  const liveBtn = document.createElement('button');
+  liveBtn.id = 'live-toggle';
+  liveBtn.className = 'nav-live-btn';
+  liveBtn.type = 'button';
+  liveBtn.innerHTML = '<span class="live-dot" aria-hidden="true">●</span> Live';
+
+  function updateLiveBtn() {
+    const live = window.isLiveMode();
+    liveBtn.setAttribute('aria-pressed', String(live));
+    liveBtn.setAttribute('aria-label', live ? 'Live auto-refresh on — click to pause' : 'Live auto-refresh off — click to enable');
+  }
+
+  liveBtn.addEventListener('click', () => {
+    const next = !window.isLiveMode();
+    if (next) localStorage.setItem('live-mode', 'on');
+    else localStorage.removeItem('live-mode');
+    updateLiveBtn();
+    window.dispatchEvent(new CustomEvent('live-mode-change', { detail: { live: next } }));
+  });
+
+  updateLiveBtn();
+  top.appendChild(liveBtn);
 
   // Theme toggle (icon on desktop, text link in mobile hamburger)
   const LIGHT_ICON = '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M440-800v-120h80v120h-80Zm0 760v-120h80v120h-80Zm360-400v-80h120v80H800Zm-760 0v-80h120v80H40Zm708-252-56-56 70-72 58 58-72 70ZM198-140l-58-58 72-70 56 56-70 72Zm564 0-70-72 56-56 72 70-58 58ZM212-692l-72-70 58-58 70 72-56 56Zm98 382q-70-70-70-170t70-170q70-70 170-70t170 70q70 70 70 170t-70 170q-70 70-170 70t-170-70Zm283.5-56.5Q640-413 640-480t-46.5-113.5Q547-640 480-640t-113.5 46.5Q320-547 320-480t46.5 113.5Q413-320 480-320t113.5-46.5ZM480-480Z"/></svg>';
