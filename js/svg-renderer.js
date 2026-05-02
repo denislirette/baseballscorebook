@@ -397,6 +397,13 @@ function drawGrid(svg, CLR, lineup, colMap, totalRows, rowOffsets, width, gridHe
   const g = svgEl('g', { class: 'grid-lines' });
   const { innings } = colMap;
 
+  // Live mode toggles the look of the active cell. Live on: green fill +
+  // 3px border so it pops at a glance during a watch-along. Live off: no
+  // fill, a thicker (5px) inner border so the surrounding cells and pitch
+  // glyphs are not visually disturbed by the highlight.
+  const isLive = typeof window !== 'undefined' && window.isLiveMode?.();
+  const activeBorderWidth = isLive ? 3 : 5;
+
   // Cell backgrounds
   for (let slotIdx = 0; slotIdx < lineup.length; slotIdx++) {
     const slot = lineup[slotIdx];
@@ -407,7 +414,7 @@ function drawGrid(svg, CLR, lineup, colMap, totalRows, rowOffsets, width, gridHe
       const hasData = grid && grid.has(cellKey) && grid.get(cellKey).length > 0;
       const isFuture = lastPlayedInning > 0 && inn > lastPlayedInning;
       const emptyFill = isFuture ? CLR.cellBgFuture : CLR.cellBgEmpty;
-      const bgFill = isActive ? CLR.activeCell : (hasData ? CLR.cellBg : emptyFill);
+      const bgFill = (isActive && isLive) ? CLR.activeCell : (hasData ? CLR.cellBg : emptyFill);
       // Get pitcher ID for this cell (from first at-bat)
       const cellPitcherId = hasData ? grid.get(cellKey)[0].pitcherId : null;
       // Fill all visual columns for this inning
@@ -422,7 +429,7 @@ function drawGrid(svg, CLR, lineup, colMap, totalRows, rowOffsets, width, gridHe
         if (cellPitcherId) rectAttrs['data-pitcher-id'] = cellPitcherId;
         g.appendChild(svgEl('rect', rectAttrs));
         if (isActive) {
-          const bw = 3;
+          const bw = activeBorderWidth;
           g.appendChild(svgEl('rect', {
             x: cx + bw / 2, y: y + bw / 2,
             width: L.COL_WIDTH - bw, height: L.ROW_HEIGHT - bw,
@@ -675,11 +682,13 @@ function drawAtBats(svg, CLR, lineup, grid, rowOffsets, colMap, subMap, subNumbe
       const subs = subMap.get(key);
       if (subs) {
         const sorted = [...subs].sort((a, b) => (a.type === 'pitcher' ? 1 : 0) - (b.type === 'pitcher' ? 1 : 0));
-        // Determine the cell background for the cover rect
+        // Determine the cell background for the cover rect — match the grid's
+        // active-cell rule: green fill only when Live mode is on.
+        const isLive = typeof window !== 'undefined' && window.isLiveMode?.();
         const hasData = cellAbs && cellAbs.length > 0;
         const isActive = key === activeCellKey;
         const isFuture = lastPlayedInning > 0 && inn > lastPlayedInning;
-        const cellBgColor = isActive ? CLR.activeCell : (hasData ? CLR.cellBg : (isFuture ? CLR.cellBgFuture : CLR.cellBgEmpty));
+        const cellBgColor = (isActive && isLive) ? CLR.activeCell : (hasData ? CLR.cellBg : (isFuture ? CLR.cellBgFuture : CLR.cellBgEmpty));
         for (const sub of sorted) {
           if (isBatAround && (sub.type === 'PH' || sub.type === 'PR')) continue;
           const subX = colMap.colX(inn);

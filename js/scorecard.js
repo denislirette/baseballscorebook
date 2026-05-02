@@ -9,6 +9,7 @@ import { updateConfig, resetConfig } from './layout-config.js';
 import { fetchLiveFeed, fetchStandings, fetchAllTeamStats, fetchCoaches, fetchTeamSeasonStats, fetchPitchArsenals } from './api.js';
 import { buildTeamLineup, computeLineupTrends, computeTeamRank } from './game-data.js';
 import { applyStreamDelay } from './time-delay.js';
+import { morphChildren } from './dom-morph.js';
 import {
   renderTeamScorecard,
   renderPitcherStatsHTML,
@@ -26,6 +27,15 @@ const params = new URLSearchParams(window.location.search);
 const gamePk = params.get('gamePk');
 
 let gameData = null;
+// Unfiltered raw GUMBO from the last successful fetch. The trickle ticker
+// re-applies the delay against this on every tick so pitches reveal at their
+// real delayed timestamps, not in 30s blocks tied to the API fetch.
+let rawGumbo = null;
+// Total visible-event count from the last trickle render. Counting events
+// (not plays) lets the ticker pick up a single new pitch crossing the
+// cutoff and re-render — that's what makes the reveal pitch-by-pitch
+// instead of play-by-play.
+let lastEventCount = -1;
 let standingsData = null;
 let allTeamStatsData = null;
 let cachedCoaches = null;
@@ -45,11 +55,15 @@ async function loadGame() {
   if (isInitialLoad) window.showProgress?.();
 
   try {
-    // Phase 1: Fetch GUMBO feed. When Live mode is on, hold the displayed
-    // state 60s behind real-time so the page doesn't out-pace the broadcast.
+    // Phase 1: Fetch GUMBO feed. Cache the raw, unfiltered version so the
+    // trickle ticker can re-render against an advancing delay cutoff between
+    // API fetches.
     const gumbo = await fetchLiveFeed(gamePk);
-    applyStreamDelay(gumbo);
-    gameData = gumbo;
+    rawGumbo = gumbo;
+    lastEventCount = -1;
+    const display = window.isLiveMode?.() ? structuredClone(gumbo) : gumbo;
+    applyStreamDelay(display);
+    gameData = display;
 
     const officialDate = gumbo.gameData?.datetime?.officialDate || '';
     const season = officialDate ? parseInt(officialDate.split('-')[0], 10) : new Date().getFullYear();
@@ -162,8 +176,13 @@ function renderGame(data, standings, allTeamStats) {
   _target.appendChild(renderTeamSection(data, 'away', allTeamStats));
   _target.appendChild(renderTeamSection(data, 'home', allTeamStats));
 
-  // Swap content in one operation to prevent flash
-  container.replaceChildren(..._target.childNodes);
+  // First render: hard insert. Subsequent renders: morph in place so only
+  // changed cells repaint (no flash on the trickle ticker).
+  if (container.childNodes.length === 0) {
+    container.replaceChildren(..._target.childNodes);
+  } else {
+    morphChildren(container, _target);
+  }
 
   // Restore and persist <details> open/closed state
   restoreDetailsState();
@@ -370,32 +389,81 @@ function restoreDetailsState() {
 // Clean up old global details state
 localStorage.removeItem('detailsState');
 
-// ── Auto-refresh: keeps the scorecard live without manual browser refresh.
-// Gated on the global Live toggle (header button) — turning it off pauses
-// polling, turning it on restarts it. ──
+// ── Auto-refresh: two timers when Live mode is on. The fetch timer hits the
+// MLB API every 30s to top up `rawGumbo`. The trickle timer ticks every
+// second, re-applies the 90s delay against the cached raw data, and morphs
+// the DOM — so each pitch surfaces at its true delayed timestamp instead of
+// in 30s blocks. Both pause when Live mode is off. ──
 
-const POLL_INTERVAL = 15_000;
+const FETCH_INTERVAL = 30_000;
+const TRICKLE_INTERVAL = 1_000;
 
-let pollTimer = null;
+let fetchTimer = null;
+let trickleTimer = null;
 
 function isGameFinal() {
   return gameData?.gameData?.status?.abstractGameState === 'Final';
 }
 
+/** Re-render from the cached raw GUMBO with a fresh delay cutoff. Skips the
+ *  render unless a new pitch event has crossed the cutoff since last tick. */
+function trickleRender() {
+  if (!rawGumbo) return;
+  if (!window.isLiveMode?.()) return;
+  if (isGameFinal()) return;
+
+  const display = structuredClone(rawGumbo);
+  applyStreamDelay(display);
+
+  // Count visible playEvents across all plays. A single new pitch crossing
+  // the cutoff bumps this and triggers a render — that's the heartbeat of
+  // the pitch-by-pitch reveal.
+  const eventCount = (display.liveData?.plays?.allPlays || []).reduce(
+    (n, p) => n + (p.playEvents?.length ?? 0), 0,
+  );
+  if (eventCount === lastEventCount) return;
+  lastEventCount = eventCount;
+
+  // Carry over enrichments
+  display._coaches = cachedCoaches || {};
+  if (cachedArsenals) display._arsenals = cachedArsenals;
+  if (cachedTrends) display._trends = cachedTrends;
+
+  gameData = display;
+  renderGame(gameData, standingsData, allTeamStatsData);
+}
+
+/** Background fetch — only updates `rawGumbo`, never renders. The trickle
+ *  ticker picks up the new data on its next tick and drips in any pitch
+ *  events that have crossed the delayed cutoff. */
+async function refreshRawGumbo() {
+  try {
+    const gumbo = await fetchLiveFeed(gamePk);
+    rawGumbo = gumbo;
+    // Force the next trickle to evaluate against the fresh data.
+    lastEventCount = -1;
+  } catch (err) {
+    console.error('Background fetch failed:', err);
+  }
+}
+
 function startAutoRefresh() {
   stopAutoRefresh();
-  pollTimer = setInterval(async () => {
+  fetchTimer = setInterval(() => {
     if (isGameFinal()) {
       stopAutoRefresh();
       return;
     }
-    await loadGame();
-  }, POLL_INTERVAL);
+    refreshRawGumbo();
+  }, FETCH_INTERVAL);
+  trickleTimer = setInterval(trickleRender, TRICKLE_INTERVAL);
 }
 
 function stopAutoRefresh() {
-  clearInterval(pollTimer);
-  pollTimer = null;
+  clearInterval(fetchTimer);
+  clearInterval(trickleTimer);
+  fetchTimer = null;
+  trickleTimer = null;
 }
 
 function syncAutoRefresh() {
@@ -403,7 +471,24 @@ function syncAutoRefresh() {
   else stopAutoRefresh();
 }
 
-window.addEventListener('live-mode-change', syncAutoRefresh);
+window.addEventListener('live-mode-change', () => {
+  // Re-render the current cached data with the new rule. Live on: apply the
+  // 90s delay. Live off: show the unfiltered latest fetch (no delay) and the
+  // active-cell highlight drops the green fill.
+  if (rawGumbo) {
+    lastEventCount = -1;
+    if (window.isLiveMode?.()) {
+      trickleRender();
+    } else {
+      gameData = rawGumbo;
+      gameData._coaches = cachedCoaches || {};
+      if (cachedArsenals) gameData._arsenals = cachedArsenals;
+      if (cachedTrends) gameData._trends = cachedTrends;
+      renderGame(gameData, standingsData, allTeamStatsData);
+    }
+  }
+  syncAutoRefresh();
+});
 
 // Initial load
 loadGame().then(() => {

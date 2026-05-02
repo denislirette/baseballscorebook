@@ -2,6 +2,15 @@
 
 Every version of BaseballScorecard.org, from the first render to the latest update.
 
+## v1.3.0 (May 2, 2026)
+
+- **True pitch-by-pitch trickle**: each pitch glyph now appears individually as its real timestamp crosses the delayed cutoff, instead of an at-bat's pitches all flashing in together. The active cell fills up one pitch at a time, broadcast-style.
+- **Hide the result until the play ends**: while an at-bat is in progress in the delayed view, the diamond, scoring notation, RBI digit, and runner advances stay hidden. They appear only when the play's `endTime` crosses the cutoff — no spoilers between pitches.
+- **No more 30-second snap renders**: the API fetch and the on-screen render are now decoupled. The 30s background fetch silently tops up the cache; the 1s trickle ticker is the only thing that paints. Plays no longer batch up between fetches.
+- **Surgical DOM morph**: replaced the wholesale subtree swap with an in-place morph that only mutates changed text/attributes/nodes. No flash on auto-refresh, scroll position and `<details>` open state preserved natively.
+- **Active-cell highlight follows Live mode**: green fill + 3px border when Live is on (it pops during a watch-along); no fill, 5px inner border when Live is off (subtle, doesn't disturb pitch glyphs in the surrounding cells).
+- **Stream delay reduced to 45s** from 60s — closer to a typical broadcast lag while still keeping the page behind the TV.
+
 ## v1.2.0 (May 2, 2026)
 
 - **Live toggle in header**: red "● Live" button next to the dark mode toggle, persistent across the home and game pages, persists via localStorage
