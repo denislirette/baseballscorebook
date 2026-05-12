@@ -1747,8 +1747,10 @@ kbd {
   }
   .collapsible-section summary {
     padding: 6px 10px;
-    font-size: 0.85em;
+    font-size: 0.51em;
   }
+  /* Bench/Bullpen titles (regular-season open-section variant): 40% smaller */
+  .open-section .scorecard-section-header { font-size: 0.66em; padding: 6px 8px; }
   .game-header {
     padding: 8px 0;
     margin-bottom: 8px;

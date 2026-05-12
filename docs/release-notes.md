@@ -2,6 +2,10 @@
 
 Every version of BaseballScorecard.org, from the first render to the latest update.
 
+## v1.3.4 (May 12, 2026)
+
+- **Shrink BENCH/BULLPEN/PITCHERS section titles on mobile**: the section titles ("Blue Jays BENCH", "Angels BULLPEN", etc.) were still visually loud against the now-larger team name. Reduced them by ~40% on tablet and phone via a new `.open-section .scorecard-section-header` mobile rule (down to 0.66em). The team name now clearly dominates the visual hierarchy of each section.
+
 ## v1.3.3 (May 12, 2026)
 
 - **Team header hierarchy on mobile**: the team name (e.g., "Toronto Blue Jays") was visually smaller than the BENCH/BULLPEN section titles below it because those titles render in mono bold uppercase. Bumped the team header to 1.5em on tablet and 1.2em on phone so the team name dominates again — clear top-of-section hierarchy.
