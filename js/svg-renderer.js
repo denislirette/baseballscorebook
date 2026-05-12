@@ -1609,18 +1609,21 @@ export function renderPitcherStatsHTML(data, side, teamAbbrev) {
     const repertoire = arsenals.get?.(p.id) || p.repertoire || [];
     const pitchCodes = formatRepertoire(repertoire);
     const spacer = i > 0 ? `<tr class="pitcher-spacer"><td colspan="12"></td></tr>` : '';
-    // Season stats row (above game row, smaller font)
+    // Season stats row (above game row, smaller font). The "Season" label is
+    // split across two td cells (instead of colspan=2) so the pitch-types
+    // column can hide cleanly on mobile without shifting every value right.
     const seasonRow = `${spacer}
       <tr class="pitcher-season-row">
-        <td class="pitcher-season-label" colspan="2">Season</td>
+        <td class="pitcher-season-label">Season</td>
+        <td class="pitch-types-col pitcher-season-label"></td>
         <td>${v(ss.inningsPitched)}</td>
         <td>${v(ss.hits)}</td>
         <td>${v(ss.runs)}</td>
         <td>${v(ss.earnedRuns)}</td>
         <td>${v(ss.baseOnBalls)}</td>
         <td>${v(ss.strikeOuts)}</td>
-        <td>-</td>
-        <td>-</td>
+        <td>${v(ss.strikes)}</td>
+        <td>${v(ss.numberOfPitches || ss.pitchesThrown)}</td>
         <td>${v(ss.era)}</td>
         <td>${v(ss.whip)}</td>
       </tr>`;
@@ -1628,7 +1631,7 @@ export function renderPitcherStatsHTML(data, side, teamAbbrev) {
     const gameRow = `
       <tr class="pitcher-game-row" data-pitcher-id="${p.id}">
         <td class="pitcher-name">${playerLink(p.name, p.id)}<span class="hand-indicator">, ${hand || '?'}</span>${p.note ? ` <span class="pitcher-note">${p.note}</span>` : ''}</td>
-        <td class="pitcher-pitches">${pitchCodes}</td>
+        <td class="pitcher-pitches pitch-types-col">${pitchCodes}</td>
         <td>${v(s.inningsPitched)}</td>
         <td>${v(s.hits)}</td>
         <td>${v(s.runs)}</td>
@@ -1646,7 +1649,7 @@ export function renderPitcherStatsHTML(data, side, teamAbbrev) {
   return `
     <div class="table-scroll-wrapper">
     <table class="pitcher-stats-table">
-      <thead><tr><th>${label}</th><th>PITCH TYPES (USAGE/MPH)</th><th>IP</th><th>H</th><th>R</th><th>ER</th><th>BB</th><th>K</th><th>S</th><th>P</th><th>ERA</th><th>WHIP</th></tr></thead>
+      <thead><tr><th>${label}</th><th class="pitch-types-col">PITCH TYPES (USAGE/MPH)</th><th>IP</th><th>H</th><th>R</th><th>ER</th><th>BB</th><th>K</th><th>S</th><th>P</th><th>ERA</th><th>WHIP</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
     </div>`;
@@ -1710,7 +1713,7 @@ export function renderBenchHTML(data, side, teamAbbrev, { useAccordion = true } 
     }
   }
 
-  const tableHTML = `<div class="table-scroll-wrapper">
+  const tableHTML = `<div class="table-scroll-wrapper bench-table-wrapper">
       <table class="pitcher-stats-table">
         <thead><tr><th>Player</th><th>POS</th><th>AVG</th><th>OBP</th><th>SLG</th><th>OPS</th><th>wOBA</th><th>HR</th><th>RBI</th><th>SB</th><th>PA</th></tr></thead>
         <tbody>${rows.join('')}</tbody>
@@ -1756,7 +1759,7 @@ export function renderBullpenHTML(data, side, teamAbbrev, { useAccordion = true 
       rows.push(`
       <tr>
         <td class="pitcher-name">${playerLink(p.name, p.id)}<span class="hand-indicator">, ${p.hand}</span></td>
-        <td class="pitcher-pitches">${pitchCodes}</td>
+        <td class="pitcher-pitches pitch-types-col">${pitchCodes}</td>
         <td>${v(ss.inningsPitched)}</td>
         <td>${v(ss.hits)}</td>
         <td>${v(ss.runs)}</td>
@@ -1771,9 +1774,9 @@ export function renderBullpenHTML(data, side, teamAbbrev, { useAccordion = true 
     }
   }
 
-  const tableHTML = `<div class="table-scroll-wrapper">
+  const tableHTML = `<div class="table-scroll-wrapper bullpen-table-wrapper">
       <table class="pitcher-stats-table">
-        <thead><tr><th>Player</th><th>PITCH TYPES (USAGE/MPH)</th><th>IP</th><th>H</th><th>R</th><th>ER</th><th>BB</th><th>K</th><th>S</th><th>P</th><th>ERA</th><th>WHIP</th></tr></thead>
+        <thead><tr><th>Player</th><th class="pitch-types-col">PITCH TYPES (USAGE/MPH)</th><th>IP</th><th>H</th><th>R</th><th>ER</th><th>BB</th><th>K</th><th>S</th><th>P</th><th>ERA</th><th>WHIP</th></tr></thead>
         <tbody>${rows.join('')}</tbody>
       </table>
       </div>`;

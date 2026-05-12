@@ -1709,7 +1709,104 @@ kbd {
   .game-header-grid table { width: 100%; }
   .scorecard-section table { max-width: 100%; }
   .pitcher-stats-table { font-size: 0.8em; }
+  .pitcher-stats-table th {
+    font-size: 0.7em;
+    padding: 2px 4px;
+    line-height: 1.15;
+  }
+  .pitcher-stats-table td { padding: 2px 4px; }
   .lineup-name-html { font-size: calc(clamp(0.95rem, 0.5vw + 0.85rem, 1.1rem) * 1.5); }
+
+  /* Mobile compactness: smaller team header + tighter section separators
+     so the game page needs less scrolling. */
+  .scorecard-section {
+    margin: 16px 0;
+    padding-top: 16px;
+  }
+  .scorecard-section-header {
+    margin-bottom: 6px;
+    gap: 2px;
+  }
+  .scorecard-section-header h2 {
+    font-size: 0.95em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .scorecard-section-header h2 .team-logo {
+    height: 1em !important;
+  }
+  .team-label { font-size: 0.7em; }
+  .team-header-row {
+    margin-bottom: 6px;
+    gap: 12px;
+  }
+  .collapsible-section {
+    margin-top: 6px;
+    margin-bottom: 6px;
+  }
+  .collapsible-section summary {
+    padding: 6px 10px;
+    font-size: 0.85em;
+  }
+  .game-header {
+    padding: 8px 0;
+    margin-bottom: 8px;
+  }
+  .game-header-linescore-row { margin-bottom: 4px; }
+  .game-header-grid { gap: 8px; margin-bottom: 8px; }
+  .decisions { font-size: 0.8em; padding: 2px 0; }
+
+  /* Pitch types are noise on mobile — hide everywhere they appear */
+  .pitch-types-col { display: none; }
+
+  /* Bench/Bullpen mobile compact: no scrolling, only essential columns.
+     Bench: Player, POS, AVG, OPS. Bullpen: Player, IP, ERA, WHIP. */
+  .bench-table-wrapper,
+  .bullpen-table-wrapper {
+    overflow: visible;
+    max-height: none;
+  }
+  .bench-table-wrapper table,
+  .bullpen-table-wrapper table { table-layout: auto; }
+  .bench-table-wrapper th,
+  .bench-table-wrapper td,
+  .bullpen-table-wrapper th,
+  .bullpen-table-wrapper td { position: static; }
+
+  /* Bench: hide OBP(4), SLG(5), wOBA(7), HR(8), RBI(9), SB(10), PA(11) */
+  .bench-table-wrapper th:nth-child(4),
+  .bench-table-wrapper td:nth-child(4),
+  .bench-table-wrapper th:nth-child(5),
+  .bench-table-wrapper td:nth-child(5),
+  .bench-table-wrapper th:nth-child(7),
+  .bench-table-wrapper td:nth-child(7),
+  .bench-table-wrapper th:nth-child(8),
+  .bench-table-wrapper td:nth-child(8),
+  .bench-table-wrapper th:nth-child(9),
+  .bench-table-wrapper td:nth-child(9),
+  .bench-table-wrapper th:nth-child(10),
+  .bench-table-wrapper td:nth-child(10),
+  .bench-table-wrapper th:nth-child(11),
+  .bench-table-wrapper td:nth-child(11) { display: none; }
+
+  /* Bullpen: hide PITCH TYPES(2), H(4), R(5), ER(6), BB(7), K(8), S(9), P(10) */
+  .bullpen-table-wrapper th:nth-child(2),
+  .bullpen-table-wrapper td:nth-child(2),
+  .bullpen-table-wrapper th:nth-child(4),
+  .bullpen-table-wrapper td:nth-child(4),
+  .bullpen-table-wrapper th:nth-child(5),
+  .bullpen-table-wrapper td:nth-child(5),
+  .bullpen-table-wrapper th:nth-child(6),
+  .bullpen-table-wrapper td:nth-child(6),
+  .bullpen-table-wrapper th:nth-child(7),
+  .bullpen-table-wrapper td:nth-child(7),
+  .bullpen-table-wrapper th:nth-child(8),
+  .bullpen-table-wrapper td:nth-child(8),
+  .bullpen-table-wrapper th:nth-child(9),
+  .bullpen-table-wrapper td:nth-child(9),
+  .bullpen-table-wrapper th:nth-child(10),
+  .bullpen-table-wrapper td:nth-child(10) { display: none; }
 
 
   /* Mobile header: less padding */
@@ -1779,9 +1876,12 @@ kbd {
 /* Mobile (≤ 480px) */
 @media (max-width: 480px) {
   :root { --container-pad: 8px; --grid-gap: 8px; }
-  .scorecard-section-header img { width: 36px; height: 36px; }
-  .scorecard-section-header h2  { font-size: 1.1em; display: flex; align-items: center; gap: 8px; }
-  .scorecard-section-header h2 .team-logo { height: 2.5em !important; }
+  /* Phone-size: even smaller team logo + name (~25% of original) */
+  .scorecard-section-header img { width: 20px; height: 20px; }
+  .scorecard-section-header h2  { font-size: 0.85em; gap: 4px; }
+  .scorecard-section-header h2 .team-logo { height: 1em !important; }
+  .scorecard-section { margin: 10px 0; padding-top: 10px; }
+  .team-header-row { margin-bottom: 4px; gap: 8px; }
 
   /* Team stats: full width on mobile */
   .team-stats-grid { flex-direction: column; }

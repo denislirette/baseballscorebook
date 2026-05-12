@@ -2,6 +2,13 @@
 
 Every version of BaseballScorecard.org, from the first render to the latest update.
 
+## v1.3.2 (May 12, 2026)
+
+- **Mobile compact game page**: tightened the game page to need much less scrolling on phones. Team header logo + name shrunk on small screens, section padding and separators pulled in, decision text and inning summaries trimmed.
+- **Pitch Types column hidden on mobile**: the "PITCH TYPES (USAGE/MPH)" column on the pitcher stats and bullpen tables is now hidden below 768px — too noisy at phone width. Refactored the Season-row cells so the IP/H/R/ER values don't shift when the column collapses.
+- **Bench + Bullpen mobile columns trimmed**: bench tables now show only Player, POS, AVG, OPS on mobile; bullpen shows Player, IP, ERA, WHIP. No horizontal scroll on the most-touched tables.
+- **Season-row pitch totals filled in**: the Season rows in pitcher stats now show real strikes and pitches thrown instead of `-` placeholders.
+
 ## v1.3.1 (May 2, 2026)
 
 - **Bat-around out marker fix**: when the same batter came up twice in one inning (e.g., Toronto's 8th vs. Minnesota), the out indicator was rendering on both PA cells. The first PA's journey was being mutated by the second PA's out info. Each PA's journey is now snapshotted before the next PA starts, so the marker only shows on the cell where the out actually happened.
