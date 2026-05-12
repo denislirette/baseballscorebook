@@ -2,6 +2,10 @@
 
 Every version of BaseballScorecard.org, from the first render to the latest update.
 
+## v1.3.3 (May 12, 2026)
+
+- **Team header hierarchy on mobile**: the team name (e.g., "Toronto Blue Jays") was visually smaller than the BENCH/BULLPEN section titles below it because those titles render in mono bold uppercase. Bumped the team header to 1.5em on tablet and 1.2em on phone so the team name dominates again — clear top-of-section hierarchy.
+
 ## v1.3.2 (May 12, 2026)
 
 - **Mobile compact game page**: tightened the game page to need much less scrolling on phones. Team header logo + name shrunk on small screens, section padding and separators pulled in, decision text and inning summaries trimmed.

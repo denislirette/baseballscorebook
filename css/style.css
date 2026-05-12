@@ -1728,7 +1728,7 @@ kbd {
     gap: 2px;
   }
   .scorecard-section-header h2 {
-    font-size: 0.95em;
+    font-size: 1.5em;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -1878,7 +1878,7 @@ kbd {
   :root { --container-pad: 8px; --grid-gap: 8px; }
   /* Phone-size: even smaller team logo + name (~25% of original) */
   .scorecard-section-header img { width: 20px; height: 20px; }
-  .scorecard-section-header h2  { font-size: 0.85em; gap: 4px; }
+  .scorecard-section-header h2  { font-size: 1.2em; gap: 4px; }
   .scorecard-section-header h2 .team-logo { height: 1em !important; }
   .scorecard-section { margin: 10px 0; padding-top: 10px; }
   .team-header-row { margin-bottom: 4px; gap: 8px; }
