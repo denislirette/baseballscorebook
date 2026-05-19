@@ -2,6 +2,10 @@
 
 Every version of BaseballScorecard.org, from the first render to the latest update.
 
+## v1.3.5 (May 18, 2026)
+
+- **Stay where you left off on refresh**: every page now remembers your scroll position across a browser refresh. Scroll halfway down the schedule, hit reload, and you land right back where you were. The position is per page (path + query), so the schedule and each game page each remember their own spot. Saved entries expire after 24 hours so a much later return still starts you at the top. Anchor links (any URL with a `#`) are left alone so jump-to-section links keep working. Implemented in `js/nav.js` so it applies everywhere the global header does.
+
 ## v1.3.4 (May 12, 2026)
 
 - **Shrink BENCH/BULLPEN/PITCHERS section titles on mobile**: the section titles ("Blue Jays BENCH", "Angels BULLPEN", etc.) were still visually loud against the now-larger team name. Reduced them by ~40% on tablet and phone via a new `.open-section .scorecard-section-header` mobile rule (down to 0.66em). The team name now clearly dominates the visual hierarchy of each section.

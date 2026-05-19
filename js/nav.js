@@ -1,7 +1,105 @@
 // Global navigation + footer - injected dynamically on every page
 // Same header on every page: site title + nav links, classic HTML link style
 
-const VERSION = '1.3.4';
+// ── Scroll position persistence ────────────────────────────────────────────
+// Keep the page where the user left it after a browser refresh. Stored in
+// localStorage keyed by pathname + search; entries expire after 24 hours so
+// stale positions don't strand the user on a much later visit. Skipped when
+// the URL has a #hash so anchor links still jump to their target.
+(function persistScrollPosition() {
+  const KEY_PREFIX = 'scroll-pos:';
+  const TTL_MS = 24 * 60 * 60 * 1000;
+  const RESTORE_WINDOW_MS = 3000;
+  const SAVE_DEBOUNCE_MS = 150;
+
+  function storageKey() {
+    return KEY_PREFIX + window.location.pathname + window.location.search;
+  }
+
+  function readSaved() {
+    try {
+      const raw = localStorage.getItem(storageKey());
+      if (!raw) return null;
+      const data = JSON.parse(raw);
+      if (!data || typeof data.y !== 'number') return null;
+      if (Date.now() - (data.ts || 0) > TTL_MS) {
+        localStorage.removeItem(storageKey());
+        return null;
+      }
+      return data.y;
+    } catch {
+      return null;
+    }
+  }
+
+  function write(y) {
+    try {
+      localStorage.setItem(storageKey(), JSON.stringify({ y, ts: Date.now() }));
+    } catch { /* quota or disabled */ }
+  }
+
+  function clear() {
+    try { localStorage.removeItem(storageKey()); } catch { /* ignore */ }
+  }
+
+  // Take over from the browser so dynamic content doesn't get its scroll reset.
+  if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+  }
+
+  // Save scroll position, debounced. Avoids spamming localStorage on every wheel tick.
+  let saveTimer = null;
+  function scheduleSave() {
+    if (saveTimer) return;
+    saveTimer = setTimeout(() => {
+      saveTimer = null;
+      const y = window.scrollY || window.pageYOffset || 0;
+      if (y > 0) write(y);
+      else clear();
+    }, SAVE_DEBOUNCE_MS);
+  }
+  window.addEventListener('scroll', scheduleSave, { passive: true });
+  window.addEventListener('beforeunload', () => {
+    const y = window.scrollY || window.pageYOffset || 0;
+    if (y > 0) write(y);
+  });
+
+  // If the URL has a hash, let the browser handle anchor scrolling instead.
+  if (window.location.hash) return;
+
+  const target = readSaved();
+  if (!target || target <= 0) return;
+
+  // Dynamic content (schedule grid, scorecard SVG) renders after the API
+  // responds, so the page is short at first. Re-apply the saved position
+  // until the document is tall enough or the user starts scrolling.
+  let userInterrupted = false;
+  function onUserInput() { userInterrupted = true; }
+  ['wheel', 'touchmove', 'keydown', 'mousedown'].forEach(evt =>
+    window.addEventListener(evt, onUserInput, { passive: true, once: true })
+  );
+
+  const start = Date.now();
+  function apply() {
+    if (userInterrupted) return;
+    const max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    const dest = Math.min(target, max);
+    if (Math.abs((window.scrollY || 0) - dest) > 1) {
+      window.scrollTo(0, dest);
+    }
+    if (Date.now() - start < RESTORE_WINDOW_MS) {
+      requestAnimationFrame(apply);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', apply, { once: true });
+  } else {
+    apply();
+  }
+})();
+
+const VERSION = '1.3.5';
 
 const IS_LOCAL = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
